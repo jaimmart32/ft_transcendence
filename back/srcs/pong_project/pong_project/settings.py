@@ -37,8 +37,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-
-    'pong_app',
+    # Our app
+    "pong_app",
 ]
 
 MIDDLEWARE = [

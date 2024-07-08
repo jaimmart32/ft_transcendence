@@ -1,0 +1,5 @@
+## Steps
+
+# 1 Run Django App
+
+To start the Djando Application we must create a project
