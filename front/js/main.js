@@ -15,10 +15,11 @@ document.addEventListener('DOMContentLoaded', function() {
         loadSignupForm();
     });
 
+//	HTML for the Login page
     function loadLoginForm() {
         app.innerHTML = `
             <h2>Login</h2>
-            <form>
+            <form id="login-form">
                 <div class="form-group">
                     <label for="email">Email address</label>
                     <input type="email" class="form-control" id="email" aria-describedby="emailHelp" placeholder="Enter email">
@@ -30,12 +31,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 <button type="submit" class="btn btn-primary">Login</button>
             </form>
         `;
+	logInHandler();
     }
 
+//	HTML for the SignUp page
     function loadSignupForm() {
         app.innerHTML = `
             <h2>Sign Up</h2>
-            <form>
+            <form id="signup-form">
                 <div class="form-group">
                     <label for="username">Username</label>
                     <input type="text" class="form-control" id="username" placeholder="Enter username">
@@ -51,6 +54,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 <button type="submit" class="btn btn-primary">Sign Up</button>
             </form>
         `;
+	signUpHandler();
+    }
+
+    function loadHomeForm()
+    {
+    	app.innerHTML = `
+	    <h2>Home</h2>
+    	`
     }
 });
 
