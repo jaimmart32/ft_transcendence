@@ -4,7 +4,7 @@ WORKDIR /app
 
 COPY dfiles/requirements.txt .
 
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --update && pip install --no-cache-dir -r ./dfiles/requirements.txt
 
 RUN apt-get update && apt-get install vim -y
 
