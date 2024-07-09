@@ -1,0 +1,17 @@
+<!-- blog/templates/blog/home.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Mi Blog</title>
+</head>
+<body>
+    <h1>Bienvenido a nuestro juego de Pong</h1>
+    {% for post in posts %}
+        <div>
+            <h2>{{ post.title }}</h2>
+            <p>{{ post.content }}</p>
+            <small>{{ post.published_date }}</small>
+        </div>
+    {% endfor %}
+</body>
+</html>
