@@ -1,13 +1,17 @@
 from django.shortcuts import render
+import json
+from django.http import JsonResponse
+from . import models
 
 # Create your views here.
 
 def main_view(request):
-	if request.method == 'GET'
-		return render(request, '../templates/pong_app/index.html')
+	if request.method == 'GET':
+		#return "Hello world!" 
+		return render(request, 'pong_app/index.html')
 		
 def signup_view(request):
-	if request.method == 'POST'
+	if request.method == 'POST':
 		data = json.loads(request.body)
 		email = data.get('email')
 		password = data.get('password')
@@ -20,14 +24,14 @@ def signup_view(request):
 	return JsonResponse({'status': 'error', 'message': 'Invalid request'})
 
 def login_view(request):
-	if request.method == 'POST'
+	if request.method == 'POST':
 		data = json.loads(request.body)
 		username = data.get('username')
 		password = data.get('password')
 	
 		if User.objects.filter(username=username).exists():
 			user = User.objects.get(username=username)
-			if user.password == password
+			if user.password == password:
 				return JsonResponse({'status': 'success', 'message': 'Logged in succesfully!'})
 			return JsonResponse({'status': 'error', 'message': 'Invalid password'})
 

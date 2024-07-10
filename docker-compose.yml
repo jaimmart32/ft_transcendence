@@ -11,7 +11,7 @@ services:
         build:
             context: ./back/
         volumes:
-            - transcendence:/app
+            - transcendence:/backup
         container_name: back 
         ports:
             - '8000:8000'
