@@ -1,10 +1,12 @@
 from django.shortcuts import render
-import json
-from django.http import JsonResponse
+import json# Maybe not needed
+from django.http import JsonResponse# Maybe not needed
 from rest_framework.views import APIView
 from rest_framework.response import Response 
 from rest_framework.permissions import AllowAny
-from rest_framework import status 
+from rest_framework import status
+from django.contrib.auth import authenticate
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from . import models
 from django.contrib.auth.models import User 
@@ -35,10 +37,14 @@ class login(APIView):
 		data = request.data
 		username = data.get('username')
 		password = data.get('password')
-		if User.objects.filter(username=username).exists():
-			user = User.objects.get(username=username)
-			if user.password == password:
-				return Response({'status': 'success', 'message': 'Logged in succesfully!'})
-			return Response({'status': 'error', 'message': 'Invalid password'})
-
-		return Response({'status': 'error', 'message': 'User does not exist'})
+		user = authenticate(request, username=username, password=password)
+        if user is not None:
+            refresh = RefreshToken.for_user(user)
+            return Response({
+                'status': 'success',
+                'message': 'Logged in successfully!',
+                'access': str(refresh.access_token),
+                'refresh': str(refresh)
+            })
+        else:
+            return Response({'status': 'error', 'message': 'Invalid credentials'})
