@@ -1,27 +1,22 @@
 function logInHandler()
 {
-    // Get the login-form that we created in the main.js
     const loginForm = document.getElementById('login-form');
 
     if (loginForm)
     {
-        // Define the behavior for when receiving an event
         loginForm.addEventListener('submit', function(event)
 	{
-            // Prevent the default behavior
             event.preventDefault();
 
-            // Get the value for the email and password tags and set them into a variable
             const formData =
 	    {
-                email: document.getElementById('email').value,
-                pass: document.getElementById('password').value
+                username: document.getElementById('username').value,
+                password: document.getElementById('password').value
             };
 
-            // Validate the credentials
-            if (validateEmail(formData.email) && validatePass(formData.pass))
+            if (validateUsername(formData.username) && validatePass(formData.password))
 	    {
-                fetch('/signup/',
+                fetch('/login/',
 		{
                     method: 'POST',
                     headers:
@@ -33,16 +28,39 @@ function logInHandler()
                 .then(response => response.json())
                 .then(data =>
 		{
-                    if (data.success)
+                    if (data.status)
 		    {
-                        alert('Signup successful!');
+			fetch('/token/',
+			{
+				method: 'GET',
+				headers:
+				{
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify(formData)
+			})
+			.then(response =>
+			{
+				if (!response.ok)
+				{
+					throw new Error('Login failed');
+				}
+				return response.json();
+			})
+			.then(data =>
+			{
+				localStorage.setItem('token', data.access);
+                        	alert('Log in successful!');
+			})
+			.catch(error =>
+			{
+				console.error('Error: ', error);
+                        	alert('Log in failed: ' + data.message);
+			});
                         // Optionally, redirect to another page or load another form
                         // window.location.href = '/home/';
                         // loadHomeForm();
-                    } else
-		    {
-                        alert('Signup failed: ' + data.message);
-                    }
+		    }
                 })
                 .catch(error =>
 		{
@@ -52,7 +70,7 @@ function logInHandler()
 	    else
 	    {
                 // Handle validation failure (optional)
-                alert('Invalid email or password format.');
+                alert('Invalid credentials.');
             }
         });
     }
@@ -77,29 +95,27 @@ function signUpHandler()
             // Get the value for the email and password tags and set them into a variable
             const formData =
 	    {
+                username: document.getElementById('username').value,
                 email: document.getElementById('email').value,
-                pass: document.getElementById('password').value
+                password: document.getElementById('password').value
             };
 
             // Validate the credentials
-            if (validateEmail(formData.email) && validatePass(formData.pass))
+            if (validateUsername(formData.username) && validateEmail(formData.email) && validatePass(formData.password))
 	    {
-	    	const csrftoken = getCookie('csrftoken');
-		console.log(csrftoken)
                 fetch('/signup/',
 		{
                     method: 'POST',
                     headers:
 		    {
                         'Content-Type': 'application/json',
-			'X-CSRFToken': csrftoken
                     },
                     body: JSON.stringify(formData)
                 })
                 .then(response => response.json())
                 .then(data =>
 		{
-                    if (data.success)
+                    if (data.status == 'success')
 		    {
                         alert('Signup successful!');
                         // Optionally, redirect to another page or load another form
@@ -129,28 +145,6 @@ function signUpHandler()
     }
 }
 
-function getCookie(name)
-{
-	let cookieVal = null;
-
-	if (document.cookie && document.cookie !== '')
-	{
-		console.log("Document cookie exists: " + document.cookie)
-		const cookies = document.cookie.split(';');
-		for (let i = 0; i < cookies.length; i++)
-		{
-			const cookie = cookies[i].trim();
-			if (cookie.startsWith(name + '='))
-			{
-				cookieVal = decodeURIComponent(cookie.substring(name.length + 1));
-				console.log("cookie: " + cookieVal)
-				break;
-			}
-		}
-	}
-	return cookieVal;
-}
-
 function validateUsername(username)
 {
 	if (username.length > 0 && username.length <= 8)
@@ -165,9 +159,9 @@ function validateEmail(email)
 	return (false);
 }
 
-function validatePass(pass)
+function validatePass(password)
 {
-	if (pass.length >= 8 && pass.length <= 12)
+	if (password.length >= 8 && password.length <= 12)
 	{
 		return (true);
 	}

@@ -21,8 +21,8 @@ document.addEventListener('DOMContentLoaded', function() {
             <h2>Login</h2>
             <form id="login-form">
                 <div class="form-group">
-                    <label for="email">Email address</label>
-                    <input type="email" class="form-control" id="email" aria-describedby="emailHelp" placeholder="Enter email">
+                    <label for="username">Username</label>
+                    <input type="username" class="form-control" id="username" aria-describedby="usernameHelp" placeholder="Enter username">
                 </div>
                 <div class="form-group">
                     <label for="password">Password</label>
