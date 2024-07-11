@@ -25,57 +25,26 @@ function logInHandler()
                     },
                     body: JSON.stringify(formData)
                 })
-                .then(response => response.json())
-                .then(data =>
-		{
-                    if (data.status)
-		    {
-			fetch('/token/',
-			{
-				method: 'GET',
-				headers:
-				{
-					'Content-Type': 'application/json'
-				},
-				body: JSON.stringify(formData)
-			})
-			.then(response =>
-			{
-				if (!response.ok)
-				{
-					throw new Error('Login failed');
-				}
-				return response.json();
-			})
-			.then(data =>
-			{
-				localStorage.setItem('token', data.access);
-                        	alert('Log in successful!');
-			})
-			.catch(error =>
-			{
-				console.error('Error: ', error);
-                        	alert('Log in failed: ' + data.message);
-			});
-                        // Optionally, redirect to another page or load another form
-                        // window.location.href = '/home/';
-                        // loadHomeForm();
-		    }
+			    .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        localStorage.setItem('access', data.access);
+                        localStorage.setItem('refresh', data.refresh);
+                        alert('Log in successful!');
+                        // Load the home content without redirecting, need to implement in main.js
+                        loadHomeForm();
+                    } else {
+                        alert('Log in failed: ' + data.message);
+                    }
                 })
-                .catch(error =>
-		{
+                .catch(error => {
                     console.error('Error:', error);
                 });
-            }
-	    else
-	    {
-                // Handle validation failure (optional)
+            } else {
                 alert('Invalid credentials.');
             }
         });
-    }
-    else
-    {
+    } else {
         console.error('login-form not found');
     }
 }

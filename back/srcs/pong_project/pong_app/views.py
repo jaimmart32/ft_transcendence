@@ -38,13 +38,13 @@ class login(APIView):
 		username = data.get('username')
 		password = data.get('password')
 		user = authenticate(request, username=username, password=password)
-        if user is not None:
-            refresh = RefreshToken.for_user(user)
-            return Response({
+		if user is not None:
+			refresh = RefreshToken.for_user(user)
+			return Response({
                 'status': 'success',
                 'message': 'Logged in successfully!',
                 'access': str(refresh.access_token),
                 'refresh': str(refresh)
             })
-        else:
-            return Response({'status': 'error', 'message': 'Invalid credentials'})
+		else:
+			return Response({'status': 'error', 'message': 'Invalid credentials'})
