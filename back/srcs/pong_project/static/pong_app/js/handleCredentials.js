@@ -32,7 +32,7 @@ function logInHandler()
                         localStorage.setItem('refresh', data.refresh);
                         alert('Log in successful!');
                         // Load the home content without redirecting, need to implement in main.js
-                        loadHomeForm();
+                        window.loadHome();
                     } else {
                         alert('Log in failed: ' + data.message);
                     }

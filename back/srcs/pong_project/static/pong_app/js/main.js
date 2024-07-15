@@ -58,11 +58,12 @@ document.addEventListener('DOMContentLoaded', function() {
 //	loadSettingsForm();
     }
 
-    function loadHomeForm()
+    function loadHome()
     {
     	app.innerHTML = `
 	    <h2>Home</h2>
-    	`
+    	`;
     }
+    window.loadHome = loadHome; //Globaly accessable for access via LoginHandler()
 });
 
