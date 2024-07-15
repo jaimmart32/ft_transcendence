@@ -3,7 +3,7 @@ import json# Maybe not needed
 from django.http import JsonResponse# Maybe not needed
 from rest_framework.views import APIView
 from rest_framework.response import Response 
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework import status
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -48,3 +48,10 @@ class login(APIView):
             })
 		else:
 			return Response({'status': 'error', 'message': 'Invalid credentials'})
+
+class Home(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        content = {'message': 'Welcome to the home page!', 'username': request.user.username}
+        return Response(content)

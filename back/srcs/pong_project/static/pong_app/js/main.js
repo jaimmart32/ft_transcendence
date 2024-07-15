@@ -58,12 +58,51 @@ document.addEventListener('DOMContentLoaded', function() {
 //	loadSettingsForm();
     }
 
-    function loadHome()
-    {
-    	app.innerHTML = `
-	    <h2>Home</h2>
-    	`;
+    function loadProfileSettings() {
+        app.innerHTML = `
+            <h2>Profile Settings</h2>
+            <p>Here you can update your profile settings.</p>
+            <!-- Add profile settings content here -->
+            <button class="btn btn-secondary" id="back-to-home">Back to Home</button>
+        `;
+        document.getElementById('back-to-home').addEventListener('click', loadHome);
     }
-    window.loadHome = loadHome; //Globaly accessable for access via LoginHandler()
+
+    function loadPlayGame() {
+        app.innerHTML = `
+            <h2>Play Game</h2>
+            <p>Get ready to play a game of Pong!</p>
+            <!-- Add game play content here -->
+            <button class="btn btn-secondary" id="back-to-home">Back to Home</button>
+        `;
+        document.getElementById('back-to-home').addEventListener('click', loadHome);
+    }
+
+    function loadFriendsSection() {
+        app.innerHTML = `
+            <h2>Friends</h2>
+            <p>Manage your friends here.</p>
+            <!-- Add friends management content here -->
+            <button class="btn btn-secondary" id="back-to-home">Back to Home</button>
+        `;
+        document.getElementById('back-to-home').addEventListener('click', loadHome);
+    }
+
+    function loadCreateTournament() {
+        app.innerHTML = `
+            <h2>Create Tournament</h2>
+            <p>Create a new tournament.</p>
+            <!-- Add tournament creation form or content here -->
+            <button class="btn btn-secondary" id="back-to-home">Back to Home</button>
+        `;
+        document.getElementById('back-to-home').addEventListener('click', loadHome);
+    }
+
+    window.loadProfileSettings = loadProfileSettings;
+    window.loadPlayGame = loadPlayGame;
+    window.loadFriendsSection = loadFriendsSection;
+    window.loadCreateTournament = loadCreateTournament;
+    window.loadLoginForm = loadLoginForm;
+    window.loadSignupForm = loadSignupForm;
 });
 
