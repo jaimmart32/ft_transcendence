@@ -24,11 +24,11 @@ class signup(APIView):
 		username = data.get('username')
 		email = data.get('email')
 		password = data.get('password')
-		if User.objects.filter(username=username).exists():
+		if CustomUser.objects.filter(username=username).exists():
 			return Response({'status': 'error', 'message': 'Username already in use'})
-		if User.objects.filter(email=email).exists():
+		if CustomUser.objects.filter(email=email).exists():
 			return Response({'status': 'error', 'message': 'Email already in use'})
-		user = User.objects.create_user(username, email=email, password=password)
+		user = CustomUser.objects.create_user(username, email=email, password=password)
 		return Response({'status': 'success', 'message': 'User created succesfully!'})
 
 class login(APIView):
