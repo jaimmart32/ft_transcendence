@@ -2,6 +2,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const app = document.getElementById('app');
     const loginLink = document.getElementById('login-link');
     const signupLink = document.getElementById('signup-link');
+    const ftLink = document.getElementById('ft-link');
 
     // Load login form on clicking "Login" link
     loginLink.addEventListener('click', function(event) {
@@ -14,6 +15,13 @@ document.addEventListener('DOMContentLoaded', function() {
         event.preventDefault();
         loadSignupForm();
     });
+
+    ftLink.addEventListener('click', function(event) {
+        event.preventDefault();
+        loadLoginFortyTwo();
+    });
+
+// https://auth.42.fr/auth/realms/students-42/protocol/openid-connect/auth?client_id=intra&redirect_uri=https%3A%2F%2Fprofile.intra.42.fr%2Fusers%2Fauth%2Fkeycloak_student%2Fcallback&response_type=code&state=a8705ac808202be0d9cf4986f6e834e63df9a5d738f3d8da
 
 //	HTML for the Login page
     function loadLoginForm() {
@@ -55,6 +63,14 @@ document.addEventListener('DOMContentLoaded', function() {
             </form>
         `;
 	signUpHandler();
+    }
+
+    function loadLoginFortyTwo() {
+        app.innerHTML = `
+            <h2>Login</h2>
+            <a href='https://auth.42.fr/auth/realms/students-42/protocol/openid-connect/auth?client_id=intra&redirect_uri=https%3A%2F%2Fprofile.intra.42.fr%2Fusers%2Fauth%2Fkeycloak_student%2Fcallback&response_type=code&state=a8705ac808202be0d9cf4986f6e834e63df9a5d738f3d8da'>Login with 42</a>
+        `;
+	logInHandler();
     }
 
 
