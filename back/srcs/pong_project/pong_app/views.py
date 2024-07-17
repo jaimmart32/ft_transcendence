@@ -8,7 +8,7 @@ from rest_framework import status
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from . import models
+from .models import CustomUser
 from django.contrib.auth.models import User 
 
 # Create your views here.

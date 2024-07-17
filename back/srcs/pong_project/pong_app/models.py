@@ -12,7 +12,7 @@ class	CustomUser(AbstractUser):
 	# Tournament stats ONLY for tournament, not the rounds in the tournament(total/wins/losses)
 	tournament_stats = models.JSONField(default=dict)
 	# Online or offline status
-	status = models.BooleanField(defult=False)
+	status = models.BooleanField(default=False)
 
 	def __str__(self):
 		return f"{self.username}"
