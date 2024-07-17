@@ -136,14 +136,14 @@ function loadHome() {
             app.innerHTML = `
                 <h2>Welcome, ${data.username}!</h2>
                 <div class="btn-group-vertical">
-                    <button class="btn btn-primary" id="profile-settings">Profile Settings</button>
+                    <button class="btn btn-primary" id="profile">Profile</button>
                     <button class="btn btn-primary" id="play-game">Play Game</button>
                     <button class="btn btn-primary" id="friends-section">Friends</button>
                     <button class="btn btn-primary" id="create-tournament">Create Tournament</button>
                 </div>
             `;
             
-            document.getElementById('profile-settings').addEventListener('click', loadProfileSettings);
+            document.getElementById('profile').addEventListener('click', loadProfile);
             document.getElementById('play-game').addEventListener('click', loadPlayGame);
             document.getElementById('friends-section').addEventListener('click', loadFriendsSection);
             document.getElementById('create-tournament').addEventListener('click', loadCreateTournament);

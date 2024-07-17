@@ -8,6 +8,7 @@ urlpatterns = [
 	path('', views.main_view, name='main'),
 
 	path('home/', views.Home.as_view(), name='home'),
+	path('home/profile/', views.Profile.as_view(), name='profile'),
 
 	path('token/', TokenObtainPairView.as_view, name='token_obtain_pair'),
 	path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),

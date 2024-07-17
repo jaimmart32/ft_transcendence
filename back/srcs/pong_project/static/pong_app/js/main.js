@@ -55,18 +55,8 @@ document.addEventListener('DOMContentLoaded', function() {
             </form>
         `;
 	signUpHandler();
-//	loadSettingsForm();
     }
 
-    function loadProfileSettings() {
-        app.innerHTML = `
-            <h2>Profile Settings</h2>
-            <p>Here you can update your profile settings.</p>
-            <!-- Add profile settings content here -->
-            <button class="btn btn-secondary" id="back-to-home">Back to Home</button>
-        `;
-        document.getElementById('back-to-home').addEventListener('click', loadHome);
-    }
 
     function loadPlayGame() {
         app.innerHTML = `
@@ -99,6 +89,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     window.loadProfileSettings = loadProfileSettings;
+    window.loadProfile = loadProfile;
     window.loadPlayGame = loadPlayGame;
     window.loadFriendsSection = loadFriendsSection;
     window.loadCreateTournament = loadCreateTournament;

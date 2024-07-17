@@ -55,3 +55,13 @@ class Home(APIView):
     def get(self, request):
         content = {'message': 'Welcome to the home page!', 'username': request.user.username}
         return Response(content)
+
+class Profile(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        content = {'username': request.user.username, 'email': request.user.email, 'tfa': request.user.tfa}
+#'lang': request.user.lang,
+#'game_stats': request.user.game_stats,
+#'tournament_stats': request.user.tournament_stats
+        return Response(content)
