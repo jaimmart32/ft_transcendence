@@ -35,7 +35,7 @@ function loadProfile()
 					    <li class="list-group-item">Games Won: <span id="games-won">0</span></li>
 					    <li class="list-group-item">Games Lost: <span id="games-lost">0</span></li>
 					</ul>
-					<button id='edit-profile' type="button" class="btn btn-primary" onclick="editProfile()">Edit Profile</button>
+					<button id='edit-profile' type="button" class="btn btn-primary">Edit Profile</button>
 				    </div>
 				</div>
 			    </div>
@@ -59,8 +59,12 @@ function loadProfile()
 				document.addEventListener('DOMContentLoaded', loadUserData);
 			    </script>
 			`;
-			document.getElementById('edit-profile').addEventListener('click', loadProfileSettings(data));
-
+			console.log('Before clicking');
+//			document.addEventListener('DOMContentLoaded', document.getElementById('edit-profile').addEventListener('click', loadProfileSettings, data));
+			document.getElementById('edit-profile').addEventListener('click', () =>
+			{
+				loadProfileSettings(data);
+			})
 
 		})
 		.catch(error =>
