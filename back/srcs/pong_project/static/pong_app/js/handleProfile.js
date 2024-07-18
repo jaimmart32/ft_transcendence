@@ -3,7 +3,6 @@ function loadProfile()
 	const token = localStorage.getItem('access');
 	if (token)
 	{
-		console.log('Has the token');
 		fetch('/home/profile/',
 		{
 			method: 'GET',
@@ -17,7 +16,6 @@ function loadProfile()
 		{
 			if (!response.ok)
 			{
-				console.log('Response not ok');
 				throw new Error('Access denied');
 			}
 			return response.json();

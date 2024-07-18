@@ -65,3 +65,23 @@ class Profile(APIView):
 #'game_stats': request.user.game_stats,
 #'tournament_stats': request.user.tournament_stats
         return Response(content)
+
+class EditProfile(APIView):
+	permission_classes = [IsAuthenticated]
+
+	def put(self, request):
+		user = request.user
+		data = request.data
+
+		# receive the data and validate if they are correct
+		user.username = data.get('username', user.username)
+		user.email = data.get('email', user.email)
+		if (data.get('twofa', user.tfa) == 'on')
+			user.tfa = True	
+		else
+			user.tfa = False 
+
+		if (data.get('password', None)):
+			user.set_password(data.get('password'))
+		user.save()
+		return Response({'status': 'success', 'message': 'Profile updated successfully!'})

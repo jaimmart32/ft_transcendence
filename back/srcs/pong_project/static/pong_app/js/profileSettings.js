@@ -4,7 +4,7 @@ function loadProfileSettings(user_content)
 		<div class="container mt-2">
 			    <h2>Profile Settings</h2>
 			    <img src="/static/pong_app/media/user-pic.jpg" alt="Default user profile picture" width="128" height="128">
-			    <form>
+			    <form id="profile-settings">
 				<!-- Username Field -->
 				<div class="form-group row">
 				    <label for="username" class="col-sm-2 col-form-label">Username</label>
@@ -54,7 +54,7 @@ function loadProfileSettings(user_content)
 				<!-- Submit Button -->
 				<div class="form-group row">
 				    <div class="col-sm-10 offset-sm-2">
-					<button type="submit" class="btn btn-success">Save Changes</button>
+					<button id="save_changes" type="submit" class="btn btn-success">Save Changes</button>
 				    </div>
 				</div>
 			    </form>
@@ -63,4 +63,56 @@ function loadProfileSettings(user_content)
 			<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
 			<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 		    `;
+		    document.getElementById('save_changes').addEventListener('click', updateUserInfo);
+}
+
+function updateUserInfo()
+{
+	const token = localStorage.getItem('access');
+
+	if (token)
+	{
+		const userInfo =
+		{
+			username: document.getElementById('username').value,
+			email: document.getElementById('email').value,
+			password: document.getElementById('password').value,
+			twofa: document.getElementById('twofa').value,
+//			lang: document.getElementById('lang').value,
+		};
+
+		fetch('/home/profile/edit/',
+		{
+			method: 'PUT',
+			headers:
+			{
+				'Authorization': `Bearer ${token}`,
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify(userInfo)
+		})
+		.then(response => response.json())
+		.then(data =>
+		{
+			if (data.status === 'succes')
+			{
+				alert('Info updated correctly!');
+				loadProfile();
+			}
+			else
+			{
+				alert('Failed to update the profile');
+			}
+		})
+		.catch(error =>
+		{
+			console.error('Error: ', error);
+			alert('Access denied');
+		});
+	}
+	else
+	{
+		alert('You are not authorized to view this page. Please log in.');
+		loadLoginForm();
+	}
 }
