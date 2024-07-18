@@ -3,7 +3,7 @@ from django.contrib.auth.models import AbstractUser
 
 # Create your models here.
 
-class	CustomUser(AbstractUser):
+class CustomUser(AbstractUser):
 	# Preferred language
 	# lang = models.CharField(max_length=2)
 	tfa = models.BooleanField(default=False)
