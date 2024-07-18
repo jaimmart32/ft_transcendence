@@ -13,4 +13,8 @@ urlpatterns = [
 
 	path('token/', TokenObtainPairView.as_view, name='token_obtain_pair'),
 	path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+
+	path('login42/', views.login42, name='login42'),
+    path('callback/', views.callback, name='callback'),
+    path('profile42/', views.profile42, name='profile42'),
 ]

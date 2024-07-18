@@ -1,6 +1,9 @@
-from django.shortcuts import render
 import json# Maybe not needed
-from django.http import JsonResponse# Maybe not needed
+from django.shortcuts import render, redirect
+from dotenv import load_dotenv
+import requests
+import os
+from django.http import HttpResponse, JsonResponse
 from rest_framework.views import APIView
 from rest_framework.response import Response 
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -76,12 +79,58 @@ class EditProfile(APIView):
 		# receive the data and validate if they are correct
 		user.username = data.get('username', user.username)
 		user.email = data.get('email', user.email)
-		if (data.get('twofa', user.tfa) == 'on')
+		if data.get('twofa', user.tfa) == 'on':
 			user.tfa = True	
-		else
+		else:
 			user.tfa = False 
 
-		if (data.get('password', None)):
+		if data.get('password', None):
 			user.set_password(data.get('password'))
 		user.save()
 		return Response({'status': 'success', 'message': 'Profile updated successfully!'})
+
+
+
+
+
+env = load_dotenv(".env")
+
+CLIENT_ID = os.getenv('CLIENT_ID')
+CLIENT_SECRET = os.getenv('CLIENT_SECRET')
+REDIRECT_URI = os.getenv('REDIRECT_URI')
+
+AUTHORIZATION_URL = os.getenv('AUTHORIZATION_URL')
+TOKEN_URL = os.getenv('TOKEN_URL')
+USER_INFO_URL = os.getenv('USER_INFO_URL')
+
+# Create your views here.
+def index(request):
+    return render(request, 'index.html')
+
+def login42(request):
+    return redirect(f'{AUTHORIZATION_URL}?client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}&response_type=code')
+
+def callback(request):
+    code = request.GET.get('code')
+    token_response = requests.post(TOKEN_URL, data={
+        'grant_type': 'authorization_code',
+        'client_id': CLIENT_ID,
+        'client_secret': CLIENT_SECRET,
+        'code': code,
+        'redirect_uri': REDIRECT_URI,
+    }).json()
+
+    access_token = token_response.get('access_token')
+    request.session['access_token'] = access_token
+    return redirect('profile42')
+
+def profile42(request):
+    access_token = request.session.get('access_token')
+    if not access_token:
+        return redirect('index')
+
+    user_info_response = requests.get(USER_INFO_URL, headers={
+        'Authorization': f'Bearer {access_token}'
+    }).json()
+
+    return JsonResponse(user_info_response)
