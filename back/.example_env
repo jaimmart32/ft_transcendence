@@ -1,0 +1,8 @@
+AUTHORIZATION_URL = 'https://api.intra.42.fr/oauth/authorize'
+TOKEN_URL = 'https://api.intra.42.fr/oauth/token'
+USER_INFO_URL = 'https://api.intra.42.fr/v2/me'
+
+CLIENT_ID=
+CLIENT_SECRET=
+REDIRECT_URI=
+
