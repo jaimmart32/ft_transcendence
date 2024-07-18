@@ -1,24 +1,44 @@
 from django.db import models
+from django.contrib.auth.models import AbstractUser 
 
 # Create your models here.
-class User(models.Model):
-    username = models.CharField(max_length=16)
-    password = models.CharField(max_length=16)
-    games_played = models.IntegerField()
-    wins = models.IntegerField()
-    losses = models.IntegerField()
-    championships = models.IntegerField()
-    connected = models.BooleanField()
 
-    def __str__(self):
-        return f"{self.username}"
+class	CustomUser(AbstractUser):
+	# Preferred language
+	# lang = models.CharField(max_length=2)
+	tfa = models.BooleanField(default=False)
+	# If the tfa is set to true, then the otp should not be blank
+	#otp = models.CharField(max_length=6, null=True, blank=True)
+	#otp_ExpDate = models.DateTimeField(null=True, blank=True)
+	# Game stats for every game played, including the tournament games(total/wins/losses)
+	game_stats = models.JSONField(default=dict)
+	# Tournament stats ONLY for tournament, not the rounds in the tournament(total/wins/losses)
+	tournament_stats = models.JSONField(default=dict)
+	# Online or offline status
+	status = models.BooleanField(default=False)
 
+	def __str__(self):
+		return f"{self.username}"
 
 class Tournament(models.Model):
-    name = models.CharField(max_length=16)
-    winner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="winner")
-    runner_up = models.ForeignKey(User, on_delete=models.CASCADE, related_name="runner_up")
+	name = models.CharField(max_length=12)
+	# Key = User chosen tag, value = user instance
+	participants = models.JSONField(default=dict)
+	winner = models.CharField(max_length=12, blank=True, null=True)
 
-    def __str__(self):
-        return f"{self.id}: {self.winner} beat {self.runner_up} to win {self.name}"
+	def __str__(self):
+		return f"Winner of {self.name}: {self.winner}!"
 
+class	Game(models.Model):
+	player1 = models.CharField(max_length=8)
+	player2 = models.CharField(max_length=8)
+	winner = models.CharField(max_length=8, blank=True, null=True)
+	# Game format:
+	# game = 3 rounds
+	# round = 20 seconds
+	# If draw, +1 round, first who scores is the winner
+	scores1 = models.JSONField(default=list)
+	scores2 = models.JSONField(default=list)
+
+	def __str__(self):
+		return f"Winner: {self.winner}!"
