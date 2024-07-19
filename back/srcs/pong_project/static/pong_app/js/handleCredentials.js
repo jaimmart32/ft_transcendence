@@ -183,3 +183,6 @@ function validatePass(password)
 }
 
 window.loadHome = loadHome;
+window.validateUsername = validateUsername;
+window.validateEmail = validateEmail;
+window.validatePass = validatePass;

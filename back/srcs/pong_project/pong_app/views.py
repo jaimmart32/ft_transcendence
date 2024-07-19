@@ -86,6 +86,14 @@ class EditProfile(APIView):
 
 		if data.get('password', None):
 			user.set_password(data.get('password'))
+		# Not sure if we need to get the actual user instance and compare it to prevent 
+		# the "access denied" error and so it prints that the credentials are already in use
+		if (user.username != data.get('username')):
+			if CustomUser.objects.filter(username=user.username).exclude(id=user.id).exists():
+				return Response({'status': 'error', 'message': 'Username in use'})
+		if (user.email != data.get('email')):
+			if CustomUser.objects.filter(email=user.email).exclude(id=user.id).exists():
+				return Response({'status': 'error', 'message': 'Email in use'})
 		user.save()
 		return Response({'status': 'success', 'message': 'Profile updated successfully!'})
 

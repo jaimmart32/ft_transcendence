@@ -54,7 +54,7 @@ function loadProfileSettings(user_content)
 				<!-- Submit Button -->
 				<div class="form-group row">
 				    <div class="col-sm-10 offset-sm-2">
-					<button id="save_changes" type="submit" class="btn btn-success">Save Changes</button>
+					<button id="save-changes" type="submit" class="btn btn-success">Save Changes</button>
 				    </div>
 				</div>
 			    </form>
@@ -63,11 +63,13 @@ function loadProfileSettings(user_content)
 			<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
 			<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 		    `;
-		    document.getElementById('save_changes').addEventListener('click', updateUserInfo);
+		    document.getElementById('save-changes').addEventListener('click', updateUserInfo);
 }
 
 function updateUserInfo()
 {
+	event.preventDefault();
+
 	const token = localStorage.getItem('access');
 
 	if (token)
@@ -80,6 +82,15 @@ function updateUserInfo()
 			twofa: document.getElementById('twofa').value,
 //			lang: document.getElementById('lang').value,
 		};
+
+//		Need to check the input, to see if everything is correct
+		if (!validateUsername(userInfo.username) || !validateEmail(userInfo.email) 
+			|| (!validatePass(userInfo.password) && userInfo.password.length > 0))
+		{
+			alert('Wrong credentials');
+			loadProfileSettings();
+			return;
+		}
 
 		fetch('/home/profile/edit/',
 		{
@@ -94,14 +105,17 @@ function updateUserInfo()
 		.then(response => response.json())
 		.then(data =>
 		{
-			if (data.status === 'succes')
+			if (data.status === 'success')
 			{
 				alert('Info updated correctly!');
 				loadProfile();
 			}
 			else
 			{
-				alert('Failed to update the profile');
+				if (data.message === 'Username in use')
+					alert('This username is already in use, try another one');
+				else if (data.message === 'Email in use')
+					alert('This email is already in use, try another one');
 			}
 		})
 		.catch(error =>
