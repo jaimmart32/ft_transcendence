@@ -1,6 +1,7 @@
 import json# Maybe not needed
 from django.shortcuts import render, redirect
 from dotenv import load_dotenv
+from django.db import IntegrityError
 import requests
 import os
 from django.http import HttpResponse, JsonResponse
@@ -68,7 +69,7 @@ class Profile(APIView):
 #'game_stats': request.user.game_stats,
 #'tournament_stats': request.user.tournament_stats
         return Response(content)
-
+"""
 class EditProfile(APIView):
 	permission_classes = [IsAuthenticated]
 
@@ -97,9 +98,35 @@ class EditProfile(APIView):
 		user.save()
 		return Response({'status': 'success', 'message': 'Profile updated successfully!'})
 
+"""
 
+class	EditProfile(APIView):
+	permission_classes = [IsAuthenticated]
 
+	def put(self, request):
+		user = request.user
+		data = request.data
 
+		try:
+			user.username = data.get('username', user.username)
+			if CustomUser.objects.filter(username=user.username).exclude(id=user.id).exists():
+				return Response({'status': 'error', 'message': 'Username in use'})
+			user.email = data.get('email', user.email)
+			if CustomUser.objects.filter(email=user.email).exclude(id=user.id).exists():
+					return Response({'status': 'error', 'message': 'Email in use'})
+			if data.get('twofa', user.tfa) == 'on':
+				user.tfa = True
+			else:
+				user.tfa = False 
+			if data.get('password'):
+				user.set_password(data.get('password'))
+			user.save()
+			return Response({'status': 'success', 'message': 'Profile updated successfully!'})
+		except IntegrityError as e:
+			return Response({'status': 'error', 'message': 'Username in use'})
+		return Response({'status': 'error', 'message': 'An error ocurred'})
+
+				
 
 env = load_dotenv(".env")
 

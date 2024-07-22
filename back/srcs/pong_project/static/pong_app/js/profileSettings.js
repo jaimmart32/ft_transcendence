@@ -112,15 +112,22 @@ function updateUserInfo()
 			}
 			else
 			{
+				console.log('Inside the else for data')
+				console.log(data.status)
+				console.log(data.message)
 				if (data.message === 'Username in use')
 					alert('This username is already in use, try another one');
 				else if (data.message === 'Email in use')
 					alert('This email is already in use, try another one');
+				else
+					alert('An error ocurred, try later');
+					
 			}
 		})
 		.catch(error =>
 		{
-			console.error('Error: ', error);
+			console.log('Inside the error')
+			console.error('Error:', error);
 			alert('Access denied');
 		});
 	}

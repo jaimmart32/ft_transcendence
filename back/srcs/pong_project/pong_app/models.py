@@ -6,16 +6,21 @@ from django.contrib.auth.models import AbstractUser
 class CustomUser(AbstractUser):
 	# Preferred language
 	# lang = models.CharField(max_length=2)
+	# username = models.CharField(max_length=150, unique=False)
+	# This attribute is to check if the user has registrated via 42intra
+	intra = models.BooleanField(default=False)
+
 	tfa = models.BooleanField(default=False)
 	# If the tfa is set to true, then the otp should not be blank
 	#otp = models.CharField(max_length=6, null=True, blank=True)
 	#otp_ExpDate = models.DateTimeField(null=True, blank=True)
+
 	# Game stats for every game played, including the tournament games(total/wins/losses)
 	game_stats = models.JSONField(default=dict)
 	# Tournament stats ONLY for tournament, not the rounds in the tournament(total/wins/losses)
 	tournament_stats = models.JSONField(default=dict)
 	# Online or offline status
-	status = models.BooleanField(default=False)
+	# is_active (The actual boolean that indicates if the user is active
 
 	def __str__(self):
 		return f"{self.username}"
