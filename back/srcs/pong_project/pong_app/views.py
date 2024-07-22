@@ -20,7 +20,7 @@ from django.contrib.auth.models import User
 def main_view(request):
 	if not request.user.is_authenticated:
 		if request.method == 'GET':
-			return render(request, 'pong_app/signup.html')
+			return render(request, 'pong_app/index.html')
 	return render(request, "pong_app/index.html")
 		
 class signup(APIView):
