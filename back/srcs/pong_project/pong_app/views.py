@@ -9,7 +9,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response 
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework import status
-from django.contrib.auth import authenticate
+from django.contrib.auth import authenticate, login, logout
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from .models import CustomUser
@@ -18,8 +18,10 @@ from django.contrib.auth.models import User
 # Create your views here.
 
 def main_view(request):
-	if request.method == 'GET':
-		return render(request, 'pong_app/index.html')
+	if not request.user.is_authenticated:
+		if request.method == 'GET':
+			return render(request, 'pong_app/signup.html')
+	return render(request, "pong_app/index.html")
 		
 class signup(APIView):
 	permission_classes = [AllowAny]
@@ -37,13 +39,14 @@ class signup(APIView):
 
 class login(APIView):
 	permission_classes = [AllowAny]
-	def post (self, request):
+	def post(self, request):
 		data = request.data
 		username = data.get('username')
 		password = data.get('password')
 		user = authenticate(request, username=username, password=password)
 		if user is not None:
 			refresh = RefreshToken.for_user(user)
+			login(request, user)
 			return Response({
                 'status': 'success',
                 'message': 'Logged in successfully!',
