@@ -3,7 +3,7 @@ function loadProfileSettings(user_content)
         app.innerHTML = `
 		<div class="container mt-2">
 			    <h2>Profile Settings</h2>
-			    <img src="/static/pong_app/media/user-pic.jpg" alt="Default user profile picture" width="128" height="128">
+			    <img src="${user_content.avatar_url} || /static/pong_app/media/user-pic.jpg" alt="Default user profile picture" width="128" height="128">
 			    <form id="profile-settings">
 				<!-- Username Field -->
 				<div class="form-group row">
@@ -74,18 +74,22 @@ function updateUserInfo()
 
 	if (token)
 	{
-		const userInfo =
-		{
-			username: document.getElementById('username').value,
-			email: document.getElementById('email').value,
-			password: document.getElementById('password').value,
-			twofa: document.getElementById('twofa').value,
+		const userInfo = new FormData();
+		userInfo.append('username', document.getElementById('username').value);
+		userInfo.append('email', document.getElementById('email').value);
+		userInfo.append('password', document.getElementById('password').value);
+		userInfo.append('twofa', document.getElementById('twofa').value);
+
 //			lang: document.getElementById('lang').value,
-		};
+
+		const userPic = document.getElementById('avatar').files[0];
+		if (userPic)
+		{
+			userInfo.append('avatar', userPic);
+		}
 
 //		Need to check the input, to see if everything is correct
-		if (!validateUsername(userInfo.username) || !validateEmail(userInfo.email) 
-			|| (!validatePass(userInfo.password) && userInfo.password.length > 0))
+		if (!validateUsername(document.getElementById('username').value) || !validateEmail(document.getElementById('email').value) || (!validatePass(document.getElementById('password').value) && document.getElementById('password').value.length > 0))
 		{
 			alert('Wrong credentials');
 			loadProfileSettings();

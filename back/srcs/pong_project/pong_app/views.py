@@ -75,6 +75,7 @@ class Profile(APIView):
 
 # View needed to edit the User's information. Auto-fills the current user's info, when new data
 # is entered, checks if it is valid (passes check for characters and if it's repeated or not).
+
 class	EditProfile(APIView):
 	permission_classes = [IsAuthenticated]
 
@@ -96,14 +97,48 @@ class	EditProfile(APIView):
 				user.tfa = False 
 			if data.get('password'):
 				user.set_password(data.get('password'))
+			if 'avatar' in request.FILES:
+				user.avatar = request.FILES['avatar']
+				
 			user.save()
 			return Response({'status': 'success', 'message': 'Profile updated successfully!'})
 		except IntegrityError as e:
 			return Response({'status': 'error', 'message': 'Username in use'})
 		return Response({'status': 'error', 'message': 'An error ocurred'})
 
-				
+"""
+class	EditProfile(APIView):
+	permission_classes = [IsAuthenticated]
 
+	def put(self, request):
+		user = request.user
+		data = request.data
+
+		try:
+		# Do we need to check if the info entered is correct like in the front end?
+			user.username = request.PUT.get('username')
+			if CustomUser.objects.filter(username=user.username).exclude(id=user.id).exists():
+				return Response({'status': 'error', 'message': 'Username in use'})
+			user.email = request.PUT.get('email')
+			if CustomUser.objects.filter(email=user.email).exclude(id=user.id).exists():
+					return Response({'status': 'error', 'message': 'Email in use'})
+			
+			if request.PUT.get('tfa') == 'on':
+				user.tfa = True
+			else:
+				user.tfa = False 
+			if request.PUT.get('password'):
+				user.set_password(request.PUT.get('password')))
+			if 'avatar' in request.FILES:
+				user.avatar = request.FILES['avatar']
+				
+			user.save()
+			return Response({'status': 'success', 'message': 'Profile updated successfully!'})
+		except IntegrityError as e:
+			return Response({'status': 'error', 'message': 'Username in use'})
+		return Response({'status': 'error', 'message': 'An error ocurred'})
+				
+"""
 env = load_dotenv(".env")
 
 CLIENT_ID = os.getenv('CLIENT_ID')
