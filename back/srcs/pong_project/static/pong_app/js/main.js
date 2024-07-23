@@ -16,10 +16,10 @@ document.addEventListener('DOMContentLoaded', function() {
         loadSignupForm();
     });
 
-    ftLink.addEventListener('click', function(event) {
-        event.preventDefault();
-        loadLoginFortyTwo();
-    });
+//    ftLink.addEventListener('click', function(event) {
+//        event.preventDefault();
+//        loadLoginFortyTwo();
+//    });
 
 //	HTML for the Login page
     function loadLoginForm() {

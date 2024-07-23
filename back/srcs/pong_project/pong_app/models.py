@@ -6,7 +6,9 @@ from django.contrib.auth.models import AbstractUser
 class CustomUser(AbstractUser):
 	# Preferred language
 	# lang = models.CharField(max_length=2)
-	# username = models.CharField(max_length=150, unique=False)
+
+	# This is to store the user's profile pic
+ 	#profile_pic = models.ImageField(upload_to='profile_pics/', null=True, blank=True)
 	# This attribute is to check if the user has registrated via 42intra
 	intra = models.BooleanField(default=False)
 

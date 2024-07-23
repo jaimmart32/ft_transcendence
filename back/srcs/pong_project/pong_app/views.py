@@ -23,7 +23,7 @@ def main_view(request):
 			return render(request, 'pong_app/index.html')
 	return render(request, "pong_app/index.html")
 		
-class signup(APIView):
+class signupClass(APIView):
 	permission_classes = [AllowAny]
 	def post (self, request):
 		data = request.data
@@ -37,7 +37,7 @@ class signup(APIView):
 		user = CustomUser.objects.create_user(username, email=email, password=password)
 		return Response({'status': 'success', 'message': 'User created succesfully!'})
 
-class login(APIView):
+class loginClass(APIView):
 	permission_classes = [AllowAny]
 	def post(self, request):
 		data = request.data
@@ -72,37 +72,9 @@ class Profile(APIView):
 #'game_stats': request.user.game_stats,
 #'tournament_stats': request.user.tournament_stats
         return Response(content)
-"""
-class EditProfile(APIView):
-	permission_classes = [IsAuthenticated]
 
-	def put(self, request):
-		user = request.user
-		data = request.data
-
-		# receive the data and validate if they are correct
-		user.username = data.get('username', user.username)
-		user.email = data.get('email', user.email)
-		if data.get('twofa', user.tfa) == 'on':
-			user.tfa = True	
-		else:
-			user.tfa = False 
-
-		if data.get('password', None):
-			user.set_password(data.get('password'))
-		# Not sure if we need to get the actual user instance and compare it to prevent 
-		# the "access denied" error and so it prints that the credentials are already in use
-		if (user.username != data.get('username')):
-			if CustomUser.objects.filter(username=user.username).exclude(id=user.id).exists():
-				return Response({'status': 'error', 'message': 'Username in use'})
-		if (user.email != data.get('email')):
-			if CustomUser.objects.filter(email=user.email).exclude(id=user.id).exists():
-				return Response({'status': 'error', 'message': 'Email in use'})
-		user.save()
-		return Response({'status': 'success', 'message': 'Profile updated successfully!'})
-
-"""
-
+# View needed to edit the User's information. Auto-fills the current user's info, when new data
+# is entered, checks if it is valid (passes check for characters and if it's repeated or not).
 class	EditProfile(APIView):
 	permission_classes = [IsAuthenticated]
 
@@ -111,6 +83,7 @@ class	EditProfile(APIView):
 		data = request.data
 
 		try:
+		# Do we need to check if the info entered is correct like in the front end?
 			user.username = data.get('username', user.username)
 			if CustomUser.objects.filter(username=user.username).exclude(id=user.id).exists():
 				return Response({'status': 'error', 'message': 'Username in use'})
