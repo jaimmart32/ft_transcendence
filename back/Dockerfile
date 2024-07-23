@@ -10,6 +10,12 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 RUN apt-get update && apt-get install vim -y
 
+COPY .hostname.txt .
+
+RUN echo "" >> .env; \
+    echo -n "HOST=" >> .env; \ 
+    cat .hostname.txt >> .env 
+
 EXPOSE 8000
 
 COPY ./srcs .
