@@ -34,7 +34,7 @@ class signupClass(APIView):
 			return Response({'status': 'error', 'message': 'Username already in use'})
 		if CustomUser.objects.filter(email=email).exists():
 			return Response({'status': 'error', 'message': 'Email already in use'})
-		user = CustomUser.objects.create_user(username, email=email, password=password)
+		CustomUser.objects.create_user(username, email=email, password=password)
 		return Response({'status': 'success', 'message': 'User created succesfully!'})
 
 class loginClass(APIView):
@@ -139,9 +139,23 @@ def profile42(request):
     access_token = request.session.get('access_token')
     if not access_token:
         return redirect('index')
-
     user_info_response = requests.get(USER_INFO_URL, headers={
         'Authorization': f'Bearer {access_token}'
     }).json()
-
-    return JsonResponse(user_info_response)
+    username = "ft_" + user_info_response['login']
+    email = user_info_response['email']
+    password = ""
+    user = CustomUser.objects.create_user(username, email=email, password=password)
+    refresh = RefreshToken.for_user(user)
+    # return Response({
+    #             'status': 'success',
+    #             'message': 'Logged in successfully!',
+    #             'access': str(refresh.access_token),
+    #             'refresh': str(refresh)
+    #         })
+    return render(request, 'pong_app/testing.js', {
+                 'status': 'success',
+                 'message': 'Logged in successfully!',
+                'access': str(refresh.access_token),
+                'refresh': str(refresh)
+           })
