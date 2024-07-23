@@ -1,7 +1,7 @@
 all: up
 
 up:
-		@hostname > back/.hostname.txt
+		@hostname | tr -d "\n" > back/.hostname.txt
 		@docker-compose -f ./docker-compose.yml up --build
 
 down:
