@@ -1,6 +1,5 @@
 import json# Maybe not needed
 from django.shortcuts import render, redirect
-from dotenv import load_dotenv
 from django.db import IntegrityError
 import requests
 import os
@@ -13,6 +12,7 @@ from django.contrib.auth import authenticate, login, logout
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from .models import CustomUser
+from django.conf import settings
 from django.contrib.auth.models import User 
 
 # Create your views here.
@@ -106,56 +106,77 @@ class	EditProfile(APIView):
 			return Response({'status': 'error', 'message': 'Username in use'})
 		return Response({'status': 'error', 'message': 'An error ocurred'})
 
-"""
-class	EditProfile(APIView):
-	permission_classes = [IsAuthenticated]
 
-	def put(self, request):
-		user = request.user
+class authSettings(APIView):
+
+	permission_classes = [AllowAny]
+	def get(self, request):
+		data = {
+			'status': 'success',
+			'client_id': settings.CLIENT_ID,
+			'redirect_uri': settings.REDIRECT_URI,
+			'auth_endpoint': settings.AUTH_ENDPOINT,
+			'scope': settings.SCOPE,
+		}
+		return Response(data)
+
+
+class callback(APIView):
+
+	permissions_classes = [AllowAny]
+	def post(self, request):
 		data = request.data
+		code = data.get('code')
+		
+		response = requests.post(settings.TOKEN_URL, info=
+		{
+			'grant_type': 'authorization_code',
+			'client_id': settings.CLIENT_ID,
+			'client_secret': settings.CLIENT_SECRET,
+			'redirect_uri': settings.REDIRECT_URI,
+			'code': code
+		})
 
-		try:
-		# Do we need to check if the info entered is correct like in the front end?
-			user.username = request.PUT.get('username')
-			if CustomUser.objects.filter(username=user.username).exclude(id=user.id).exists():
-				return Response({'status': 'error', 'message': 'Username in use'})
-			user.email = request.PUT.get('email')
-			if CustomUser.objects.filter(email=user.email).exclude(id=user.id).exists():
-					return Response({'status': 'error', 'message': 'Email in use'})
-			
-			if request.PUT.get('tfa') == 'on':
-				user.tfa = True
-			else:
-				user.tfa = False 
-			if request.PUT.get('password'):
-				user.set_password(request.PUT.get('password')))
-			if 'avatar' in request.FILES:
-				user.avatar = request.FILES['avatar']
-				
-			user.save()
-			return Response({'status': 'success', 'message': 'Profile updated successfully!'})
-		except IntegrityError as e:
-			return Response({'status': 'error', 'message': 'Username in use'})
-		return Response({'status': 'error', 'message': 'An error ocurred'})
-				
-"""
-env = load_dotenv(".env")
+		token_data = response.json()
+		access_token = token_data.get('access_token')
+		
+		user_response = request.get(settings.USER_INFO_URL, headers=
+		{
+			'Authorization': f'Bearer {access_token}'
+		})
 
-CLIENT_ID = os.getenv('CLIENT_ID')
-CLIENT_SECRET = os.getenv('CLIENT_SECRET')
-REDIRECT_URI = os.getenv('REDIRECT_URI')
+		if not user_response:
+			return Response({
+				'status': 'error',
+				'message': 'API is not available, try later.'
+			})
 
-AUTHORIZATION_URL = os.getenv('AUTHORIZATION_URL')
-TOKEN_URL = os.getenv('TOKEN_URL')
-USER_INFO_URL = os.getenv('USER_INFO_URL')
+		user_info = user_response.json()
+		username = "ft_" + user_info['login']
+		email = user_info['email']
+		password = ""
+		user = CustomUser.objects.create_user(username, email=email, password=password)
+		refresh = RefreshToken.for_user(user)
+		
+		return Response({
+			'status': 'success',
+			'message': 'Logged in successfully!',
+			'access': str(refresh.access_token),
+			'refresh': str(refresh)
+		})
 
-# Create your views here.
+
+
+
+
 def index(request):
     return render(request, 'index.html')
 
 def login42(request):
     return redirect(f'{AUTHORIZATION_URL}?client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}&response_type=code')
 
+
+"""
 def callback(request):
     code = request.GET.get('code')
     token_response = requests.post(TOKEN_URL, data={
@@ -169,6 +190,7 @@ def callback(request):
     access_token = token_response.get('access_token')
     request.session['access_token'] = access_token
     return redirect('profile42')
+    """
 
 def profile42(request):
     access_token = request.session.get('access_token')

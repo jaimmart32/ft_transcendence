@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const app = document.getElementById('app');
     const loginLink = document.getElementById('login-link');
     const signupLink = document.getElementById('signup-link');
-    const ftLink = document.getElementById('ft-link');
+    const login42Link = document.getElementById('login42-link');
 
     // Load login form on clicking "Login" link
     loginLink.addEventListener('click', function(event) {
@@ -16,10 +16,12 @@ document.addEventListener('DOMContentLoaded', function() {
         loadSignupForm();
     });
 
-//    ftLink.addEventListener('click', function(event) {
-//        event.preventDefault();
-//        loadLoginFortyTwo();
-//    });
+    login42Link.addEventListener('click', function(event)
+    {
+    	event.preventDefault();
+	handleAuth();
+//	loadLogin42Form();
+    });
 
 //	HTML for the Login page
     function loadLoginForm() {
