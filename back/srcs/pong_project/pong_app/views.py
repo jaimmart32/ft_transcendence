@@ -128,7 +128,7 @@ class callback(APIView):
 		data = request.data
 		code = data.get('code')
 		
-		response = requests.post(settings.TOKEN_URL, info=
+		response = requests.post(settings.TOKEN_URL, data=
 		{
 			'grant_type': 'authorization_code',
 			'client_id': settings.CLIENT_ID,
@@ -139,8 +139,15 @@ class callback(APIView):
 
 		token_data = response.json()
 		access_token = token_data.get('access_token')
+
+		if not access_token:
+			return Response(
+			{
+				'status': 'error',
+				'message': 'No access token was found'
+			})
 		
-		user_response = request.get(settings.USER_INFO_URL, headers=
+		user_response = requests.get(settings.USER_INFO_URL, headers=
 		{
 			'Authorization': f'Bearer {access_token}'
 		})

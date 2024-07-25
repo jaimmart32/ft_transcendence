@@ -14,8 +14,9 @@ function getAuthUrl()
 		if (data.status === 'success')
 		{
 			alert('Settings found');
-			const authUrl = '${data.auth_endpoint}?client_id=${data.client_id}&redirect_uri=${data.redirect_uri}&response_type=${data.scope}'
-			return (authUrl);
+//			const authUrl = '{data.auth_endpoint}?client_id={data.client_id}&redirect_uri=${data.redirect_uri}&response_type=${data.scope}'
+//			console.log(authUrl);
+			return ('${data.auth_endpoint}?client_id=${data.client_id}&redirect_uri=${data.redirect_uri}&response_type=${data.scope}');
 		}
 		else
 		{
@@ -28,12 +29,13 @@ function getAuthUrl()
 // This function receives the auth url, changes the window to that url (API42),
 // the user verifies in the API and receives a code (token). Here we receive
 // the token and send it to the backend.
-function handleAuth()
+async function handleAuth()
 {
-	const authUrl = getAuthUrl();
-
+	authUrl = await getAuthUrl();
+	console.log('Inside handle auth')
 	if (authUrl)
 	{
+		console.log(authUrl)
 		console.log('inside handle auth, found url');
 		window.location.href = authUrl;
 		const urlParams = new URLSearchParams(window.location.search);
@@ -41,10 +43,15 @@ function handleAuth()
 
 		if (code)
 		{
-			makeApiPetition(code);
+			alert('Code found');
+			return (code);
+//			makeApiPetition(code);
 		}
 		else
+		{
 			alert('No code found');
+			return (null);
+		}
 	}
 }
 
@@ -70,8 +77,12 @@ async function makeApiPetition(code)
 	}
 	else
 	{
+		console.log(data.status);
+		console.log(data.message);
 		alert('Authentication failed');
 	}
 }
 
+window.getAuthUrl = getAuthUrl;
 window.handleAuth = handleAuth;
+window.makeApiPetition = makeApiPetition;

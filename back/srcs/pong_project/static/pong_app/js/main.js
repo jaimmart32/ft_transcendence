@@ -19,7 +19,10 @@ document.addEventListener('DOMContentLoaded', function() {
     login42Link.addEventListener('click', function(event)
     {
     	event.preventDefault();
-	handleAuth();
+//	const authUrl = getAuthUrl();
+//	handleAuth();
+	const code = handleAuth();
+	makeApiPetition(code);
 //	loadLogin42Form();
     });
 
