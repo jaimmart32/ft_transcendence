@@ -11,20 +11,26 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Load signup form on clicking "Sign Up" link
-    signupLink.addEventListener('click', function(event) {
-        event.preventDefault();
-        loadSignupForm();
-    });
+	signupLink.addEventListener('click', function(event)
+	{
+    		event.preventDefault();
+		loadSignupForm();
+	});
 
-    login42Link.addEventListener('click', function(event)
-    {
-    	event.preventDefault();
-//	const authUrl = getAuthUrl();
-//	handleAuth();
-	const code = handleAuth();
-	makeApiPetition(code);
-//	loadLogin42Form();
-    });
+	login42Link.addEventListener('click', async function(event)
+	{
+    		event.preventDefault();
+		await handleAuth();
+	});
+
+	const urlParams = new URLSearchParams(window.location.search);
+	const code = urlParams.get('code');
+
+	if (code)
+	{
+		history.replaceState(null, null, window.location.pathname);
+		makeApiPetition(code);
+	}
 
 //	HTML for the Login page
     function loadLoginForm() {

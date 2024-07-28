@@ -124,10 +124,15 @@ class authSettings(APIView):
 class callback(APIView):
 
 	permissions_classes = [AllowAny]
-	def post(self, request):
-		data = request.data
-		code = data.get('code')
-		
+
+	def get(self, request):
+		code = request.GET.get('code')
+		if not code:
+			return Response(
+			{
+				'status': 'error',
+				'message': 'No code provided'
+			})
 		response = requests.post(settings.TOKEN_URL, data=
 		{
 			'grant_type': 'authorization_code',
@@ -165,6 +170,7 @@ class callback(APIView):
 		user = CustomUser.objects.create_user(username, email=email, password=password)
 		refresh = RefreshToken.for_user(user)
 		
+		#return redirect('/home/')
 		return Response({
 			'status': 'success',
 			'message': 'Logged in successfully!',

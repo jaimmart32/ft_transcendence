@@ -1,29 +1,34 @@
-function getAuthUrl()
+async function getAuthUrl()
 {
-	fetch('api/auth-settings/',
+	try
 	{
-		method: 'GET',
-		headers:
+		const response = await fetch('api/auth-settings/',
 		{
-			'Content-Type': 'application/json'
-		}
-	})
-	.then(response => response.json())
-	.then(data =>
-	{
+			method: 'GET',
+			headers:
+			{
+				'Content-Type': 'application/json'
+			}
+		});
+		const data = await response.json();
 		if (data.status === 'success')
 		{
-			alert('Settings found');
-//			const authUrl = '{data.auth_endpoint}?client_id={data.client_id}&redirect_uri=${data.redirect_uri}&response_type=${data.scope}'
-//			console.log(authUrl);
-			return ('${data.auth_endpoint}?client_id=${data.client_id}&redirect_uri=${data.redirect_uri}&response_type=${data.scope}');
+//			alert('Settings found');
+			const authUrl =  `${data.auth_endpoint}?client_id=${data.client_id}&redirect_uri=${data.redirect_uri}&response_type=${data.scope}`
+			return (authUrl);
 		}
 		else
 		{
 			alert('Could not retrieve API settings');
 			return (null);
 		}
-	})
+	}
+	catch(error)
+	{
+		console.error('Error fetching API settings: ', error);
+		return (null);
+	}
+
 }
 
 // This function receives the auth url, changes the window to that url (API42),
@@ -32,54 +37,53 @@ function getAuthUrl()
 async function handleAuth()
 {
 	authUrl = await getAuthUrl();
-	console.log('Inside handle auth')
+
 	if (authUrl)
 	{
-		console.log(authUrl)
-		console.log('inside handle auth, found url');
 		window.location.href = authUrl;
-		const urlParams = new URLSearchParams(window.location.search);
-		const code = urlParams.get('code');
-
-		if (code)
-		{
-			alert('Code found');
-			return (code);
-//			makeApiPetition(code);
-		}
-		else
-		{
-			alert('No code found');
-			return (null);
-		}
+	}
+	else
+	{
+		alert('No AuthURL was found');
 	}
 }
 
 async function makeApiPetition(code)
 {
-	const response = await fetch('api/auth/callback/', 
+	try
 	{
-		method: 'POST',
-		headers:
+		const response = await fetch('api/auth/callback/',
 		{
-			'Content-Type': 'application/json'
-		},
-		body: JSON.stringify({ code })
-	});
-	const data = await response.json();
+			method: 'POST',
+			headers:
+			{
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({ code })
+		});
 
-	if (data.status === 'success')
-	{
-		alert('Authenticated successfully');
-		localStorage.setItem('access', data.access);
-		localStorage.setItem('refresh', data.access);
-		loadHome();
+		const data = await response.json();
+
+		if (data.status === 'success')
+		{
+//			Need to create another html, where the whole process of getting the
+//			code, storing the tokens and loading the home is done.
+			alert('Authenticated successfully');
+			localStorage.setItem('access', data.access);
+			localStorage.setItem('refresh', data.access);
+			window.location.href('/home/');
+//			loadHome();
+		}
+		else
+		{
+			console.log(data.status);
+			console.log(data.message);
+			alert('Authentication failed');
+		}
 	}
-	else
+	catch(error)
 	{
-		console.log(data.status);
-		console.log(data.message);
-		alert('Authentication failed');
+		console.error('Error fetching API settings: ', error);
 	}
 }
 
