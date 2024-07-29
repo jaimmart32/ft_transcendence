@@ -141,3 +141,5 @@ function updateUserInfo()
 		loadLoginForm();
 	}
 }
+
+window.loadProfileSettings = loadProfileSettings;

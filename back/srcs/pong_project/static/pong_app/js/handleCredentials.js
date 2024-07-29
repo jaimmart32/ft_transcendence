@@ -118,6 +118,7 @@ function signUpHandler()
 function loadHome() {
     const app = document.getElementById('app');
     const token = localStorage.getItem('access');
+    console.log('Token in localstorage: ', token);
     if (token) {
         fetch('/home/', {
             method: 'GET',

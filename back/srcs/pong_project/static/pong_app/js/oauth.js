@@ -40,6 +40,7 @@ async function handleAuth()
 
 	if (authUrl)
 	{
+		console.log('Before redirecting to url');
 		window.location.href = authUrl;
 	}
 	else
@@ -71,8 +72,8 @@ async function makeApiPetition(code)
 			alert('Authenticated successfully');
 			localStorage.setItem('access', data.access);
 			localStorage.setItem('refresh', data.access);
-			window.location.href('/home/');
-//			loadHome();
+			loadHome();
+//			window.location.href('/home/');
 		}
 		else
 		{
@@ -90,3 +91,13 @@ async function makeApiPetition(code)
 window.getAuthUrl = getAuthUrl;
 window.handleAuth = handleAuth;
 window.makeApiPetition = makeApiPetition;
+
+// Ensure this script runs after the DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const code = urlParams.get('code');
+
+    if (code) {
+        makeApiPetition(code);
+    }
+});

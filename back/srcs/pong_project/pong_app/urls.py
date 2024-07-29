@@ -19,4 +19,5 @@ urlpatterns = [
 	path('api/auth/callback/', views.callback.as_view(), name='callback'),
 
 	path('callback.html', TemplateView.as_view(template_name='callback.html'), name='callback_html'),
+	path('index.html', TemplateView.as_view(template_name='index.html'), name='index_html'),
 ]

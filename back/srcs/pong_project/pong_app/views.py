@@ -125,8 +125,8 @@ class callback(APIView):
 
 	permissions_classes = [AllowAny]
 
-	def get(self, request):
-		code = request.GET.get('code')
+	def post(self, request):
+		code = request.data.get('code')
 		if not code:
 			return Response(
 			{
@@ -167,6 +167,10 @@ class callback(APIView):
 		username = "ft_" + user_info['login']
 		email = user_info['email']
 		password = ""
+		if CustomUser.objects.filter(username=username).exists():
+			return Response({'status': 'error', 'message': 'Username already in use'})
+		if CustomUser.objects.filter(email=email).exists():
+			return Response({'status': 'error', 'message': 'Email already in use'})
 		user = CustomUser.objects.create_user(username, email=email, password=password)
 		refresh = RefreshToken.for_user(user)
 		

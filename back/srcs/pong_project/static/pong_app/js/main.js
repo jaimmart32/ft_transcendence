@@ -23,15 +23,6 @@ document.addEventListener('DOMContentLoaded', function() {
 		await handleAuth();
 	});
 
-	const urlParams = new URLSearchParams(window.location.search);
-	const code = urlParams.get('code');
-
-	if (code)
-	{
-		history.replaceState(null, null, window.location.pathname);
-		makeApiPetition(code);
-	}
-
 //	HTML for the Login page
     function loadLoginForm() {
         app.innerHTML = `
@@ -74,15 +65,6 @@ document.addEventListener('DOMContentLoaded', function() {
 	signUpHandler();
     }
 
-    function loadLoginFortyTwo() {
-        app.innerHTML = `
-            <h2>Login</h2>
-            <a href='login42'>Login with 42</a>
-        `;
-	logInHandler();
-    }
-
-
     function loadPlayGame() {
         app.innerHTML = `
             <h2>Play Game</h2>
@@ -113,7 +95,6 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('back-to-home').addEventListener('click', loadHome);
     }
 
-    window.loadProfileSettings = loadProfileSettings;
     window.loadProfile = loadProfile;
     window.loadPlayGame = loadPlayGame;
     window.loadFriendsSection = loadFriendsSection;

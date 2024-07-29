@@ -1,60 +1,32 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Callback</title>
-    <script>
-        // Function to extract query parameters from URL
-        function getQueryParams(url) {
-            const params = {};
-            const parser = new URL(url);
-            const queryString = parser.search.slice(1);
-            const queries = queryString.split('&');
-            queries.forEach(query => {
-                const [key, value] = query.split('=');
-                params[key] = decodeURIComponent(value);
-            });
-            return params;
-        }
-
-        // Function to handle the authentication callback
-        async function handleAuthCallback() {
-            const params = getQueryParams(window.location.href);
-            const code = params['code'];
-
-            if (code) {
-                try {
-                    const response = await fetch('/api/auth/callback/', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({ code })
-                    });
-
-                    const data = await response.json();
-
-                    if (data.status === 'success') {
-                        localStorage.setItem('access', data.access);
-                        localStorage.setItem('refresh', data.refresh);
-                        window.location.href = '/home/';
-                    } else {
-                        alert('Authentication failed: ' + data.message);
-                    }
-                } catch (error) {
-                    console.error('Error during authentication callback:', error);
-                    alert('Authentication failed. Please try again.');
-                }
-            } else {
-                alert('No code found in the URL.');
-            }
-        }
-
-        document.addEventListener('DOMContentLoaded', handleAuthCallback);
-    </script>
+    <title>OAuth Callback</title>
 </head>
 <body>
-    <h1>Processing your authentication...</h1>
+    <h1>Processing your login...</h1>
+    <script src="../../static/pong_app/js/main.js"></script>
+    <script src="../../static/pong_app/js/handleCredentials.js"></script>
+    <script src="../../static/pong_app/js/oauth.js"></script>
+    <script>
+        (function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const code = urlParams.get('code');
+
+            if (code)
+	    {
+                // Use the makeApiPetition function defined in main.js
+		console.log('code inside html ', code)
+                makeApiPetition(code);
+            }
+	    else
+	    {
+                alert('No authorization code found.');
+		loadLoginForm();
+//                window.location.href = '/login/'; // Redirect to login page if no code
+            }
+        })();
+    </script>
 </body>
 </html>
+
