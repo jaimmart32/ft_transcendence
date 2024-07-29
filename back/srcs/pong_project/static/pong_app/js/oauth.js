@@ -1,3 +1,19 @@
+document.addEventListener('DOMContentLoaded', () =>
+{
+	const urlParams = new URLSearchParams(window.location.search);
+	const code = urlParams.get('code');
+	
+	if (code)
+	{
+		makeApiPetition(code);
+	}
+	else
+	{
+		alert('No auth code found.');
+//		Do I need to redirect and use the window.href ?
+		loadLoginForm();
+	}
+});
 async function getAuthUrl()
 {
 	try
@@ -36,7 +52,7 @@ async function getAuthUrl()
 // the token and send it to the backend.
 async function handleAuth()
 {
-	authUrl = await getAuthUrl();
+	const authUrl = await getAuthUrl();
 
 	if (authUrl)
 	{

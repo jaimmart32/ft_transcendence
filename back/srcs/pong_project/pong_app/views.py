@@ -120,7 +120,64 @@ class authSettings(APIView):
 		}
 		return Response(data)
 
+class callback(APIView):
 
+	permissions_classes = [AllowAny]
+
+	def post(self, request):
+		code = request.data.get('code')
+		if not code:
+			return Response(
+			{
+				'status': 'error',
+				'message': 'No code provided'
+			})
+		response = requests.post(settings.TOKEN_URL, data=
+		{
+			'grant_type': 'authorization_code',
+			'client_id': settings.CLIENT_ID,
+			'client_secret': settings.CLIENT_SECRET,
+			'redirect_uri': settings.REDIRECT_URI,
+			'code': code
+		})
+
+		token_data = response.json()
+		access_token = token_data.get('access_token')
+
+		if not access_token:
+			return Response(
+			{
+				'status': 'error',
+				'message': 'No access token was found'
+			})
+		
+		user_response = requests.get(settings.USER_INFO_URL, headers=
+		{
+			'Authorization': f'Bearer {access_token}'
+		})
+
+		if not user_response:
+			return Response({
+				'status': 'error',
+				'message': 'API is not available, try later.'
+			})
+
+		user_info = user_response.json()
+		username = "ft_" + user_info['login']
+		email = user_info['email']
+		password = ""
+		if CustomUser.objects.filter(username=username).exists():
+			return Response({'status': 'error', 'message': 'Username already in use'})
+		if CustomUser.objects.filter(email=email).exists():
+			return Response({'status': 'error', 'message': 'Email already in use'})
+		user = CustomUser.objects.create_user(username, email=email, password=password)
+		# Could use the CustomUser.objects.get_or_create() and later check if the user exists 
+		refresh = RefreshToken.for_user(user)
+
+		redirect_url = f"{settings.FRONT_REDIRECT}?access={refresh.access_token}&refresh={refresh}"
+		return redirect(redirect_url)
+
+"""
 class callback(APIView):
 
 	permissions_classes = [AllowAny]
@@ -181,7 +238,7 @@ class callback(APIView):
 			'access': str(refresh.access_token),
 			'refresh': str(refresh)
 		})
-
+"""
 
 
 
