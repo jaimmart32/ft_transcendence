@@ -1,3 +1,6 @@
+// This function will send a petition to the back, the back will give this function
+// the settings (.env) variables needed. After getting the variables, it will
+// construct the authUrl.
 async function getAuthUrl()
 {
 	try
@@ -32,9 +35,8 @@ async function getAuthUrl()
 
 }
 
-// This function receives the auth url, changes the window to that url (API42),
-// the user verifies in the API and receives a code (token). Here we receive
-// the token and send it to the backend.
+// This function calls getAuthUrl(), and will redirect to the corresponing URL
+// which will start the process of loging into the 42 intra
 async function handleAuth()
 {
 	const authUrl = await getAuthUrl();
@@ -50,6 +52,11 @@ async function handleAuth()
 	}
 }
 
+// After being redirected to the callback html, this function will be triggered by the DOM 
+// if a code is found inside the URL. First, it will send the code received to the back,
+// so the backend uses that code with the 42API and can retrieve information. 
+// If the code is valid, the backend will return a success response along with the info
+// that retrieved from the API. Finally, the handle42Info is called.
 async function verifyCode(code)
 {
 	try
@@ -81,6 +88,10 @@ async function verifyCode(code)
 	}
 }
 
+// This will be the last petition sent to the backend for this OAuth process.
+// In this petition, it will send back the user information to the backend,
+// the backend will handle the information and return a response along with
+// a URL to redirect the program back to the app.
 async function handle42Info(userInfo)
 {
 	try
@@ -123,6 +134,10 @@ async function handle42Info(userInfo)
 	}
 }
 
+// This function will be always in the background, waiting for the callback.html
+// file, and the corresponding url to either the code or the refresh or access
+// tokens given by the backend. Depending to what token or code is in the URL,
+// it will set the tokens inside the localStorage or will start the process of OAuth.
 document.addEventListener('DOMContentLoaded', () =>
 {
 	const urlParams = new URLSearchParams(window.location.search);
