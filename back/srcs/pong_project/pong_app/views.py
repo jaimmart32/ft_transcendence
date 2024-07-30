@@ -120,19 +120,14 @@ class authSettings(APIView):
 		}
 		return Response(data)
 
-class callback(APIView):
-
-	permissions_classes = [AllowAny]
-
+class authVerify(APIView):
+	
+	permission_classes = [AllowAny]
 	def post(self, request):
 		code = request.data.get('code')
 		if not code:
-			return Response(
-			{
-				'status': 'error',
-				'message': 'No code provided'
-			})
-		response = requests.post(settings.TOKEN_URL, data=
+			return Response({'status': 'error', 'message': 'No code provided'})
+		tokenResponse = requests.post(settings.TOKEN_URL, data=
 		{
 			'grant_type': 'authorization_code',
 			'client_id': settings.CLIENT_ID,
@@ -140,31 +135,28 @@ class callback(APIView):
 			'redirect_uri': settings.REDIRECT_URI,
 			'code': code
 		})
-
-		token_data = response.json()
-		access_token = token_data.get('access_token')
-
-		if not access_token:
-			return Response(
-			{
-				'status': 'error',
-				'message': 'No access token was found'
-			})
-		
-		user_response = requests.get(settings.USER_INFO_URL, headers=
+		tokenData = tokenResponse.json()
+		accessToken = tokenData.get('access_token')
+		if not accessToken:
+			return Response({'status': 'error', 'message': 'No access token was found'})
+		userResponse = requests.get(settings.USER_INFO_URL, headers=
 		{
-			'Authorization': f'Bearer {access_token}'
+			'Authorization': f'Bearer {accessToken}'
 		})
+		if userResponse.status_code != 200:
+			return Response({'status': 'error', 'message': 'Could not retrieve the user data'})
+		userInfo = userResponse.json()
+		return Response({'status': 'success', 'userInfo': userInfo})
 
-		if not user_response:
-			return Response({
-				'status': 'error',
-				'message': 'API is not available, try later.'
-			})
-
-		user_info = user_response.json()
-		username = "ft_" + user_info['login']
-		email = user_info['email']
+class authCreateUser(APIView):
+	
+	permission_classes = [AllowAny]
+	def post(self, request):
+		userInfo = request.data.get('userInfo')
+		if not userInfo:
+			return Response({'status': 'error', 'message': 'No user information'})
+		username = "ft_" + userInfo['login']
+		email = userInfo['email']
 		password = ""
 		if CustomUser.objects.filter(username=username).exists():
 			return Response({'status': 'error', 'message': 'Username already in use'})
@@ -175,72 +167,7 @@ class callback(APIView):
 		refresh = RefreshToken.for_user(user)
 
 		redirect_url = f"{settings.FRONT_REDIRECT}?access={refresh.access_token}&refresh={refresh}"
-		return redirect(redirect_url)
-
-"""
-class callback(APIView):
-
-	permissions_classes = [AllowAny]
-
-	def post(self, request):
-		code = request.data.get('code')
-		if not code:
-			return Response(
-			{
-				'status': 'error',
-				'message': 'No code provided'
-			})
-		response = requests.post(settings.TOKEN_URL, data=
-		{
-			'grant_type': 'authorization_code',
-			'client_id': settings.CLIENT_ID,
-			'client_secret': settings.CLIENT_SECRET,
-			'redirect_uri': settings.REDIRECT_URI,
-			'code': code
-		})
-
-		token_data = response.json()
-		access_token = token_data.get('access_token')
-
-		if not access_token:
-			return Response(
-			{
-				'status': 'error',
-				'message': 'No access token was found'
-			})
-		
-		user_response = requests.get(settings.USER_INFO_URL, headers=
-		{
-			'Authorization': f'Bearer {access_token}'
-		})
-
-		if not user_response:
-			return Response({
-				'status': 'error',
-				'message': 'API is not available, try later.'
-			})
-
-		user_info = user_response.json()
-		username = "ft_" + user_info['login']
-		email = user_info['email']
-		password = ""
-		if CustomUser.objects.filter(username=username).exists():
-			return Response({'status': 'error', 'message': 'Username already in use'})
-		if CustomUser.objects.filter(email=email).exists():
-			return Response({'status': 'error', 'message': 'Email already in use'})
-		user = CustomUser.objects.create_user(username, email=email, password=password)
-		refresh = RefreshToken.for_user(user)
-		
-		#return redirect('/home/')
-		return Response({
-			'status': 'success',
-			'message': 'Logged in successfully!',
-			'access': str(refresh.access_token),
-			'refresh': str(refresh)
-		})
-"""
-
-
+		return Response({'status': 'success', 'redirect_url': redirect_url}, status=200)
 
 
 def index(request):

@@ -4,24 +4,32 @@ document.addEventListener('DOMContentLoaded', function() {
     const signupLink = document.getElementById('signup-link');
     const login42Link = document.getElementById('login42-link');
 
-    // Load login form on clicking "Login" link
-    loginLink.addEventListener('click', function(event) {
-        event.preventDefault();
-        loadLoginForm();
-    });
-
-    // Load signup form on clicking "Sign Up" link
-	signupLink.addEventListener('click', function(event)
+	if (loginLink)
 	{
-    		event.preventDefault();
-		loadSignupForm();
-	});
+		loginLink.addEventListener('click', function(event)
+		{
+			event.preventDefault();
+			loadLoginForm();
+		});
+	}
 
-	login42Link.addEventListener('click', async function(event)
+	if (signupLink)
 	{
-    		event.preventDefault();
-		await handleAuth();
-	});
+		signupLink.addEventListener('click', function(event)
+		{
+			event.preventDefault();
+			loadSignupForm();
+		});
+	}
+
+	if (login42Link)
+	{
+		login42Link.addEventListener('click', async function(event)
+		{
+			event.preventDefault();
+			await handleAuth();
+		});
+	}
 
 //	HTML for the Login page
     function loadLoginForm() {
@@ -95,7 +103,6 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('back-to-home').addEventListener('click', loadHome);
     }
 
-    window.loadProfile = loadProfile;
     window.loadPlayGame = loadPlayGame;
     window.loadFriendsSection = loadFriendsSection;
     window.loadCreateTournament = loadCreateTournament;

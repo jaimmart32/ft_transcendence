@@ -1,19 +1,3 @@
-document.addEventListener('DOMContentLoaded', () =>
-{
-	const urlParams = new URLSearchParams(window.location.search);
-	const code = urlParams.get('code');
-	
-	if (code)
-	{
-		makeApiPetition(code);
-	}
-	else
-	{
-		alert('No auth code found.');
-//		Do I need to redirect and use the window.href ?
-		loadLoginForm();
-	}
-});
 async function getAuthUrl()
 {
 	try
@@ -29,8 +13,9 @@ async function getAuthUrl()
 		const data = await response.json();
 		if (data.status === 'success')
 		{
-//			alert('Settings found');
+			alert('Settings found');
 			const authUrl =  `${data.auth_endpoint}?client_id=${data.client_id}&redirect_uri=${data.redirect_uri}&response_type=${data.scope}`
+			console.log(authUrl);
 			return (authUrl);
 		}
 		else
@@ -65,11 +50,11 @@ async function handleAuth()
 	}
 }
 
-async function makeApiPetition(code)
+async function verifyCode(code)
 {
 	try
 	{
-		const response = await fetch('api/auth/callback/',
+		const response = await fetch('api/auth/verify/',
 		{
 			method: 'POST',
 			headers:
@@ -78,42 +63,88 @@ async function makeApiPetition(code)
 			},
 			body: JSON.stringify({ code })
 		});
-
 		const data = await response.json();
-
 		if (data.status === 'success')
 		{
-//			Need to create another html, where the whole process of getting the
-//			code, storing the tokens and loading the home is done.
-			alert('Authenticated successfully');
-			localStorage.setItem('access', data.access);
-			localStorage.setItem('refresh', data.access);
-			loadHome();
-//			window.location.href('/home/');
+			console.log('Code verified');
+			handle42Info(data.userInfo);
 		}
 		else
 		{
-			console.log(data.status);
-			console.log(data.message);
-			alert('Authentication failed');
+			console.log('Error: ', data.message);
+			alert('Code verification failed');
 		}
 	}
 	catch(error)
 	{
-		console.error('Error fetching API settings: ', error);
+		console.error("Error: ", error);
 	}
 }
 
+async function handle42Info(userInfo)
+{
+	try
+	{
+		const response = await fetch('api/auth/create-user/',
+		{
+			method: 'POST',
+			headers:
+			{
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({ userInfo })
+		});
+		const data = await response.text();
+
+		try
+		{
+			const jsonData = JSON.parse(data);
+			if (jsonData.status === 'success')
+			{
+				alert('Success to create user');
+				window.location.href = jsonData.redirect_url;
+			}
+			else
+			{
+				console.log('Error: ', jsonData.message);
+				alert('Failed to create the user');
+			}
+		}
+		catch(e)
+		{
+			console.error('Error: ', e);
+			console.error('Response: ', data);
+			alert('Failed to create the user');
+		}
+	}
+	catch(error)
+	{
+		console.error("Error: ", error);
+	}
+}
+
+document.addEventListener('DOMContentLoaded', () =>
+{
+	const urlParams = new URLSearchParams(window.location.search);
+	const code = urlParams.get('code');
+	const access = urlParams.get('access');
+	const refresh = urlParams.get('refresh');
+
+	if (access && refresh)
+	{
+		console.log('Inside event listener, found tokens');
+		localStorage.setItem('access', access);
+		localStorage.setItem('refresh', refresh);
+		loadHome();
+	}
+	if (code)
+	{
+		console.log('Inside event listener, found code');
+		verifyCode(code);
+	}
+});
+
 window.getAuthUrl = getAuthUrl;
 window.handleAuth = handleAuth;
-window.makeApiPetition = makeApiPetition;
-
-// Ensure this script runs after the DOM is loaded
-document.addEventListener('DOMContentLoaded', () => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const code = urlParams.get('code');
-
-    if (code) {
-        makeApiPetition(code);
-    }
-});
+window.handle42Info = handle42Info;
+window.verifyCode = verifyCode;
