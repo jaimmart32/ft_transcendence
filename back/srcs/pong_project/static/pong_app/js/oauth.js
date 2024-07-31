@@ -16,9 +16,7 @@ async function getAuthUrl()
 		const data = await response.json();
 		if (data.status === 'success')
 		{
-			alert('Settings found');
 			const authUrl =  `${data.auth_endpoint}?client_id=${data.client_id}&redirect_uri=${data.redirect_uri}&response_type=${data.scope}`
-			console.log(authUrl);
 			return (authUrl);
 		}
 		else
@@ -150,7 +148,8 @@ document.addEventListener('DOMContentLoaded', () =>
 		console.log('Inside event listener, found tokens');
 		localStorage.setItem('access', access);
 		localStorage.setItem('refresh', refresh);
-		loadHome();
+		window.history.replaceState({}, document.title, "/home");
+		navigateTo('/home');
 	}
 	if (code)
 	{

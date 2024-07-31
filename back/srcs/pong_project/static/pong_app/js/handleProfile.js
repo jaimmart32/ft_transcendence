@@ -57,24 +57,26 @@ function loadProfile()
 				document.addEventListener('DOMContentLoaded', loadUserData);
 			    </script>
 			`;
-			console.log('Before clicking');
-//			document.addEventListener('DOMContentLoaded', document.getElementById('edit-profile').addEventListener('click', loadProfileSettings, data));
-			document.getElementById('edit-profile').addEventListener('click', () =>
+			const edit = document.getElementById('edit-profile');
+			if (edit)
 			{
-				loadProfileSettings(data);
-			})
-
+				edit.addEventListener('click', function(event)
+				{
+					event.preventDefault();	
+					navigateTo('/home/profile/edit');
+				});
+			}
 		})
 		.catch(error =>
 		{
 			console.error('Error:', error);
 			alert('You are not authorized to view this page. Please log in.');
-			loadLoginForm();
+			navigateTo('/login');
 		});
 	}
 	else
 	{
 		alert('You are not authorized to view this page. Please log in.');
-		loadLoginForm();
+		navigateTo('/login');
 	}
 }

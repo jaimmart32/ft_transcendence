@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', function() {
 		loginLink.addEventListener('click', function(event)
 		{
 			event.preventDefault();
-			loadLoginForm();
+			navigateTo('/login');
 		});
 	}
 
@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', function() {
 		signupLink.addEventListener('click', function(event)
 		{
 			event.preventDefault();
-			loadSignupForm();
+			navigateTo('/signup');
 		});
 	}
 
@@ -31,82 +31,9 @@ document.addEventListener('DOMContentLoaded', function() {
 		});
 	}
 
-//	HTML for the Login page
-    function loadLoginForm() {
-        app.innerHTML = `
-            <h2>Login</h2>
-            <form id="login-form">
-                <div class="form-group">
-                    <label for="username">Username</label>
-                    <input type="username" class="form-control" id="username" aria-describedby="usernameHelp" placeholder="Enter username">
-                </div>
-                <div class="form-group">
-                    <label for="password">Password</label>
-                    <input type="password" class="form-control" id="password" placeholder="Password">
-                </div>
-                <button type="submit" class="btn btn-primary">Login</button>
-            </form>
-        `;
-	logInHandler();
-    }
+	window.addEventListener('popstate', function(event)
+	{
+		loadPage(window.location.pathname);
+	});
 
-//	HTML for the SignUp page
-    function loadSignupForm() {
-        app.innerHTML = `
-            <h2>Sign Up</h2>
-            <form id="signup-form">
-                <div class="form-group">
-                    <label for="username">Username</label>
-                    <input type="text" class="form-control" id="username" placeholder="Enter username">
-                </div>
-                <div class="form-group">
-                    <label for="email">Email address</label>
-                    <input type="email" class="form-control" id="email" aria-describedby="emailHelp" placeholder="Enter email">
-                </div>
-                <div class="form-group">
-                    <label for="password">Password</label>
-                    <input type="password" class="form-control" id="password" placeholder="Password">
-                </div>
-                <button type="submit" class="btn btn-primary">Sign Up</button>
-            </form>
-        `;
-	signUpHandler();
-    }
-
-    function loadPlayGame() {
-        app.innerHTML = `
-            <h2>Play Game</h2>
-            <p>Get ready to play a game of Pong!</p>
-            <!-- Add game play content here -->
-            <button class="btn btn-secondary" id="back-to-home">Back to Home</button>
-        `;
-        document.getElementById('back-to-home').addEventListener('click', loadHome);
-    }
-
-    function loadFriendsSection() {
-        app.innerHTML = `
-            <h2>Friends</h2>
-            <p>Manage your friends here.</p>
-            <!-- Add friends management content here -->
-            <button class="btn btn-secondary" id="back-to-home">Back to Home</button>
-        `;
-        document.getElementById('back-to-home').addEventListener('click', loadHome);
-    }
-
-    function loadCreateTournament() {
-        app.innerHTML = `
-            <h2>Create Tournament</h2>
-            <p>Create a new tournament.</p>
-            <!-- Add tournament creation form or content here -->
-            <button class="btn btn-secondary" id="back-to-home">Back to Home</button>
-        `;
-        document.getElementById('back-to-home').addEventListener('click', loadHome);
-    }
-
-    window.loadPlayGame = loadPlayGame;
-    window.loadFriendsSection = loadFriendsSection;
-    window.loadCreateTournament = loadCreateTournament;
-    window.loadLoginForm = loadLoginForm;
-    window.loadSignupForm = loadSignupForm;
 });
-

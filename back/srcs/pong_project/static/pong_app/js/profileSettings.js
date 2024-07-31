@@ -63,12 +63,21 @@ function loadProfileSettings(user_content)
 			<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
 			<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 		    `;
-		    document.getElementById('save-changes').addEventListener('click', updateUserInfo);
+//		    I could add one more button to go back without making any changes
+		    const save = document.getElementById('save-changes');
+		    if (save)
+		    {
+		    	save.addEventListener('click', function(event)
+			{
+				event.preventDefault();
+				updateUserInfo();
+			});
+		    }
 }
 
 function updateUserInfo()
 {
-	event.preventDefault();
+//	event.preventDefault();
 
 	const token = localStorage.getItem('access');
 
@@ -82,11 +91,11 @@ function updateUserInfo()
 
 //			lang: document.getElementById('lang').value,
 
-		const userPic = document.getElementById('avatar').files[0];
-		if (userPic)
-		{
-			userInfo.append('avatar', userPic);
-		}
+//		const userPic = document.getElementById('avatar').files[0];
+//		if (userPic)
+//		{
+//			userInfo.append('avatar', userPic);
+//		}
 
 //		Need to check the input, to see if everything is correct
 		if (!validateUsername(document.getElementById('username').value) || !validateEmail(document.getElementById('email').value) || (!validatePass(document.getElementById('password').value) && document.getElementById('password').value.length > 0))
@@ -112,7 +121,7 @@ function updateUserInfo()
 			if (data.status === 'success')
 			{
 				alert('Info updated correctly!');
-				loadProfile();
+				navigateTo('/home/profile');
 			}
 			else
 			{
@@ -138,7 +147,7 @@ function updateUserInfo()
 	else
 	{
 		alert('You are not authorized to view this page. Please log in.');
-		loadLoginForm();
+		navigateTo('/login');
 	}
 }
 
