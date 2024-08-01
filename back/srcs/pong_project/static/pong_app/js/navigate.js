@@ -1,8 +1,10 @@
 function loadPage(url)
 {
-	if (url === '' || url === '/home')
-		loadHome();	
-	if (url === '/login')
+//	if (url === '/' || url === '')
+//		loadHome();	
+	if (url === '/home')
+		loadHome();
+	else if (url === '/login')
 		loadLoginForm();
 	else if (url === '/signup')
 		loadSignupForm();

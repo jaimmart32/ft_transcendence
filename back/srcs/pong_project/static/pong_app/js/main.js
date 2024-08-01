@@ -31,9 +31,12 @@ document.addEventListener('DOMContentLoaded', function() {
 		});
 	}
 
+//	This event listener is in charge of receiving any event regarding the 
+//	browser buttons (forward/backward/refresh)
 	window.addEventListener('popstate', function(event)
 	{
 		loadPage(window.location.pathname);
 	});
 
+	loadPage(window.location.pathname);	
 });
