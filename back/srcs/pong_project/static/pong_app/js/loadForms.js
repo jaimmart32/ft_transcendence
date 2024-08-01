@@ -7,12 +7,12 @@ function loadLoginForm()
 		<div class="form-group">
 		    <label for="username">Username</label>
 		    <input type="username" class="form-control" id="username" aria-describedby="usernameHelp" placeholder="Enter username">
-		    <span class="error-message"></span>
+		    <span id="username-error" class="error-message"></span>
 		</div>
 		<div class="form-group">
 		    <label for="password">Password</label>
 		    <input type="password" class="form-control" id="password" placeholder="Password">
-		    <span class="error-message"></span>
+		    <span id="password-error" class="error-message"></span>
 		</div>
 		<button type="submit" class="btn btn-primary">Login</button>
 	    </form>
@@ -29,22 +29,22 @@ function loadSignupForm()
 		<div class="form-group">
 		    <label for="username">Username</label>
 		    <input type="text" class="form-control" id="username" placeholder="Enter username">
-		    <span class="error-message"></span>
+		    <span id="username-error" class="error-message"></span>
 		</div>
 		<div class="form-group">
 		    <label for="email">Email address</label>
 		    <input type="email" class="form-control" id="email" aria-describedby="emailHelp" placeholder="Enter email">
-		    <span class="error-message"></span>
+		    <span id="email-error" class="error-message"></span>
 		</div>
 		<div class="form-group">
 		    <label for="password">Password</label>
 		    <input type="password" class="form-control" id="password" placeholder="Password">
-		    <span class="error-message"></span>
+		    <span id="password-error" class="error-message"></span>
 		</div>
 		<div class="form-group">
 		    <label for="confirm password">Confirm password</label>
 		    <input type="password" class="form-control" id="confirm-password" placeholder="Confirm password">
-		    <span class="error-message"></span>
+		    <span id="conf-password-error" class="error-message"></span>
 		</div>
 		<button type="submit" class="btn btn-primary">Sign Up</button>
 	    </form>

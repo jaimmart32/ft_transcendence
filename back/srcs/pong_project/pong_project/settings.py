@@ -168,6 +168,8 @@ AUTH_USER_MODEL = 'pong_app.CustomUser'
 
 env = load_dotenv(".env")
 
+PEPPER = os.getenv('PEPPER')
+
 CLIENT_ID = os.getenv('CLIENT_ID')
 CLIENT_SECRET = os.getenv('CLIENT_SECRET')
 REDIRECT_URI = os.getenv('REDIRECT_URI')
