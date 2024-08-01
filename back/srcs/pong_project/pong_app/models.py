@@ -6,12 +6,10 @@ from django.contrib.auth.models import AbstractUser
 class CustomUser(AbstractUser):
 	# Preferred language
 	# lang = models.CharField(max_length=2)
-
 	# This is to store the user's profile pic
- 	#profile_pic = models.ImageField(upload_to='profile_pics/', null=True, blank=True)
+	avatar = models.ImageField(upload_to='profile_pics/', null=True, blank=True)
 	# This attribute is to check if the user has registrated via 42intra
 	intra = models.BooleanField(default=False)
-
 	tfa = models.BooleanField(default=False)
 	# If the tfa is set to true, then the otp should not be blank
 	#otp = models.CharField(max_length=6, null=True, blank=True)

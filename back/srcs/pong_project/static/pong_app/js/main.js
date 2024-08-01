@@ -2,112 +2,41 @@ document.addEventListener('DOMContentLoaded', function() {
     const app = document.getElementById('app');
     const loginLink = document.getElementById('login-link');
     const signupLink = document.getElementById('signup-link');
-    const ftLink = document.getElementById('ft-link');
+    const login42Link = document.getElementById('login42-link');
 
-    // Load login form on clicking "Login" link
-    loginLink.addEventListener('click', function(event) {
-        event.preventDefault();
-        loadLoginForm();
-    });
+	if (loginLink)
+	{
+		loginLink.addEventListener('click', function(event)
+		{
+			event.preventDefault();
+			navigateTo('/login');
+		});
+	}
 
-    // Load signup form on clicking "Sign Up" link
-    signupLink.addEventListener('click', function(event) {
-        event.preventDefault();
-        loadSignupForm();
-    });
+	if (signupLink)
+	{
+		signupLink.addEventListener('click', function(event)
+		{
+			event.preventDefault();
+			navigateTo('/signup');
+		});
+	}
 
-//    ftLink.addEventListener('click', function(event) {
-//        event.preventDefault();
-//        loadLoginFortyTwo();
-//    });
+	if (login42Link)
+	{
+		login42Link.addEventListener('click', async function(event)
+		{
+			event.preventDefault();
+			await handleAuth();
+		});
+	}
 
-//	HTML for the Login page
-    function loadLoginForm() {
-        app.innerHTML = `
-            <h2>Login</h2>
-            <form id="login-form">
-                <div class="form-group">
-                    <label for="username">Username</label>
-                    <input type="username" class="form-control" id="username" aria-describedby="usernameHelp" placeholder="Enter username">
-                </div>
-                <div class="form-group">
-                    <label for="password">Password</label>
-                    <input type="password" class="form-control" id="password" placeholder="Password">
-                </div>
-                <button type="submit" class="btn btn-primary">Login</button>
-            </form>
-        `;
-	logInHandler();
-    }
+//	This event listener is in charge of receiving any event regarding the 
+//	browser buttons (forward/backward/refresh)
+	window.addEventListener('popstate', function(event)
+	{
+		loadPage(window.location.pathname);
+	});
 
-//	HTML for the SignUp page
-    function loadSignupForm() {
-        app.innerHTML = `
-            <h2>Sign Up</h2>
-            <form id="signup-form">
-                <div class="form-group">
-                    <label for="username">Username</label>
-                    <input type="text" class="form-control" id="username" placeholder="Enter username">
-                </div>
-                <div class="form-group">
-                    <label for="email">Email address</label>
-                    <input type="email" class="form-control" id="email" aria-describedby="emailHelp" placeholder="Enter email">
-                </div>
-                <div class="form-group">
-                    <label for="password">Password</label>
-                    <input type="password" class="form-control" id="password" placeholder="Password">
-                </div>
-                <button type="submit" class="btn btn-primary">Sign Up</button>
-            </form>
-        `;
-	signUpHandler();
-    }
-
-    function loadLoginFortyTwo() {
-        app.innerHTML = `
-            <h2>Login</h2>
-            <a href='login42'>Login with 42</a>
-        `;
-	logInHandler();
-    }
-
-
-    function loadPlayGame() {
-        app.innerHTML = `
-            <h2>Play Game</h2>
-            <p>Get ready to play a game of Pong!</p>
-            <!-- Add game play content here -->
-            <button class="btn btn-secondary" id="back-to-home">Back to Home</button>
-        `;
-        document.getElementById('back-to-home').addEventListener('click', loadHome);
-    }
-
-    function loadFriendsSection() {
-        app.innerHTML = `
-            <h2>Friends</h2>
-            <p>Manage your friends here.</p>
-            <!-- Add friends management content here -->
-            <button class="btn btn-secondary" id="back-to-home">Back to Home</button>
-        `;
-        document.getElementById('back-to-home').addEventListener('click', loadHome);
-    }
-
-    function loadCreateTournament() {
-        app.innerHTML = `
-            <h2>Create Tournament</h2>
-            <p>Create a new tournament.</p>
-            <!-- Add tournament creation form or content here -->
-            <button class="btn btn-secondary" id="back-to-home">Back to Home</button>
-        `;
-        document.getElementById('back-to-home').addEventListener('click', loadHome);
-    }
-
-    window.loadProfileSettings = loadProfileSettings;
-    window.loadProfile = loadProfile;
-    window.loadPlayGame = loadPlayGame;
-    window.loadFriendsSection = loadFriendsSection;
-    window.loadCreateTournament = loadCreateTournament;
-    window.loadLoginForm = loadLoginForm;
-    window.loadSignupForm = loadSignupForm;
+	loadPage(window.location.pathname);	
 });
-

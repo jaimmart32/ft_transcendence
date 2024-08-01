@@ -111,6 +111,20 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'DEBUG',
+    },
+}
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
@@ -154,3 +168,15 @@ REST_FRAMEWORK = {
 }
 
 AUTH_USER_MODEL = 'pong_app.CustomUser'
+
+env = load_dotenv(".env")
+
+CLIENT_ID = os.getenv('CLIENT_ID')
+CLIENT_SECRET = os.getenv('CLIENT_SECRET')
+REDIRECT_URI = os.getenv('REDIRECT_URI')
+AUTH_ENDPOINT = os.getenv('AUTH_ENDPOINT')
+SCOPE = os.getenv('SCOPE')
+FRONT_REDIRECT = os.getenv('FRONT_REDIRECT')
+
+TOKEN_URL = os.getenv('TOKEN_URL')
+USER_INFO_URL = os.getenv('USER_INFO_URL')

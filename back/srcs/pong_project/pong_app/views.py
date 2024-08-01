@@ -1,6 +1,5 @@
 import json# Maybe not needed
 from django.shortcuts import render, redirect
-from dotenv import load_dotenv
 from django.db import IntegrityError
 import requests
 import os
@@ -13,6 +12,7 @@ from django.contrib.auth import authenticate, login, logout
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from .models import CustomUser
+from django.conf import settings
 from django.contrib.auth.models import User 
 
 # Create your views here.
@@ -75,6 +75,7 @@ class Profile(APIView):
 
 # View needed to edit the User's information. Auto-fills the current user's info, when new data
 # is entered, checks if it is valid (passes check for characters and if it's repeated or not).
+
 class	EditProfile(APIView):
 	permission_classes = [IsAuthenticated]
 
@@ -96,31 +97,87 @@ class	EditProfile(APIView):
 				user.tfa = False 
 			if data.get('password'):
 				user.set_password(data.get('password'))
+			if 'avatar' in request.FILES:
+				user.avatar = request.FILES['avatar']
+				
 			user.save()
 			return Response({'status': 'success', 'message': 'Profile updated successfully!'})
 		except IntegrityError as e:
 			return Response({'status': 'error', 'message': 'Username in use'})
 		return Response({'status': 'error', 'message': 'An error ocurred'})
 
-				
 
-env = load_dotenv(".env")
+class authSettings(APIView):
 
-CLIENT_ID = os.getenv('CLIENT_ID')
-CLIENT_SECRET = os.getenv('CLIENT_SECRET')
-REDIRECT_URI = os.getenv('REDIRECT_URI')
+	permission_classes = [AllowAny]
+	def get(self, request):
+		data = {
+			'status': 'success',
+			'client_id': settings.CLIENT_ID,
+			'redirect_uri': settings.REDIRECT_URI,
+			'auth_endpoint': settings.AUTH_ENDPOINT,
+			'scope': settings.SCOPE,
+		}
+		return Response(data)
 
-AUTHORIZATION_URL = os.getenv('AUTHORIZATION_URL')
-TOKEN_URL = os.getenv('TOKEN_URL')
-USER_INFO_URL = os.getenv('USER_INFO_URL')
+class authVerify(APIView):
+	
+	permission_classes = [AllowAny]
+	def post(self, request):
+		code = request.data.get('code')
+		if not code:
+			return Response({'status': 'error', 'message': 'No code provided'})
+		tokenResponse = requests.post(settings.TOKEN_URL, data=
+		{
+			'grant_type': 'authorization_code',
+			'client_id': settings.CLIENT_ID,
+			'client_secret': settings.CLIENT_SECRET,
+			'redirect_uri': settings.REDIRECT_URI,
+			'code': code
+		})
+		tokenData = tokenResponse.json()
+		accessToken = tokenData.get('access_token')
+		if not accessToken:
+			return Response({'status': 'error', 'message': 'No access token was found'})
+		userResponse = requests.get(settings.USER_INFO_URL, headers=
+		{
+			'Authorization': f'Bearer {accessToken}'
+		})
+		if userResponse.status_code != 200:
+			return Response({'status': 'error', 'message': 'Could not retrieve the user data'})
+		userInfo = userResponse.json()
+		return Response({'status': 'success', 'userInfo': userInfo})
 
-# Create your views here.
+class authCreateUser(APIView):
+	
+	permission_classes = [AllowAny]
+	def post(self, request):
+		userInfo = request.data.get('userInfo')
+		if not userInfo:
+			return Response({'status': 'error', 'message': 'No user information'})
+		username = "ft_" + userInfo['login']
+		email = userInfo['email']
+		password = ""
+		if CustomUser.objects.filter(username=username).exists():
+			return Response({'status': 'error', 'message': 'Username already in use'})
+		if CustomUser.objects.filter(email=email).exists():
+			return Response({'status': 'error', 'message': 'Email already in use'})
+		user = CustomUser.objects.create_user(username, email=email, password=password)
+		# Could use the CustomUser.objects.get_or_create() and later check if the user exists 
+		refresh = RefreshToken.for_user(user)
+
+		redirect_url = f"{settings.FRONT_REDIRECT}?access={refresh.access_token}&refresh={refresh}"
+		return Response({'status': 'success', 'redirect_url': redirect_url}, status=200)
+
+
 def index(request):
     return render(request, 'index.html')
 
 def login42(request):
     return redirect(f'{AUTHORIZATION_URL}?client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}&response_type=code')
 
+
+"""
 def callback(request):
     code = request.GET.get('code')
     token_response = requests.post(TOKEN_URL, data={
@@ -134,6 +191,7 @@ def callback(request):
     access_token = token_response.get('access_token')
     request.session['access_token'] = access_token
     return redirect('profile42')
+    """
 
 def profile42(request):
     access_token = request.session.get('access_token')
