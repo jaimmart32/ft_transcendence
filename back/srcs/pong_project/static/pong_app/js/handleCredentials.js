@@ -26,13 +26,17 @@ function logInHandler()
                     body: JSON.stringify(formData)
                 })
 			    .then(response => response.json())
-                .then(data => {
-                    if (data.status === 'success') {
+                .then(data =>
+		{
+                    if (data.status === 'success')
+		    {
                         localStorage.setItem('access', data.access);
                         localStorage.setItem('refresh', data.refresh);
                         alert('Log in successful!');
 			navigateTo('/home');
-                    } else {
+                    }
+		    else
+		    {
                         alert('Log in failed: ' + data.message);
                     }
                 })
@@ -41,7 +45,9 @@ function logInHandler()
                 });
             }
         });
-    } else {
+    }
+    else
+    {
         console.error('login-form not found');
     }
 }
