@@ -63,7 +63,7 @@ function loadProfile()
 				edit.addEventListener('click', function(event)
 				{
 					event.preventDefault();	
-					navigateTo('/home/profile/edit');
+					navigateTo('/home/profile/edit', data);
 				});
 			}
 		})

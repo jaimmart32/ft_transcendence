@@ -14,7 +14,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from .models import CustomUser
 from django.conf import settings
 from django.contrib.auth.models import User 
-from .validators import validateUsername, validateEmail, validatePassword, hashPassword, validateHash
+from .validators import validateUsername, validateEmail, validatePassword
 
 # Create your views here.
 
@@ -44,8 +44,10 @@ class signupClass(APIView):
 			return Response({'status': 'error', 'message': 'Username already in use'})
 		if CustomUser.objects.filter(email=email).exists():
 			return Response({'status': 'error', 'message': 'Email already in use'})
-		hashedPass = hashPassword(password)
-		user = CustomUser.objects.create_user(username, email=email, password=hashedPass)
+		#hashedPass = hashPassword(password)
+		user = CustomUser.objects.create_user(username, email=email)
+		user.set_password(password + settings.PEPPER)
+		user.save()
 		return Response({'status': 'success', 'message': 'User created succesfully!'})
 
 class loginClass(APIView):
@@ -60,18 +62,14 @@ class loginClass(APIView):
 		except CustomUser.DoesNotExist:
 			return Response({ 'status': 'error', 'message': 'Invalid username'})
 
-		stored_pass = user.password
-		provided_pass = password
-
-		if validateHash(stored_pass, password):
+		if user.check_password(password + settings.PEPPER):
 			refresh = RefreshToken.for_user(user)
-			login(request, user)
 			return Response({
                 'status': 'success',
                 'message': 'Logged in successfully!',
                 'access': str(refresh.access_token),
                 'refresh': str(refresh)
-            })
+            	})
 		else:
 			return Response({'status': 'error', 'message': 'Invalid credentials'})
 
