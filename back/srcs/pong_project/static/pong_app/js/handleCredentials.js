@@ -132,7 +132,7 @@ function validateInput(formData, form)
 	{
 		hideMessage('email-error');
 	}
-	if (!validatePass(formData.password))
+	if (!validatePass(formData.password) && form !== 'edit')
 	{
 		valid = false;
 		showMessage('password-error', 'Invalid password');

@@ -99,9 +99,17 @@ function updateUserInfo()
 //		{
 //			userInfo.append('avatar', userPic);
 //		}
-
+		const userDict =
+		{
+			username: userInfo.get('username'),
+			email: userInfo.get('email'),
+			password: userInfo.get('password')
+		};
 //		Need to check the input, to see if everything is correct
-		if (validateInput(userInfo, 'signup'))
+		console.log(userDict.username);
+		console.log(userDict.email);
+		console.log(userDict.password);
+		if (validateInput(userDict, 'edit'))
 		{
 			fetch('/home/profile/edit/',
 			{
