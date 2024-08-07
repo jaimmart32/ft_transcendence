@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-=======
 // HTML for the Login page
 function loadLoginForm()
 {
