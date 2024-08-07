@@ -7,12 +7,12 @@ function loadLoginForm()
 		<div class="form-group">
 		    <label for="username">Username</label>
 		    <input type="username" class="form-control" id="username" aria-describedby="usernameHelp" placeholder="Enter username">
-		    <span id="username-error" class="error-message"></span>
+		    <span class="error-message"></span>
 		</div>
 		<div class="form-group">
 		    <label for="password">Password</label>
 		    <input type="password" class="form-control" id="password" placeholder="Password">
-		    <span id="password-error" class="error-message"></span>
+		    <span class="error-message"></span>
 		</div>
 		<button type="submit" class="btn btn-primary">Login</button>
 	    </form>
@@ -29,22 +29,22 @@ function loadSignupForm()
 		<div class="form-group">
 		    <label for="username">Username</label>
 		    <input type="text" class="form-control" id="username" placeholder="Enter username">
-		    <span id="username-error" class="error-message"></span>
+		    <span class="error-message"></span>
 		</div>
 		<div class="form-group">
 		    <label for="email">Email address</label>
 		    <input type="email" class="form-control" id="email" aria-describedby="emailHelp" placeholder="Enter email">
-		    <span id="email-error" class="error-message"></span>
+		    <span class="error-message"></span>
 		</div>
 		<div class="form-group">
 		    <label for="password">Password</label>
 		    <input type="password" class="form-control" id="password" placeholder="Password">
-		    <span id="password-error" class="error-message"></span>
+		    <span class="error-message"></span>
 		</div>
 		<div class="form-group">
 		    <label for="confirm password">Confirm password</label>
 		    <input type="password" class="form-control" id="confirm-password" placeholder="Confirm password">
-		    <span id="conf-password-error" class="error-message"></span>
+		    <span class="error-message"></span>
 		</div>
 		<button type="submit" class="btn btn-primary">Sign Up</button>
 	    </form>
@@ -58,9 +58,10 @@ function loadPlayGame()
 	    <h2>Play Game</h2>
 	    <p>Get ready to play a game of Pong!</p>
 	    <!-- Add game play content here -->
-	    <button class="btn btn-secondary" id="back-to-home">Back to Home</button>
+		<button class="btn btn-secondary" id="back-to-home">Back to Home</button>
+	    <canvas id="board" width="100" height="100"></canvas>
 	`;
-
+	
 	const back = document.getElementById('back-to-home');
 
 	if (back)
@@ -71,6 +72,8 @@ function loadPlayGame()
 			navigateTo('/home');
 		});
 	}
+
+	initializeGame();
 }
 
 function loadFriendsSection()
@@ -153,7 +156,7 @@ function loadHome()
                     <button class="btn btn-primary" id="create-tournament">Create Tournament</button>
                 </div>
             `;	
-	    	const profile = document.getElementById('profile');
+	    const profile = document.getElementById('profile');
 		const play = document.getElementById('play-game');
 		const friends = document.getElementById('friends-section');
 		const tournament = document.getElementById('create-tournament');

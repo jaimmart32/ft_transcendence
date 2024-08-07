@@ -37,6 +37,7 @@ class Ball{
 }
            
 function initializeGame(){
+    alert("HOLA");
     let context;
     let board = new Board(500, 500);
     let player1 = new Player(1, board);
@@ -128,3 +129,5 @@ function initializeGame(){
         }
     }
 }
+
+window.initializeGame = initializeGame;
