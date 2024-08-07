@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-=======
 function loadProfile()
 {
 	const token = localStorage.getItem('access');
