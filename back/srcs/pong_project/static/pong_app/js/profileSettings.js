@@ -3,13 +3,14 @@ function loadProfileSettings(user_content)
         app.innerHTML = `
 		<div class="container mt-2">
 			    <h2>Profile Settings</h2>
-			    <img src="${user_content.avatar_url} || /static/pong_app/media/user-pic.jpg" alt="Default user profile picture" width="128" height="128">
+			    <img src="/static/pong_app/media/user-pic.jpg" alt="Default user profile picture" width="128" height="128">
 			    <form id="profile-settings">
 				<!-- Username Field -->
 				<div class="form-group row">
 				    <label for="username" class="col-sm-2 col-form-label">Username</label>
 				    <div class="col-sm-10">
 					<input type="text" class="form-control" id="username" value=${user_content.username}>
+		    			<span id="username-error" class="error-message"></span>
 				    </div>
 				</div>
 				<!-- Email Field -->
@@ -17,6 +18,7 @@ function loadProfileSettings(user_content)
 				    <label for="email" class="col-sm-2 col-form-label">Email</label>
 				    <div class="col-sm-10">
 					<input type="email" class="form-control" id="email" value=${user_content.email}>
+		    			<span id="email-error" class="error-message"></span>
 				    </div>
 				</div>
 				<!-- Password Field -->
@@ -24,6 +26,7 @@ function loadProfileSettings(user_content)
 				    <label for="password" class="col-sm-2 col-form-label">Password</label>
 				    <div class="col-sm-10">
 					<input type="password" class="form-control" id="password" placeholder="*******">
+		    			<span id="password-error" class="error-message"></span>
 				    </div>
 				</div>
 				<!-- Preferred Language Field -->
@@ -83,11 +86,10 @@ function updateUserInfo()
 
 	if (token)
 	{
-		const userInfo = new FormData();
-		userInfo.append('username', document.getElementById('username').value);
-		userInfo.append('email', document.getElementById('email').value);
-		userInfo.append('password', document.getElementById('password').value);
-		userInfo.append('twofa', document.getElementById('twofa').value);
+		username = document.getElementById('username').value;
+		email = document.getElementById('email').value;
+		password = document.getElementById('password').value;
+		twofa = document.getElementById('twofa').value;
 
 //			lang: document.getElementById('lang').value,
 
@@ -96,53 +98,58 @@ function updateUserInfo()
 //		{
 //			userInfo.append('avatar', userPic);
 //		}
-
+		const userDict =
+		{
+			username: username,
+			email: email,
+			password: password,
+			twofa: twofa
+		};
 //		Need to check the input, to see if everything is correct
-		if (!validateUsername(document.getElementById('username').value) || !validateEmail(document.getElementById('email').value) || (!validatePass(document.getElementById('password').value) && document.getElementById('password').value.length > 0))
+		if (validateInput(userDict, 'edit'))
 		{
-			alert('Wrong credentials');
-			loadProfileSettings();
-			return;
-		}
-
-		fetch('/home/profile/edit/',
-		{
-			method: 'PUT',
-			headers:
+			console.log(JSON.stringify(userDict));
+			fetch('/home/profile/edit/',
 			{
-				'Authorization': `Bearer ${token}`,
-				'Content-Type': 'application/json'
-			},
-			body: JSON.stringify(userInfo)
-		})
-		.then(response => response.json())
-		.then(data =>
-		{
-			if (data.status === 'success')
+				method: 'PUT',
+				headers:
+				{
+					'Authorization': `Bearer ${token}`,
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify(userDict)
+			})
+			.then(response => response.json())
+			.then(data =>
 			{
-				alert('Info updated correctly!');
-				navigateTo('/home/profile');
-			}
-			else
-			{
-				console.log('Inside the else for data')
-				console.log(data.status)
-				console.log(data.message)
-				if (data.message === 'Username in use')
-					alert('This username is already in use, try another one');
-				else if (data.message === 'Email in use')
-					alert('This email is already in use, try another one');
+				if (data.status === 'success')
+				{
+					alert('Info updated correctly!');
+					navigateTo('/home/profile', userDict);
+				}
 				else
-					alert('An error ocurred, try later');
-					
-			}
-		})
-		.catch(error =>
+				{
+					if (data.message === 'Username in use')
+					{
+						showMessage('username-error', 'Username already in use');
+					}
+					else if (data.message === 'Email in use')
+						showMessage('email-error', 'Email already in use');
+					else
+						alert('An error ocurred, try later');
+				}
+			})
+			.catch(error =>
+			{
+				console.log('Inside the error')
+				console.error('Error:', error);
+				alert('Access denied');
+			});
+		}
+		else
 		{
-			console.log('Inside the error')
-			console.error('Error:', error);
-			alert('Access denied');
-		});
+			loadProfileSettings(userInfo);
+		}
 	}
 	else
 	{

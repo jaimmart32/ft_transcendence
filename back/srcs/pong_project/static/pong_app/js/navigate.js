@@ -1,7 +1,5 @@
-function loadPage(url)
+function loadPage(url, data)
 {
-//	if (url === '/' || url === '')
-//		loadHome();	
 	if (url === '/home')
 		loadHome();
 	else if (url === '/login')
@@ -9,20 +7,20 @@ function loadPage(url)
 	else if (url === '/signup')
 		loadSignupForm();
 	else if (url === '/home/profile')
-		loadProfile();
+		loadProfile(data);
+	else if (url === '/home/profile/edit')
+		loadProfileSettings(data);
 	else if (url === '/home/game')
 		loadPlayGame();
 	else if (url === '/home/friends')
 		loadFriendsSection();
-	else if (url === '/home/profile/edit')
-		loadCreateTournament();
 
 }
 
-function navigateTo(url)
+function navigateTo(url, data)
 {
 	window.history.pushState({}, '', url);
-	loadPage(url);
+	loadPage(url, data);
 }
 
 window.loadPage = loadPage;
