@@ -188,34 +188,20 @@ class authCreateUser(APIView):
 		redirect_url = f"{settings.FRONT_REDIRECT}?access={refresh.access_token}&refresh={refresh}"
 		return Response({'status': 'success', 'redirect_url': redirect_url}, status=200)
 
-class Move(APIView):
-    permission_classes = [AllowAny]
-    def post(self, request):   
-        print("move!")
-        return Response({'status': 'error', 'message': 'Invalid credentials'})
-
 
 def profile42(request):
     access_token = request.session.get('access_token')
     if not access_token:
         return redirect('index')
+
     user_info_response = requests.get(USER_INFO_URL, headers={
         'Authorization': f'Bearer {access_token}'
     }).json()
-    username = "ft_" + user_info_response['login']
-    email = user_info_response['email']
-    password = ""
-    user = CustomUser.objects.create_user(username, email=email, password=password)
-    refresh = RefreshToken.for_user(user)
-    # return Response({
-    #             'status': 'success',
-    #             'message': 'Logged in successfully!',
-    #             'access': str(refresh.access_token),
-    #             'refresh': str(refresh)
-    #         })
-    return render(request, 'pong_app/testing.js', {
-                 'status': 'success',
-                 'message': 'Logged in successfully!',
-                'access': str(refresh.access_token),
-                'refresh': str(refresh)
-           })
+
+    return JsonResponse(user_info_response)
+
+class Move(APIView):
+    permission_classes = [AllowAny]
+    def post(self, request):   
+        print("move!")
+        return Response({'status': 'error', 'message': 'Invalid credentials'})
