@@ -86,11 +86,10 @@ function updateUserInfo()
 
 	if (token)
 	{
-		const userInfo = new FormData();
-		userInfo.append('username', document.getElementById('username').value);
-		userInfo.append('email', document.getElementById('email').value);
-		userInfo.append('password', document.getElementById('password').value);
-		userInfo.append('twofa', document.getElementById('twofa').value);
+		username = document.getElementById('username').value;
+		email = document.getElementById('email').value;
+		password = document.getElementById('password').value;
+		twofa = document.getElementById('twofa').value;
 
 //			lang: document.getElementById('lang').value,
 
@@ -101,16 +100,15 @@ function updateUserInfo()
 //		}
 		const userDict =
 		{
-			username: userInfo.get('username'),
-			email: userInfo.get('email'),
-			password: userInfo.get('password')
+			username: username,
+			email: email,
+			password: password,
+			twofa: twofa
 		};
 //		Need to check the input, to see if everything is correct
-		console.log(userDict.username);
-		console.log(userDict.email);
-		console.log(userDict.password);
 		if (validateInput(userDict, 'edit'))
 		{
+			console.log(JSON.stringify(userDict));
 			fetch('/home/profile/edit/',
 			{
 				method: 'PUT',
@@ -119,7 +117,7 @@ function updateUserInfo()
 					'Authorization': `Bearer ${token}`,
 					'Content-Type': 'application/json'
 				},
-				body: JSON.stringify(userInfo)
+				body: JSON.stringify(userDict)
 			})
 			.then(response => response.json())
 			.then(data =>
@@ -127,12 +125,14 @@ function updateUserInfo()
 				if (data.status === 'success')
 				{
 					alert('Info updated correctly!');
-					navigateTo('/home/profile', userInfo);
+					navigateTo('/home/profile', userDict);
 				}
 				else
 				{
 					if (data.message === 'Username in use')
+					{
 						showMessage('username-error', 'Username already in use');
+					}
 					else if (data.message === 'Email in use')
 						showMessage('email-error', 'Email already in use');
 					else

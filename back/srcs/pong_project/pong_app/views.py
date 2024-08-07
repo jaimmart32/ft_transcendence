@@ -97,7 +97,6 @@ class	EditProfile(APIView):
 	permission_classes = [IsAuthenticated]
 
 	def put(self, request):
-		print("_"*50)
 		user = request.user
 		data = request.data
 
@@ -117,8 +116,6 @@ class	EditProfile(APIView):
 				user.set_password(data.get('password'))
 			if 'avatar' in request.FILES:
 				user.avatar = request.FILES['avatar']
-			print(f'new username: {user.username}')
-			print(f'new email: {user.email}')
 			user.save()
 			return Response({'status': 'success', 'message': 'Profile updated successfully!'})
 		except IntegrityError as e:
