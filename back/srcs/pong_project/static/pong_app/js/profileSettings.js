@@ -3,7 +3,7 @@ function loadProfileSettings(user_content)
         app.innerHTML = `
 		<div class="container mt-2">
 			    <h2>Profile Settings</h2>
-			    <img src="/static/pong_app/media/user-pic.jpg" alt="Default user profile picture" width="128" height="128">
+			    <img src="${user_content.avatar_url} || /static/pong_app/media/user-pic.jpg" alt="Default user profile picture" width="128" height="128">
 			    <form id="profile-settings">
 				<!-- Username Field -->
 				<div class="form-group row">
@@ -63,29 +63,42 @@ function loadProfileSettings(user_content)
 			<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
 			<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 		    `;
-		    document.getElementById('save-changes').addEventListener('click', updateUserInfo);
+//		    I could add one more button to go back without making any changes
+		    const save = document.getElementById('save-changes');
+		    if (save)
+		    {
+		    	save.addEventListener('click', function(event)
+			{
+				event.preventDefault();
+				updateUserInfo();
+			});
+		    }
 }
 
 function updateUserInfo()
 {
-	event.preventDefault();
+//	event.preventDefault();
 
 	const token = localStorage.getItem('access');
 
 	if (token)
 	{
-		const userInfo =
-		{
-			username: document.getElementById('username').value,
-			email: document.getElementById('email').value,
-			password: document.getElementById('password').value,
-			twofa: document.getElementById('twofa').value,
+		const userInfo = new FormData();
+		userInfo.append('username', document.getElementById('username').value);
+		userInfo.append('email', document.getElementById('email').value);
+		userInfo.append('password', document.getElementById('password').value);
+		userInfo.append('twofa', document.getElementById('twofa').value);
+
 //			lang: document.getElementById('lang').value,
-		};
+
+//		const userPic = document.getElementById('avatar').files[0];
+//		if (userPic)
+//		{
+//			userInfo.append('avatar', userPic);
+//		}
 
 //		Need to check the input, to see if everything is correct
-		if (!validateUsername(userInfo.username) || !validateEmail(userInfo.email) 
-			|| (!validatePass(userInfo.password) && userInfo.password.length > 0))
+		if (!validateUsername(document.getElementById('username').value) || !validateEmail(document.getElementById('email').value) || (!validatePass(document.getElementById('password').value) && document.getElementById('password').value.length > 0))
 		{
 			alert('Wrong credentials');
 			loadProfileSettings();
@@ -108,7 +121,7 @@ function updateUserInfo()
 			if (data.status === 'success')
 			{
 				alert('Info updated correctly!');
-				loadProfile();
+				navigateTo('/home/profile');
 			}
 			else
 			{
@@ -134,6 +147,8 @@ function updateUserInfo()
 	else
 	{
 		alert('You are not authorized to view this page. Please log in.');
-		loadLoginForm();
+		navigateTo('/login');
 	}
 }
+
+window.loadProfileSettings = loadProfileSettings;

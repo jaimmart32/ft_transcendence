@@ -31,8 +31,7 @@ function logInHandler()
                         localStorage.setItem('access', data.access);
                         localStorage.setItem('refresh', data.refresh);
                         alert('Log in successful!');
-                        // Load the home content without redirecting, need to implement in main.js
-                        loadHome();
+			navigateTo('/home');
                     } else {
                         alert('Log in failed: ' + data.message);
                     }
@@ -87,10 +86,7 @@ function signUpHandler()
                     if (data.status == 'success')
 		    {
                         alert('Signup successful!');
-                        loadLoginForm();
-                        // Optionally, redirect to another page or load another form
-                        // window.location.href = '/home/';
-                        // loadHomeForm();
+			navigateTo('/login');
                     }
 		    else
 		    {
@@ -115,49 +111,6 @@ function signUpHandler()
     }
 }
 
-function loadHome() {
-    const app = document.getElementById('app');
-    const token = localStorage.getItem('access');
-    if (token) {
-        fetch('/home/', {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            }
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Access denied');
-            }
-            return response.json();
-        })
-        .then(data => {
-            app.innerHTML = `
-                <h2>Welcome, ${data.username}!</h2>
-                <div class="btn-group-vertical">
-                    <button class="btn btn-primary" id="profile">Profile</button>
-                    <button class="btn btn-primary" id="play-game">Play Game</button>
-                    <button class="btn btn-primary" id="friends-section">Friends</button>
-                    <button class="btn btn-primary" id="create-tournament">Create Tournament</button>
-                </div>
-            `;
-            
-            document.getElementById('profile').addEventListener('click', loadProfile);
-            document.getElementById('play-game').addEventListener('click', loadPlayGame);
-            document.getElementById('friends-section').addEventListener('click', loadFriendsSection);
-            document.getElementById('create-tournament').addEventListener('click', loadCreateTournament);
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('You are not authorized to view this page. Please log in.');
-            loadLoginForm();
-        });
-    } else {
-        alert('You are not authorized to view this page. Please log in.');
-        loadLoginForm();
-    }
-}
 
 function validateUsername(username)
 {
@@ -182,7 +135,6 @@ function validatePass(password)
 	return (false);
 }
 
-window.loadHome = loadHome;
 window.validateUsername = validateUsername;
 window.validateEmail = validateEmail;
 window.validatePass = validatePass;

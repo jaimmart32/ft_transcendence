@@ -1,6 +1,7 @@
 from django.urls import path
 from . import views
 from rest_framework_simplejwt.views import TokenObtainPairView,TokenRefreshView
+from django.views.generic import TemplateView
 
 urlpatterns = [
 	path('signup/', views.signupClass.as_view(), name='signup'),
@@ -14,7 +15,11 @@ urlpatterns = [
 	path('token/', TokenObtainPairView.as_view, name='token_obtain_pair'),
 	path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 
-	path('login42/', views.login42, name='login42'),
-    path('callback/', views.callback, name='callback'),
-    path('profile42/', views.profile42, name='profile42'),
+	path('api/auth-settings/', views.authSettings.as_view(), name='auth_settings'),
+	path('api/auth/verify/', views.authVerify.as_view(), name='verify'),
+	path('api/auth/create-user/', views.authCreateUser.as_view(), name='create-user'),
+	#path('api/auth/callback/', views.callback.as_view(), name='callback'),
+
+	path('callback.html', TemplateView.as_view(template_name='callback.html'), name='callback_html'),
+	path('index.html', TemplateView.as_view(template_name='index.html'), name='index_html'),
 ]
