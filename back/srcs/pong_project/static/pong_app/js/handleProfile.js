@@ -80,4 +80,3 @@ function loadProfile()
 		navigateTo('/login');
 	}
 }
->>>>>>> 40d64b041888da5c1c1f4b2a6539a158f36e3dda
