@@ -18,7 +18,6 @@ urlpatterns = [
 	path('api/auth-settings/', views.authSettings.as_view(), name='auth_settings'),
 	path('api/auth/verify/', views.authVerify.as_view(), name='verify'),
 	path('api/auth/create-user/', views.authCreateUser.as_view(), name='create-user'),
-	#path('api/auth/callback/', views.callback.as_view(), name='callback'),
 
 	path('move/', views.Move.as_view(), name='move'),
 	

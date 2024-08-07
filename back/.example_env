@@ -1,7 +1,10 @@
-AUTHORIZATION_URL = 'https://api.intra.42.fr/oauth/authorize'
-TOKEN_URL = 'https://api.intra.42.fr/oauth/token'
-USER_INFO_URL = 'https://api.intra.42.fr/v2/me'
+TOKEN_URL=https://api.intra.42.fr/oauth/token
+USER_INFO_URL=https://api.intra.42.fr/v2/me
 
-CLIENT_ID=
-CLIENT_SECRET=
-
+CLIENT_ID=your-id-given-by-42-api
+CLIENT_SECRET=your-secret-given-by-42-api
+AUTH_ENDPOINT=https://api.intra.42.fr/oauth/authorize
+REDIRECT_URI=redirection-uri-for-callback
+FRONT_REDIRECT=redirection-for-after-callback
+SCOPE=
+PEPPER=

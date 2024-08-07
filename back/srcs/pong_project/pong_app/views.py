@@ -14,6 +14,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from .models import CustomUser
 from django.conf import settings
 from django.contrib.auth.models import User 
+from .validators import validateUsername, validateEmail, validatePassword
 
 # Create your views here.
 
@@ -30,11 +31,23 @@ class signupClass(APIView):
 		username = data.get('username')
 		email = data.get('email')
 		password = data.get('password')
+		confPass = data.get('confPass')
+		try:
+			validateUsername(username)
+			validateEmail(email)
+			validatePassword(password)
+		except ValidationError as e:
+			return Response({'status': 'error', 'message': str(e)})
+		if not password == confPass:
+			return Response({'status': 'error', 'message': 'Invalid password confirmation'})
 		if CustomUser.objects.filter(username=username).exists():
 			return Response({'status': 'error', 'message': 'Username already in use'})
 		if CustomUser.objects.filter(email=email).exists():
 			return Response({'status': 'error', 'message': 'Email already in use'})
-		CustomUser.objects.create_user(username, email=email, password=password)
+		#hashedPass = hashPassword(password)
+		user = CustomUser.objects.create_user(username, email=email)
+		user.set_password(password + settings.PEPPER)
+		user.save()
 		return Response({'status': 'success', 'message': 'User created succesfully!'})
 
 class loginClass(APIView):
@@ -43,16 +56,20 @@ class loginClass(APIView):
 		data = request.data
 		username = data.get('username')
 		password = data.get('password')
-		user = authenticate(request, username=username, password=password)
-		if user is not None:
+
+		try:
+			user = CustomUser.objects.get(username=username)
+		except CustomUser.DoesNotExist:
+			return Response({ 'status': 'error', 'message': 'Invalid username'})
+
+		if user.check_password(password + settings.PEPPER):
 			refresh = RefreshToken.for_user(user)
-			login(request, user)
 			return Response({
                 'status': 'success',
                 'message': 'Logged in successfully!',
                 'access': str(refresh.access_token),
                 'refresh': str(refresh)
-            })
+            	})
 		else:
 			return Response({'status': 'error', 'message': 'Invalid credentials'})
 
@@ -80,6 +97,7 @@ class	EditProfile(APIView):
 	permission_classes = [IsAuthenticated]
 
 	def put(self, request):
+		print("_"*50)
 		user = request.user
 		data = request.data
 
@@ -99,7 +117,8 @@ class	EditProfile(APIView):
 				user.set_password(data.get('password'))
 			if 'avatar' in request.FILES:
 				user.avatar = request.FILES['avatar']
-				
+			print(f'new username: {user.username}')
+			print(f'new email: {user.email}')
 			user.save()
 			return Response({'status': 'success', 'message': 'Profile updated successfully!'})
 		except IntegrityError as e:
@@ -175,29 +194,6 @@ class Move(APIView):
         print("move!")
         return Response({'status': 'error', 'message': 'Invalid credentials'})
 
-
-def index(request):
-    return render(request, 'index.html')
-
-def login42(request):
-    return redirect(f'{AUTHORIZATION_URL}?client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}&response_type=code')
-
-
-"""
-def callback(request):
-    code = request.GET.get('code')
-    token_response = requests.post(TOKEN_URL, data={
-        'grant_type': 'authorization_code',
-        'client_id': CLIENT_ID,
-        'client_secret': CLIENT_SECRET,
-        'code': code,
-        'redirect_uri': REDIRECT_URI,
-    }).json()
-
-    access_token = token_response.get('access_token')
-    request.session['access_token'] = access_token
-    return redirect('profile42')
-    """
 
 def profile42(request):
     access_token = request.session.get('access_token')

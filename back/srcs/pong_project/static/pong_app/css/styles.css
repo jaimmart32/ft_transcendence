@@ -48,3 +48,9 @@ body {
     border-top: 5px solid skyblue;
     border-bottom: 5px solid skyblue;
 }
+.error-message
+{
+	color: red;
+	font-size: 12px;
+	display: none;
+}
