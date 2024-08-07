@@ -27,3 +27,4 @@ function navigateTo(url)
 
 window.loadPage = loadPage;
 window.navigateTo = navigateTo;
+window.loadLoginForm = loadLoginForm;

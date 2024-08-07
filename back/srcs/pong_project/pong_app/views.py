@@ -169,6 +169,12 @@ class authCreateUser(APIView):
 		redirect_url = f"{settings.FRONT_REDIRECT}?access={refresh.access_token}&refresh={refresh}"
 		return Response({'status': 'success', 'redirect_url': redirect_url}, status=200)
 
+class Move(APIView):
+    permission_classes = [AllowAny]
+    def post(self, request):   
+        print("move!")
+        return Response({'status': 'error', 'message': 'Invalid credentials'})
+
 
 def index(request):
     return render(request, 'index.html')
