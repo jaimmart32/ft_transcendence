@@ -44,11 +44,35 @@ class signupClass(APIView):
 			return Response({'status': 'error', 'message': 'Username already in use'})
 		if CustomUser.objects.filter(email=email).exists():
 			return Response({'status': 'error', 'message': 'Email already in use'})
-		#hashedPass = hashPassword(password)
+		# The user is no longer created here, it will only send a success status to
+		# indicate the front-end that now the email has to be sent
+		return Response({'status': 'success', 'message': 'Valid credentials'})
+		#user = CustomUser.objects.create_user(username, email=email)
+		#user.set_password(password + settings.PEPPER)
+		#user.save()
+		#return Response({'status': 'success', 'message': 'User created succesfully!'})
+
+class	createUser(APIView):
+	permission_classes = [AllowAny]
+	def post(self, request):
+		data = request.data
+		username = data.get('username')
+		email = data.get('email')
+		password = data.get('password')
+		confPass = data.get('confPass')
+		
 		user = CustomUser.objects.create_user(username, email=email)
 		user.set_password(password + settings.PEPPER)
 		user.save()
 		return Response({'status': 'success', 'message': 'User created succesfully!'})
+
+class	confirmEmail(APIView):
+	permission_classes = [AllowAny]
+	def post(self, request):
+		data = request.data
+		email = data.get('email')
+
+
 
 class loginClass(APIView):
 	permission_classes = [AllowAny]
@@ -162,7 +186,7 @@ class authVerify(APIView):
 		if userResponse.status_code != 200:
 			return Response({'status': 'error', 'message': 'Could not retrieve the user data'})
 		userInfo = userResponse.json()
-		return Response({'status': 'success', 'userInfo': userInfo})
+		return Response({'status': 'success', 'userInfo': userInfo}, status=200)
 
 class authCreateUser(APIView):
 	

@@ -20,6 +20,22 @@ function loadLoginForm()
 	logInHandler();
 }
 
+function loadEmailConfirmation()
+{
+	app.innerHTML = `
+	    <h2>Sign Up</h2>
+	    <form id="emailConf-form">
+		<div class="form-group">
+		    <label for="code">Code</label>
+		    <input type="text" class="form-control" id="code" placeholder="Enter code">
+		    <span class="error-message"></span>
+		</div>
+		<button type="submit" class="btn btn-primary">Verify</button>
+	    </form>
+	`;
+	emailConfirmationHandler();
+}
+
 // HTML for the SignUp page
 function loadSignupForm()
 {

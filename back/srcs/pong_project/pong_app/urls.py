@@ -5,6 +5,8 @@ from django.views.generic import TemplateView
 
 urlpatterns = [
 	path('signup/', views.signupClass.as_view(), name='signup'),
+	path('signup/email/', views.confirmEmail.as_view(), name='confirmEmail'),
+	path('signup/create-user/', views.createUser.as_view(), name='createUser'),
 	path('login/', views.loginClass.as_view(), name='login'),
 	path('', views.main_view, name='main'),
 
