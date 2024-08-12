@@ -20,6 +20,7 @@ function confirmEmail(formData)
 		if (data.status === 'success')
 		{
 			alert('Confirmation email sent');
+			createUser(formData)
 //			navigateTo('/login');
 		}
 		else
@@ -31,6 +32,36 @@ function confirmEmail(formData)
 	{
 		console.error('Error: ', error);
 	});
+}
+
+function createUser(formData)
+{
+	fetch('/signup/create-user/', 
+		{
+			method: 'POST',
+			headers:
+			{
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify(formData)
+		})
+		.then(response => response.json())
+		.then(data =>
+		{
+			if (data.status === 'success')
+			{
+				alert('User created successfully!');
+				navigateTo('/login');
+			}
+			else
+			{
+				alert('Could not create User');
+			}
+		})
+		.catch(error => 
+		{
+			console.error('Error: ', error);
+		});
 }
 
 function signUpHandler()
@@ -95,7 +126,7 @@ function emailConfirmationHandler()
 {
     const emailConfForm= document.getElementById('emailConf-form');
 
-    if (signUpForm)
+//    if (signUpForm)
 }
 
 window.signUpHandler = signUpHandler

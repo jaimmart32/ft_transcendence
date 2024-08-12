@@ -71,6 +71,7 @@ class	confirmEmail(APIView):
 	def post(self, request):
 		data = request.data
 		email = data.get('email')
+		return Response({'status': 'success', 'message': 'Need to really confirm email but go through.'})
 
 
 
@@ -126,17 +127,17 @@ class	EditProfile(APIView):
 
 		try:
 		# Do we need to check if the info entered is correct like in the front end?
-			user.username = data.get('username', user.username)
+			user.username = request.POST.get('username', user.username)
 			if CustomUser.objects.filter(username=user.username).exclude(id=user.id).exists():
 				return Response({'status': 'error', 'message': 'Username in use'})
-			user.email = data.get('email', user.email)
+			user.email = request.POST.get('email', user.email)
 			if CustomUser.objects.filter(email=user.email).exclude(id=user.id).exists():
 					return Response({'status': 'error', 'message': 'Email in use'})
-			if data.get('twofa', user.tfa) == 'on':
+			if request.POST.get('twofa', user.tfa) == 'on':
 				user.tfa = True
 			else:
 				user.tfa = False 
-			if data.get('password'):
+			if request.POST.get('password'):
 				user.set_password(data.get('password'))
 			if 'avatar' in request.FILES:
 				user.avatar = request.FILES['avatar']

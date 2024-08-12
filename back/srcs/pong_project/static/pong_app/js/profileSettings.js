@@ -90,20 +90,23 @@ function updateUserInfo()
 		email = document.getElementById('email').value;
 		password = document.getElementById('password').value;
 		twofa = document.getElementById('twofa').value;
+		const form = document.getElementById('profile-settings');
+		const formData = new FormData(form);
+
 
 //			lang: document.getElementById('lang').value,
 
-//		const userPic = document.getElementById('avatar').files[0];
-//		if (userPic)
-//		{
-//			userInfo.append('avatar', userPic);
-//		}
+		const userPic = document.getElementById('avatar').files[0];
+		if (userPic)
+		{
+			formData.append('avatar', userPic);
+		}
 		const userDict =
 		{
 			username: username,
 			email: email,
 			password: password,
-			twofa: twofa
+			twofa: twofa,
 		};
 //		Need to check the input, to see if everything is correct
 		if (validateInput(userDict, 'edit'))
@@ -115,9 +118,10 @@ function updateUserInfo()
 				headers:
 				{
 					'Authorization': `Bearer ${token}`,
-					'Content-Type': 'application/json'
+//					'Content-Type': 'application/json'
 				},
-				body: JSON.stringify(userDict)
+//				body: JSON.stringify(userDict)
+				body: formData
 			})
 			.then(response => response.json())
 			.then(data =>
@@ -148,7 +152,7 @@ function updateUserInfo()
 		}
 		else
 		{
-			loadProfileSettings(userInfo);
+			loadProfileSettings(userDict);
 		}
 	}
 	else
