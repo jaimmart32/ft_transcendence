@@ -6,7 +6,7 @@ from django.views.generic import TemplateView
 urlpatterns = [
 	path('signup/', views.signupClass.as_view(), name='signup'),
 	path('signup/email/', views.confirmEmail.as_view(), name='confirmEmail'),
-	path('signup/create-user/', views.createUser.as_view(), name='createUser'),
+#	path('signup/email/activate/', views.activate.as_view(), name='activate'),
 	path('login/', views.loginClass.as_view(), name='login'),
 	path('', views.main_view, name='main'),
 
@@ -20,6 +20,9 @@ urlpatterns = [
 	path('api/auth-settings/', views.authSettings.as_view(), name='auth_settings'),
 	path('api/auth/verify/', views.authVerify.as_view(), name='verify'),
 	path('api/auth/create-user/', views.authCreateUser.as_view(), name='create-user'),
+
+	#path('activate/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})/',  
+        #views.activate, name='activate'), 
 
 	path('move/', views.Move.as_view(), name='move'),
 	

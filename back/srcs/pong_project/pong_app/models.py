@@ -11,6 +11,7 @@ class CustomUser(AbstractUser):
 	# This attribute is to check if the user has registrated via 42intra
 	intra = models.BooleanField(default=False)
 	tfa = models.BooleanField(default=False)
+	verfified = models.BooleanField(default=False)
 	# If the tfa is set to true, then the otp should not be blank
 	#otp = models.CharField(max_length=6, null=True, blank=True)
 	#otp_ExpDate = models.DateTimeField(null=True, blank=True)

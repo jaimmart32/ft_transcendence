@@ -20,8 +20,8 @@ function confirmEmail(formData)
 		if (data.status === 'success')
 		{
 			alert('Confirmation email sent');
-			createUser(formData)
-//			navigateTo('/login');
+//			createUser(formData)
+			navigateTo('/login');
 		}
 		else
 		{
@@ -120,13 +120,6 @@ function signUpHandler()
     {
         console.error('login-form not found');
     }
-}
-
-function emailConfirmationHandler()
-{
-    const emailConfForm= document.getElementById('emailConf-form');
-
-//    if (signUpForm)
 }
 
 window.signUpHandler = signUpHandler

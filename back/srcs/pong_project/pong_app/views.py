@@ -15,6 +15,10 @@ from .models import CustomUser
 from django.conf import settings
 from django.contrib.auth.models import User 
 from .validators import validateUsername, validateEmail, validatePassword
+from django.core.mail import send_mail
+from django.utils.http import urlsafe_base64_encode
+from django.utils.encoding import force_bytes 
+from django.template.loader import render_to_string
 
 # Create your views here.
 
@@ -44,22 +48,6 @@ class signupClass(APIView):
 			return Response({'status': 'error', 'message': 'Username already in use'})
 		if CustomUser.objects.filter(email=email).exists():
 			return Response({'status': 'error', 'message': 'Email already in use'})
-		# The user is no longer created here, it will only send a success status to
-		# indicate the front-end that now the email has to be sent
-		return Response({'status': 'success', 'message': 'Valid credentials'})
-		#user = CustomUser.objects.create_user(username, email=email)
-		#user.set_password(password + settings.PEPPER)
-		#user.save()
-		#return Response({'status': 'success', 'message': 'User created succesfully!'})
-
-class	createUser(APIView):
-	permission_classes = [AllowAny]
-	def post(self, request):
-		data = request.data
-		username = data.get('username')
-		email = data.get('email')
-		password = data.get('password')
-		confPass = data.get('confPass')
 		
 		user = CustomUser.objects.create_user(username, email=email)
 		user.set_password(password + settings.PEPPER)
@@ -71,9 +59,25 @@ class	confirmEmail(APIView):
 	def post(self, request):
 		data = request.data
 		email = data.get('email')
-		return Response({'status': 'success', 'message': 'Need to really confirm email but go through.'})
+		username = data.get('username')
 
-
+		try:
+			user = CustomUser.objects.get(username=username)
+		except CustomUser.DoesNotExist:
+			return Response({ 'status': 'error', 'message': 'Invalid username'})
+		mailSubject = 'Ft_transcendence - Activation link'
+		domain = settings.FRONT_REDIRECT
+		message = 'Please verify your email'
+		#message = render_to_string('emailVerification.html',
+		#{
+		#	'username': username,
+		#	'domain': domain,
+		#	'uid': urlsafe_base64_encode(force_bytes(user.id)),
+		#	'token': '12345678'
+			#'token': makeVerifyToken(user)
+		#})
+		send_mail(mailSubject, message, settings.EMAIL_HOST_USER, [email])
+		return Response({'status': 'success', 'message': 'Email was sent.'})
 
 class loginClass(APIView):
 	permission_classes = [AllowAny]
