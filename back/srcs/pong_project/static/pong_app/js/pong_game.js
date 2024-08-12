@@ -36,46 +36,57 @@ class Ball{
     }
 }
            
+let context;
+let board = new Board(500, 500);
+let player1 = new Player(1, board);
+let player2 = new Player(2, board);
+let ball = new Ball(board);
+
 function initializeGame(){
-    alert("HOLA");
-    let context;
-    let board = new Board(500, 500);
-    let player1 = new Player(1, board);
-    let player2 = new Player(2, board);
-    let ball = new Ball(board);
-    console.table(player1)
-    console.table(player2)
+    console.table(player1);
+    console.table(player2);
 
-    window.onload = function() {
-        let canvas = document.getElementById("board");
-        context = canvas.getContext("2d");
+    console.table(player1);
+    console.table(player2);
+    let canvas = document.getElementById("board");
+    context = canvas.getContext("2d");
 
-        // draw players
-        context.fillStyle = "skyblue";
-        canvas.width = board.width;
-        canvas.height = board.height;
-        context.fillRect(player1.x, player1.y, player1.width, player1.height);
-        context.fillRect(player2.x, player2.y, player2.width, player2.height);
 
-        requestAnimationFrame(update);
-        //document.addEventListener("keyup", movePlayer);
-        document.addEventListener("keyup", moveDjango);
-        }
+    // draw players
+    context.fillStyle = "skyblue";
+    canvas.width = board.width;
+    canvas.height = board.height;
+    console.log(player1.x);
+    context.fillRect(player1.x, player1.y, player1.width, player1.height);
+    context.fillRect(player2.x, player2.y, player2.width, player2.height);
+
+    requestAnimationFrame(update);
+    //document.addEventListener("keyup", movePlayer);
+    document.addEventListener("keyup", moveDjango);
         
-        function moveDjango(){
-        fetch('/move/',
-            {
-                    method: 'POST',
-                    headers:
-                    {
-                            'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(
-                    {
-                            'Player1': player1
-                    })
-            })
-        }
+    async function moveDjango(e){
+        const response = await fetch('/move/',
+        {
+                method: 'POST',
+                headers:
+                {
+                        'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(
+                {
+                        'Player1': player1.y,
+                        'Player2': player2.y,
+                        'key': e.code,
+                        'speed1': player1.velocityY,
+                        'speed2': player2.velocityY,
+                })
+        })
+        const data = await response.json();
+        player1.y = data['Player1'];
+        player2.y = data['Player2'];
+        player1.velocityY = data['speed1'];
+        player2.velocityY = data['speed2'];
+    }
             
     function update() {
         requestAnimationFrame(update);
@@ -83,12 +94,6 @@ function initializeGame(){
 
         // draw players
         context.fillStyle = "skyblue";
-        if (!outOfBounds(player1.y + player1.velocityY, player1, board)){
-            player1.y += player1.velocityY;
-        }
-        if (!outOfBounds(player2.y + player2.velocityY, player2, board)){
-            player2.y += player2.velocityY;
-        }
         context.fillRect(player1.x, player1.y, player1.width, player1.height);
         context.fillRect(player2.x, player2.y, player2.width, player2.height);
 
@@ -102,31 +107,8 @@ function initializeGame(){
         context.fillRect(ball.x, ball.y, ball.width, ball.height);
     }
 
-    function outOfBounds(yPosition, player, board) {
-        return (yPosition < 0 || yPosition + player.height > board.height)
-    }
-
     function ballOutOfBounds(yPosition, ball, board) {
         return (yPosition < 0 || yPosition + ball.height > board.height)
-    }
-
-
-    function movePlayer(e) {
-        //player 1
-        if (e.code == "KeyW"){
-            player1.velocityY = -3;
-        }
-        else if (e.code == "KeyS"){
-            player1.velocityY = 3;
-        }
-
-        //player 2
-        if (e.code == "ArrowUp"){
-            player2.velocityY = -3;
-        }
-        else if (e.code == "ArrowDown"){
-            player2.velocityY = 3;
-        }
     }
 }
 

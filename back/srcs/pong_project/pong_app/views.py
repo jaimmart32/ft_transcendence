@@ -197,8 +197,44 @@ def profile42(request):
 
     return JsonResponse(user_info_response)
 
+
+def outOfBounds(yPosition, player, board):
+		return yPosition < 0 or yPosition + player > board
+
 class Move(APIView):
-    permission_classes = [AllowAny]
-    def post(self, request):   
-        print("move!")
-        return Response({'status': 'error', 'message': 'Invalid credentials'})
+	permission_classes = [AllowAny]
+	def post(self, request):   
+		player1 = request.data.get("Player1")
+		key = request.data.get('key')
+		player2 = request.data.get("Player2")
+		key = request.data.get("key")
+		speed1 = request.data.get("speed1")
+		speed2 = request.data.get("speed2")
+		# player 1
+		if key == "KeyW":
+			speed1 = -3
+		elif key == "KeyS":
+			speed1 = 3
+		# player 2
+		elif key == "ArrowUp":
+			speed2 = -3
+		elif key == "ArrowDown":
+			speed2 = 3
+		if not outOfBounds(player1 + speed1, 10, 500):
+			try:
+				player1 += speed1
+			except:
+				pass
+		if not outOfBounds(player2 + speed2, 10, 500):
+			try:
+				player2 += speed2
+			except:
+				pass
+		position_updated = {
+			'Player1': player1,
+			'Player2': player2,
+			'Speed1': speed1,
+			'Speed2': speed2,
+		}
+
+		return JsonResponse(position_updated)

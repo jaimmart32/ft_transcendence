@@ -58,8 +58,9 @@ function loadPlayGame()
 	    <h2>Play Game</h2>
 	    <p>Get ready to play a game of Pong!</p>
 	    <!-- Add game play content here -->
+	    <canvas id="board" width="500" height="500"></canvas>
+		<br>
 		<button class="btn btn-secondary" id="back-to-home">Back to Home</button>
-	    <canvas id="board" width="100" height="100"></canvas>
 	`;
 	
 	const back = document.getElementById('back-to-home');
