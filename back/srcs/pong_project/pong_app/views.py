@@ -1,6 +1,7 @@
 import json# Maybe not needed
 from django.shortcuts import render, redirect
 from django.db import IntegrityError
+from django.core.exceptions import ValidationError
 import requests
 import os
 from django.http import HttpResponse, JsonResponse
@@ -113,7 +114,8 @@ class Profile(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        content = {'username': request.user.username, 'email': request.user.email, 'tfa': request.user.tfa}
+        user = request.user
+        content = {'username': user.username, 'email': user.email, 'tfa': user.tfa, 'avatar': user.avatar.url if user.avatar else None,}
 #'lang': request.user.lang,
 #'game_stats': request.user.game_stats,
 #'tournament_stats': request.user.tournament_stats
@@ -144,11 +146,17 @@ class	EditProfile(APIView):
 			if request.POST.get('password'):
 				user.set_password(data.get('password'))
 			if 'avatar' in request.FILES:
-				user.avatar = request.FILES['avatar']
+				avatar = request.FILES['avatar']
+				if avatar.size == 0:
+					raise ValidationError("The uploaded file is empty!")
+				else:
+					user.avatar = avatar
 			user.save()
 			return Response({'status': 'success', 'message': 'Profile updated successfully!'})
 		except IntegrityError as e:
 			return Response({'status': 'error', 'message': 'Username in use'})
+		except ValidationError as e:
+			return Response({'status': 'error', 'message': 'File is empty'})
 		return Response({'status': 'error', 'message': 'An error ocurred'})
 
 

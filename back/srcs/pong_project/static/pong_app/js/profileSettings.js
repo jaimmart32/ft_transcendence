@@ -53,6 +53,7 @@ function loadProfileSettings(user_content)
 				    <div class="col-sm-10">
 					<input type="file" class="form-control-file" id="avatar">
 				    </div>
+					<span id="file-error" class="error-message"></span>
 				</div>
 				<!-- Submit Button -->
 				<div class="form-group row">
@@ -139,6 +140,8 @@ function updateUserInfo()
 					}
 					else if (data.message === 'Email in use')
 						showMessage('email-error', 'Email already in use');
+					else if(data.message === 'File is empty')
+						showMessage('file-error', 'File is empty');
 					else
 						alert('An error ocurred, try later');
 				}
