@@ -276,16 +276,18 @@ class Move(APIView):
 			speed2 = -3
 		elif key == "ArrowDown":
 			speed2 = 3
-		if not outOfBounds(player1 + speed1, 10, 500):
-			try:
-				player1 += speed1
-			except:
+		try:
+			speed1 = int(speed1)
+			if not outOfBounds(player1 + speed1, 10, 500):
+				player1 += int(speed1)
+		except:
 				pass
-		if not outOfBounds(player2 + speed2, 10, 500):
-			try:
-				player2 += speed2
-			except:
-				pass
+		try:
+			speed2 = int(speed2)
+			if not outOfBounds(player2 + speed2, 10, 500):
+				player2 += int(speed2)
+		except:
+			pass
 		position_updated = {
 			'Player1': player1,
 			'Player2': player2,
