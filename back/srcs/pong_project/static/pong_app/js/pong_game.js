@@ -46,6 +46,9 @@ function initializeGame(){
     console.table(player1);
     console.table(player2);
 
+    player1.velocityY = 0;
+    player2.velocityY = 0;
+
     console.table(player1);
     console.table(player2);
     let canvas = document.getElementById("board");
