@@ -6,6 +6,11 @@ function loadPage(url, data)
 		loadLoginForm();
 	else if (url === '/signup')
 		loadSignupForm();
+	else if (url === '/signup/email/activate/')
+	{
+		console.log('Activation');
+		loadLoginForm();
+	}
 	else if (url === '/home/profile')
 		loadProfile(data);
 	else if (url === '/home/profile/edit')

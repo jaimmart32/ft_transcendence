@@ -22,11 +22,14 @@ function loadProfile()
 		})
 		.then(data => 
 		{
+			console.log(data.avatar);
+			const avatarUrl = data.avatar ? data.avatar : '/static/pong_app/media/user-pic.jpg';
+			console.log(avatarUrl);
 			app.innerHTML = `
 					<div id="profile-settings" class="container mt-4">
 				<div class="card mx-auto" style="max-width: 500px;">
 				    <div class="card-body text-center">
-					<img src="/static/pong_app/media/user-pic.jpg" alt="Profile Picture" class="img-thumbnail mb-3">
+					<img src="${avatarUrl}" alt="Profile Picture" class="img-thumbnail mb-3">
 					<h3 id="username">${data.username}</h3>
 					<ul class="list-group list-group-flush mb-3">
 					    <li class="list-group-item">Games Played: <span id="games-played">0</span></li>
@@ -63,7 +66,7 @@ function loadProfile()
 				edit.addEventListener('click', function(event)
 				{
 					event.preventDefault();	
-					navigateTo('/home/profile/edit');
+					navigateTo('/home/profile/edit', data);
 				});
 			}
 		})

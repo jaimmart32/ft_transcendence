@@ -22,3 +22,6 @@ def validatePassword(password):
 
 	if not pattern.match(password):
 		raise ValidationError('Password must be at least 8 characters long, contain at least one digit, one lowercase letter, and one uppercase letter')
+
+#def makeVerifyToken(user):
+

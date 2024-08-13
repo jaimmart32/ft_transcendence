@@ -13,14 +13,6 @@ function loadProfileSettings(user_content)
 		    			<span id="username-error" class="error-message"></span>
 				    </div>
 				</div>
-				<!-- Email Field -->
-				<div class="form-group row">
-				    <label for="email" class="col-sm-2 col-form-label">Email</label>
-				    <div class="col-sm-10">
-					<input type="email" class="form-control" id="email" value=${user_content.email}>
-		    			<span id="email-error" class="error-message"></span>
-				    </div>
-				</div>
 				<!-- Password Field -->
 				<div class="form-group row">
 				    <label for="password" class="col-sm-2 col-form-label">Password</label>
@@ -53,6 +45,7 @@ function loadProfileSettings(user_content)
 				    <div class="col-sm-10">
 					<input type="file" class="form-control-file" id="avatar">
 				    </div>
+					<span id="file-error" class="error-message"></span>
 				</div>
 				<!-- Submit Button -->
 				<div class="form-group row">
@@ -90,20 +83,23 @@ function updateUserInfo()
 		email = document.getElementById('email').value;
 		password = document.getElementById('password').value;
 		twofa = document.getElementById('twofa').value;
+		const form = document.getElementById('profile-settings');
+		const formData = new FormData(form);
+
 
 //			lang: document.getElementById('lang').value,
 
-//		const userPic = document.getElementById('avatar').files[0];
-//		if (userPic)
-//		{
-//			userInfo.append('avatar', userPic);
-//		}
+		const userPic = document.getElementById('avatar').files[0];
+		if (userPic)
+		{
+			formData.append('avatar', userPic);
+		}
 		const userDict =
 		{
 			username: username,
 			email: email,
 			password: password,
-			twofa: twofa
+			twofa: twofa,
 		};
 //		Need to check the input, to see if everything is correct
 		if (validateInput(userDict, 'edit'))
@@ -115,9 +111,10 @@ function updateUserInfo()
 				headers:
 				{
 					'Authorization': `Bearer ${token}`,
-					'Content-Type': 'application/json'
+//					'Content-Type': 'application/json'
 				},
-				body: JSON.stringify(userDict)
+//				body: JSON.stringify(userDict)
+				body: formData
 			})
 			.then(response => response.json())
 			.then(data =>
@@ -135,6 +132,8 @@ function updateUserInfo()
 					}
 					else if (data.message === 'Email in use')
 						showMessage('email-error', 'Email already in use');
+					else if(data.message === 'File is empty')
+						showMessage('file-error', 'File is empty');
 					else
 						alert('An error ocurred, try later');
 				}
@@ -148,7 +147,7 @@ function updateUserInfo()
 		}
 		else
 		{
-			loadProfileSettings(userInfo);
+			loadProfileSettings(userDict);
 		}
 	}
 	else

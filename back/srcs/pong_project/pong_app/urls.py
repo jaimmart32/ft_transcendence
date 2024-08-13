@@ -1,10 +1,11 @@
-from django.urls import path
+from django.urls import path, re_path
 from . import views
 from rest_framework_simplejwt.views import TokenObtainPairView,TokenRefreshView
 from django.views.generic import TemplateView
 
 urlpatterns = [
 	path('signup/', views.signupClass.as_view(), name='signup'),
+	path('activate/<uidb64>/<token>/', views.ActivateAccountView.as_view(), name='activate'),
 	path('login/', views.loginClass.as_view(), name='login'),
 	path('', views.main_view, name='main'),
 
@@ -23,4 +24,5 @@ urlpatterns = [
 	
 	path('callback.html', TemplateView.as_view(template_name='callback.html'), name='callback_html'),
 	path('index.html', TemplateView.as_view(template_name='index.html'), name='index_html'),
+    	#re_path(r'^.*$', views.main_view, name='index.html')
 ]
