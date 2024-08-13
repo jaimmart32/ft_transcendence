@@ -1,4 +1,5 @@
 import json# Maybe not needed
+import smtplib, ssl
 from django.shortcuts import render, redirect
 from django.db import IntegrityError
 from django.core.exceptions import ValidationError
@@ -16,10 +17,10 @@ from .models import CustomUser
 from django.conf import settings
 from django.contrib.auth.models import User 
 from .validators import validateUsername, validateEmail, validatePassword
-from django.core.mail import send_mail
-from django.utils.http import urlsafe_base64_encode
-from django.utils.encoding import force_bytes 
-from django.template.loader import render_to_string
+from email.mime.text import MIMEText
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.encoding import force_bytes, force_str
+from django.contrib.auth.tokens import PasswordResetTokenGenerator
 
 # Create your views here.
 
@@ -37,6 +38,7 @@ class signupClass(APIView):
 		email = data.get('email')
 		password = data.get('password')
 		confPass = data.get('confPass')
+		# Validating the new user's credentials
 		try:
 			validateUsername(username)
 			validateEmail(email)
@@ -49,36 +51,51 @@ class signupClass(APIView):
 			return Response({'status': 'error', 'message': 'Username already in use'})
 		if CustomUser.objects.filter(email=email).exists():
 			return Response({'status': 'error', 'message': 'Email already in use'})
-		
+		# Create the user after passing all the requirements	
 		user = CustomUser.objects.create_user(username, email=email)
+		user.is_active = False 
 		user.set_password(password + settings.PEPPER)
 		user.save()
+
+		# Generating link for confirmation email
+		token_generator = PasswordResetTokenGenerator()
+		domain = settings.FRONT_REDIRECT
+		uid = urlsafe_base64_encode(force_bytes(user.id))
+		token = token_generator.make_token(user)
+		activation_link = f'{domain}/activate/{uid}/{token}/'
+		message = MIMEText(f'Please click the following link to activate your account\n {activation_link}')
+		message['Subject'] = 'Account confirmation'
+		message['From'] = settings.EMAIL_HOST_USER 
+		message['To'] = email 
+
+		# Starting the server smtp connection and sending the email
+		smtp_connection = smtplib.SMTP(settings.EMAIL_HOST, settings.EMAIL_PORT)
+		smtp_connection.starttls()
+		smtp_connection.login(settings.EMAIL_HOST_USER, settings.EMAIL_HOST_PASSWORD)
+		smtp_connection.send_message(message)
+
 		return Response({'status': 'success', 'message': 'User created succesfully!'})
 
-class	confirmEmail(APIView):
+class ActivateAccountView(APIView):
 	permission_classes = [AllowAny]
-	def post(self, request):
-		data = request.data
-		email = data.get('email')
-		username = data.get('username')
-
+	def get(self, request, uidb64, token):
 		try:
-			user = CustomUser.objects.get(username=username)
-		except CustomUser.DoesNotExist:
-			return Response({ 'status': 'error', 'message': 'Invalid username'})
-		mailSubject = 'Ft_transcendence - Activation link'
-		domain = settings.FRONT_REDIRECT
-		message = 'Please verify your email'
-		#message = render_to_string('emailVerification.html',
-		#{
-		#	'username': username,
-		#	'domain': domain,
-		#	'uid': urlsafe_base64_encode(force_bytes(user.id)),
-		#	'token': '12345678'
-			#'token': makeVerifyToken(user)
-		#})
-		send_mail(mailSubject, message, settings.EMAIL_HOST_USER, [email])
-		return Response({'status': 'success', 'message': 'Email was sent.'})
+				# Decode the user ID from the URL
+			uid = force_str(urlsafe_base64_decode(uidb64))
+			user = CustomUser.objects.get(pk=uid)
+		except (TypeError, ValueError, OverflowError, CustomUser.DoesNotExist):
+			user = None
+			# Create an instance of the token generator
+		token_generator = PasswordResetTokenGenerator()
+				# Check if the token is valid
+		if user is not None and token_generator.check_token(user, token):
+			user.is_active = True
+			user.save()
+				    # Redirect to the login page or another page after successful activation
+			return redirect('http://localhost:8000')  # Replace 'login' with the actual name of your login URL
+		else:
+				    # Render a template with an error message if the token is invalid
+			return redirect('http://localhost:8000')  # Replace 'login' with the actual name of your login URL
 
 class loginClass(APIView):
 	permission_classes = [AllowAny]
@@ -92,6 +109,8 @@ class loginClass(APIView):
 		except CustomUser.DoesNotExist:
 			return Response({ 'status': 'error', 'message': 'Invalid username'})
 
+		if user.is_active is False:
+			return Response({'status': 'error', 'message': 'Email not verified'})
 		if user.check_password(password + settings.PEPPER):
 			refresh = RefreshToken.for_user(user)
 			return Response({

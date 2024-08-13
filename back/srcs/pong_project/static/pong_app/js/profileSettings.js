@@ -13,14 +13,6 @@ function loadProfileSettings(user_content)
 		    			<span id="username-error" class="error-message"></span>
 				    </div>
 				</div>
-				<!-- Email Field -->
-				<div class="form-group row">
-				    <label for="email" class="col-sm-2 col-form-label">Email</label>
-				    <div class="col-sm-10">
-					<input type="email" class="form-control" id="email" value=${user_content.email}>
-		    			<span id="email-error" class="error-message"></span>
-				    </div>
-				</div>
 				<!-- Password Field -->
 				<div class="form-group row">
 				    <label for="password" class="col-sm-2 col-form-label">Password</label>

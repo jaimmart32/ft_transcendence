@@ -11,7 +11,6 @@ class CustomUser(AbstractUser):
 	# This attribute is to check if the user has registrated via 42intra
 	intra = models.BooleanField(default=False)
 	tfa = models.BooleanField(default=False)
-	verfified = models.BooleanField(default=False)
 	# If the tfa is set to true, then the otp should not be blank
 	#otp = models.CharField(max_length=6, null=True, blank=True)
 	#otp_ExpDate = models.DateTimeField(null=True, blank=True)
@@ -20,8 +19,6 @@ class CustomUser(AbstractUser):
 	game_stats = models.JSONField(default=dict)
 	# Tournament stats ONLY for tournament, not the rounds in the tournament(total/wins/losses)
 	tournament_stats = models.JSONField(default=dict)
-	# Online or offline status
-	# is_active (The actual boolean that indicates if the user is active
 
 	def __str__(self):
 		return f"{self.username}"

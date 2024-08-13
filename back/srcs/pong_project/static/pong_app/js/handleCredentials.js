@@ -30,6 +30,7 @@ function logInHandler()
 		{
                     if (data.status === 'success')
 		    {
+		    	console.log('Inside success');
                         localStorage.setItem('access', data.access);
                         localStorage.setItem('refresh', data.refresh);
                         alert('Log in successful!');
@@ -37,7 +38,19 @@ function logInHandler()
                     }
 		    else
 		    {
-                        alert('Log in failed: ' + data.message);
+		    	console.log('Inside else');
+		    	if (data.message === 'Invalid credentials')
+			{
+				showMessage('password-error', 'Invalid password. Try again');
+			}
+		    	else if (data.message === 'Invalid username')
+			{
+				showMessage('username-error', 'Invalid username');
+			}
+			else
+			{
+				showMessage('email-error', 'Account is not verified, please check your email');
+			}
                     }
                 })
                 .catch(error => {

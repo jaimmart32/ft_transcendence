@@ -1,69 +1,3 @@
-//This function will be called after receiving the response from the backend
-//which confirms if the credentials for the new user are correct. 
-//It's purpose is to send a petition to the backend which will send the confirmation
-//email. After the confirmation email is sent, the HTML will be changed so the
-//received code can be entered in the correct field.
-function confirmEmail(formData)
-{
-	fetch('/signup/email/', 
-	{
-		method: 'POST',
-		headers:
-		{
-			'Content-Type': 'application/json',
-		},
-		body: JSON.stringify(formData)
-	})
-	.then(response => response.json())
-	.then(data =>
-	{
-		if (data.status === 'success')
-		{
-			alert('Confirmation email sent');
-//			createUser(formData)
-			navigateTo('/login');
-		}
-		else
-		{
-			alert('Confirmation email could not be sent');
-		}
-	})
-	.catch(error => 
-	{
-		console.error('Error: ', error);
-	});
-}
-
-function createUser(formData)
-{
-	fetch('/signup/create-user/', 
-		{
-			method: 'POST',
-			headers:
-			{
-				'Content-Type': 'application/json',
-			},
-			body: JSON.stringify(formData)
-		})
-		.then(response => response.json())
-		.then(data =>
-		{
-			if (data.status === 'success')
-			{
-				alert('User created successfully!');
-				navigateTo('/login');
-			}
-			else
-			{
-				alert('Could not create User');
-			}
-		})
-		.catch(error => 
-		{
-			console.error('Error: ', error);
-		});
-}
-
 function signUpHandler()
 {
     const signUpForm = document.getElementById('signup-form');
@@ -101,8 +35,8 @@ function signUpHandler()
 		{
                     if (data.status == 'success')
 		    {
-		    	confirmEmail(formData);
-//			navigateTo('/login');
+		    	alert('Signup correct');
+			navigateTo('/login');
                     }
 		    else
 		    {

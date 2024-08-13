@@ -35,8 +35,9 @@ document.addEventListener('DOMContentLoaded', function() {
 //	browser buttons (forward/backward/refresh)
 	window.addEventListener('popstate', function(event)
 	{
-		loadPage(window.location.pathname);
+		navigateTo(window.location.pathname);
+//		loadPage(window.location.pathname);
 	});
 
-	loadPage(window.location.pathname);	
+	loadPage(window.location.pathname);
 });
