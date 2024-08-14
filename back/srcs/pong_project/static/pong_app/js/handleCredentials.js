@@ -78,7 +78,7 @@ function validateInput(formData, form)
 	{
 		hideMessage('username-error');
 	}
-	if (!validateEmail(formData.email, form))
+	if (form != 'edit' && !validateEmail(formData.email, form))
 	{
 		valid = false;
 		showMessage('email-error', 'Invalid email');
