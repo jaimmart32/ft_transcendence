@@ -25,4 +25,9 @@ urlpatterns = [
 	path('callback.html', TemplateView.as_view(template_name='callback.html'), name='callback_html'),
 	path('index.html', TemplateView.as_view(template_name='index.html'), name='index_html'),
     	#re_path(r'^.*$', views.main_view, name='index.html')
+	
+	# Friends
+	path('friends/', FriendsList.as_view(), name='friends-list'),
+	path('friends/add/', AddFriend.as_view(), name='add-friend'),
+	path('friends/remove/', RemoveFriend.as_view(), name='remove-friend'),
 ]
