@@ -31,10 +31,30 @@ function logInHandler()
                     if (data.status === 'success')
 		    {
 		    	console.log('Inside success');
-                        localStorage.setItem('access', data.access);
-                        localStorage.setItem('refresh', data.refresh);
-                        alert('Log in successful!');
-			navigateTo('/home');
+			if (data.message === 'Verification code sent')
+			{
+				console.log('Inside the verification code sent');
+				code = prompt('Enter the verification code: ');
+				if (handle2FA(code))
+				{
+
+					alert('Valid code');
+					return;
+				}
+				else 
+				{
+					alert('Non-valid code');
+					return;
+				}
+
+			}
+			else
+			{
+				localStorage.setItem('access', data.access);
+				localStorage.setItem('refresh', data.refresh);
+				alert('Log in successful!');
+				navigateTo('/home');
+			}
                     }
 		    else
 		    {
@@ -65,6 +85,41 @@ function logInHandler()
     }
 }
 
+function handle2FA(code)
+{
+	const formData =
+	{
+		username: document.getElementById('username').value,
+		otp: code
+	};
+	fetch('/login/verify-2fa/',
+	{
+	    method: 'POST',
+	    headers:
+	    {
+		'Content-Type': 'application/json'
+	    },
+	    body: JSON.stringify(formData)
+	})
+	.then(response => response.json())
+	.then(data =>
+	{
+	    if (data.status === 'success')
+	    {
+		localStorage.setItem('access', data.access);
+		localStorage.setItem('refresh', data.refresh);
+		alert('Log in successful!');
+		navigateTo('/home');
+		return (true);
+	    }
+	    else
+	    {
+		showMessage('code-error', 'Incorrect verification code, please try again.');
+		return (false);
+	    }
+	})
+}
+
 function validateInput(formData, form)
 {
 	let valid = true;
@@ -78,7 +133,7 @@ function validateInput(formData, form)
 	{
 		hideMessage('username-error');
 	}
-	if (!validateEmail(formData.email, form))
+	if (form != 'edit' && !validateEmail(formData.email, form))
 	{
 		valid = false;
 		showMessage('email-error', 'Invalid email');

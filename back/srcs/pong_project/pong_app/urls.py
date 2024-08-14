@@ -7,6 +7,7 @@ urlpatterns = [
 	path('signup/', views.signupClass.as_view(), name='signup'),
 	path('activate/<uidb64>/<token>/', views.ActivateAccountView.as_view(), name='activate'),
 	path('login/', views.loginClass.as_view(), name='login'),
+	path('login/verify-2fa/', views.verify2FA.as_view(), name='verify2FA'),
 	path('', views.main_view, name='main'),
 
 	path('home/', views.Home.as_view(), name='home'),
@@ -27,7 +28,7 @@ urlpatterns = [
     	#re_path(r'^.*$', views.main_view, name='index.html')
 	
 	# Friends
-	path('friends/', FriendsList.as_view(), name='friends-list'),
-	path('friends/add/', AddFriend.as_view(), name='add-friend'),
-	path('friends/remove/', RemoveFriend.as_view(), name='remove-friend'),
+	#path('friends/', FriendsList.as_view(), name='friends-list'),
+	#path('friends/add/', AddFriend.as_view(), name='add-friend'),
+	#path('friends/remove/', RemoveFriend.as_view(), name='remove-friend'),
 ]

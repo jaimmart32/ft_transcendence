@@ -80,7 +80,6 @@ function updateUserInfo()
 	if (token)
 	{
 		username = document.getElementById('username').value;
-		email = document.getElementById('email').value;
 		password = document.getElementById('password').value;
 		twofa = document.getElementById('twofa').value;
 		const form = document.getElementById('profile-settings');
@@ -97,7 +96,6 @@ function updateUserInfo()
 		const userDict =
 		{
 			username: username,
-			email: email,
 			password: password,
 			twofa: twofa,
 		};
@@ -111,9 +109,7 @@ function updateUserInfo()
 				headers:
 				{
 					'Authorization': `Bearer ${token}`,
-//					'Content-Type': 'application/json'
 				},
-//				body: JSON.stringify(userDict)
 				body: formData
 			})
 			.then(response => response.json())
@@ -130,8 +126,6 @@ function updateUserInfo()
 					{
 						showMessage('username-error', 'Username already in use');
 					}
-					else if (data.message === 'Email in use')
-						showMessage('email-error', 'Email already in use');
 					else if(data.message === 'File is empty')
 						showMessage('file-error', 'File is empty');
 					else

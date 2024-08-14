@@ -16,11 +16,13 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from .models import CustomUser
 from django.conf import settings
 from django.contrib.auth.models import User 
-from .validators import validateUsername, validateEmail, validatePassword
+from .validators import validateUsername, validateEmail, validatePassword, generate_random_digits
 from email.mime.text import MIMEText
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
+from datetime import timedelta
+from django.utils import timezone
 
 # Create your views here.
 
@@ -59,10 +61,11 @@ class signupClass(APIView):
 
 		# Generating link for confirmation email
 		token_generator = PasswordResetTokenGenerator()
-		domain = settings.FRONT_REDIRECT
+		domain = settings.HOST
 		uid = urlsafe_base64_encode(force_bytes(user.id))
 		token = token_generator.make_token(user)
-		activation_link = f'{domain}/activate/{uid}/{token}/'
+		activation_link = f'http://localhost:8000/activate/{uid}/{token}/'
+		#activation_link = f'http://{domain}:8000/activate/{uid}/{token}/'
 		message = MIMEText(f'Please click the following link to activate your account\n {activation_link}')
 		message['Subject'] = 'Account confirmation'
 		message['From'] = settings.EMAIL_HOST_USER 
@@ -73,6 +76,7 @@ class signupClass(APIView):
 		smtp_connection.starttls()
 		smtp_connection.login(settings.EMAIL_HOST_USER, settings.EMAIL_HOST_PASSWORD)
 		smtp_connection.send_message(message)
+		smtp_connection.quit()
 
 		return Response({'status': 'success', 'message': 'User created succesfully!'})
 
@@ -92,10 +96,10 @@ class ActivateAccountView(APIView):
 			user.is_active = True
 			user.save()
 				    # Redirect to the login page or another page after successful activation
-			return redirect('http://localhost:8000')  # Replace 'login' with the actual name of your login URL
+			return redirect(f'http://{settings.HOST}:8000')
 		else:
 				    # Render a template with an error message if the token is invalid
-			return redirect('http://localhost:8000')  # Replace 'login' with the actual name of your login URL
+			return redirect(f'http://{settings.HOST}:8000')
 
 class loginClass(APIView):
 	permission_classes = [AllowAny]
@@ -109,19 +113,68 @@ class loginClass(APIView):
 		except CustomUser.DoesNotExist:
 			return Response({ 'status': 'error', 'message': 'Invalid username'})
 
+		# Check the attribute is_active, if it's false, means the user has not verified
+		# their email
 		if user.is_active is False:
 			return Response({'status': 'error', 'message': 'Email not verified'})
+
+		# The password is correct
 		if user.check_password(password + settings.PEPPER):
+			# If the user has 2FA active, we send the needed code
+			if user.tfa is True:
+				user.otp = generate_random_digits()
+				user.otp_expDate = timezone.now() + timedelta(hours=1)
+				user.save()
+				email = user.email
+				userOtp = user.otp
+
+				message = MIMEText(f'Your verification code is: {userOtp}')
+				message['Subject'] = 'Verification code'
+				message['From'] = settings.EMAIL_HOST_USER 
+				message['To'] = email
+
+				smtp_connection = smtplib.SMTP(settings.EMAIL_HOST, settings.EMAIL_PORT)
+				smtp_connection.starttls()
+				smtp_connection.login(settings.EMAIL_HOST_USER, settings.EMAIL_HOST_PASSWORD)
+				smtp_connection.send_message(message)
+				smtp_connection.quit()
+
+				return Response({'status': 'success', 'message': 'Verification code sent'})
 			refresh = RefreshToken.for_user(user)
 			return Response({
-                'status': 'success',
-                'message': 'Logged in successfully!',
-                'access': str(refresh.access_token),
-                'refresh': str(refresh)
-            	})
+					'status': 'success',
+					'message': 'Logged in successfully!',
+					'access': str(refresh.access_token),
+					'refresh': str(refresh)
+				})
 		else:
 			return Response({'status': 'error', 'message': 'Invalid credentials'})
 
+
+class verify2FA(APIView):
+	permission_classes = [AllowAny]
+	def post(self, request):
+		data = request.data
+		username = data.get('username')
+		otp = data.get('otp')
+
+		user = CustomUser.objects.get(username=username)
+
+		if user is not None:
+			if (user.otp == otp and user.otp_expDate is not None and user.otp_expDate > timezone.now()):
+				refresh = RefreshToken.for_user(user)
+				return Response({
+						'status': 'success',
+						'message': 'Logged in successfully!',
+						'access': str(refresh.access_token),
+						'refresh': str(refresh)
+					})
+			else:
+				return Response({'status': 'error', 'message': 'Expired code'})
+		else:
+			return Response({'status': 'error', 'message': 'Invalid code'})
+
+				
 class Home(APIView):
     permission_classes = [IsAuthenticated]
 

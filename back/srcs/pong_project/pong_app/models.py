@@ -12,8 +12,8 @@ class CustomUser(AbstractUser):
 	intra = models.BooleanField(default=False)
 	tfa = models.BooleanField(default=False)
 	# If the tfa is set to true, then the otp should not be blank
-	#otp = models.CharField(max_length=6, null=True, blank=True)
-	#otp_ExpDate = models.DateTimeField(null=True, blank=True)
+	otp = models.CharField(max_length=6, null=True, blank=True)
+	otp_expDate = models.DateTimeField(null=True, blank=True)
 
 	# Game stats for every game played, including the tournament games(total/wins/losses)
 	game_stats = models.JSONField(default=dict)

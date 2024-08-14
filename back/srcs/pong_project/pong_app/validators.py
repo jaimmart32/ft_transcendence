@@ -1,8 +1,10 @@
 import re
 import os
+import random 
 import hashlib 
 from django.core.exceptions import ValidationError
 from django.conf import settings
+
 
 def validateUsername(username):
 	pattern = re.compile(r'^(?!ft_)[a-zA-Z0-9._%+-]{1,8}$')
@@ -23,5 +25,6 @@ def validatePassword(password):
 	if not pattern.match(password):
 		raise ValidationError('Password must be at least 8 characters long, contain at least one digit, one lowercase letter, and one uppercase letter')
 
-#def makeVerifyToken(user):
+def generate_random_digits(n=6):
+	return "".join(map(str, random.sample(range(0, 10), n)))
 
