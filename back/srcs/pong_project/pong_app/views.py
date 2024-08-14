@@ -253,6 +253,44 @@ def profile42(request):
 
     return JsonResponse(user_info_response)
 
+# FRIENDS
+
+class FriendsList(APIView):
+	permission_classes = [IsAuthenticated]
+
+	def get(self, request):
+		user = request.user
+		friends = user.friends.all()
+		friends_data = [{'username': friend.username, 'online': friend.is_active} for friend in friends]
+		return Response(friends_data)
+
+class AddFriend(APIView):
+	permission_classes = [IsAuthenticated]
+
+	def post(self, request):
+		user = request.user
+		friend_username = request.data.get('friend_username')
+		try:
+			friend = CustomUser.objects.get(username=friend_username)
+			user.friends.add(friend)
+			return Response({'status': 'success', 'message': f'{friend_username} added as a friend'})
+		except CustomUser.DoesNotExist:
+			return Response({'status': 'error', 'message': 'User not found'}, status=404)
+
+class RemoveFriend(APIView):
+	permission_classes = [IsAuthenticated]
+
+	def post(self, request):
+		user = request.user
+		friend_username = request.data.get('friend_username')
+		try:
+			friend = CustomUser.objects.get(username=friend_username)
+			user.friends.remove(friend)
+			return Response({'status': 'success', 'message': f'{friend_username} removed from friends'})
+		except CustomUser.DoesNotExist:
+			return Response({'status': 'error', 'message': 'User not found'}, status=404)
+
+
 
 def outOfBounds(yPosition, player, board):
 		return yPosition < 0 or yPosition + player > board
