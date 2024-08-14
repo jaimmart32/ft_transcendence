@@ -93,7 +93,7 @@ function loadPlayGame()
 
 	initializeGame();
 }
-
+/*
 function loadFriendsSection()
 {
 	app.innerHTML = `
@@ -113,7 +113,7 @@ function loadFriendsSection()
 			navigateTo('/home');
 		});
 	}
-}
+}*/
 
 function loadCreateTournament()
 {
@@ -227,7 +227,6 @@ function loadHome()
 }
 
 window.loadPlayGame = loadPlayGame;
-window.loadFriendsSection = loadFriendsSection;
 window.loadCreateTournament = loadCreateTournament;
 window.loadLoginForm = loadLoginForm;
 window.loadSignupForm = loadSignupForm;

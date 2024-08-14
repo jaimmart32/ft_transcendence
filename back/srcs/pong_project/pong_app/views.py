@@ -208,9 +208,6 @@ class	EditProfile(APIView):
 			user.username = request.POST.get('username', user.username)
 			if CustomUser.objects.filter(username=user.username).exclude(id=user.id).exists():
 				return Response({'status': 'error', 'message': 'Username in use'})
-			user.email = request.POST.get('email', user.email)
-			if CustomUser.objects.filter(email=user.email).exclude(id=user.id).exists():
-					return Response({'status': 'error', 'message': 'Email in use'})
 			if request.POST.get('twofa', user.tfa) == 'on':
 				user.tfa = True
 			else:
