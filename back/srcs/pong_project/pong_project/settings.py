@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    'channels',
     'pong_app',
 
     'rest_framework',
@@ -80,6 +81,8 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'pong_project.wsgi.application'
+# Define the ASGI application
+ASGI_APPLICATION = 'pong_project.asgi.application'
 
 
 # Database

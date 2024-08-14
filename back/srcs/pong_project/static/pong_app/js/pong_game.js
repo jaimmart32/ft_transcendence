@@ -42,7 +42,14 @@ let player1 = new Player(1, board);
 let player2 = new Player(2, board);
 let ball = new Ball(board);
 
+const socket = new WebSocket('ws://' + window.location.host + '/ws/pong-socket/');
+
 function initializeGame(){
+    socket.onmessage = function(event){
+        const data = JSON.parse(event.data);
+        console.log(data);
+    }
+    
     console.table(player1);
     console.table(player2);
 
