@@ -27,7 +27,7 @@ urlpatterns = [
     	#re_path(r'^.*$', views.main_view, name='index.html')
 	
 	# Friends
-	path('friends/', FriendsList.as_view(), name='friends-list'),
-	path('friends/add/', AddFriend.as_view(), name='add-friend'),
-	path('friends/remove/', RemoveFriend.as_view(), name='remove-friend'),
+	path('friends/', views.FriendsList.as_view(), name='friends-list'),
+	path('friends/add/', views.AddFriend.as_view(), name='add-friend'),
+	path('friends/remove/', views.RemoveFriend.as_view(), name='remove-friend'),
 ]

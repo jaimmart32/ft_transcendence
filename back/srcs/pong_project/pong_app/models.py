@@ -20,7 +20,7 @@ class CustomUser(AbstractUser):
 	# Tournament stats ONLY for tournament, not the rounds in the tournament(total/wins/losses)
 	tournament_stats = models.JSONField(default=dict)
 	# self so that can be related witj user model,
-	friends = models.ManyToManyField('self', blank=True, related_name='friends_set')
+	friends = models.ManyToManyField('self', blank=True)
 
 	def __str__(self):
 		return f"{self.username}"
