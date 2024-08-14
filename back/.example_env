@@ -4,7 +4,12 @@ USER_INFO_URL=https://api.intra.42.fr/v2/me
 CLIENT_ID=your-id-given-by-42-api
 CLIENT_SECRET=your-secret-given-by-42-api
 AUTH_ENDPOINT=https://api.intra.42.fr/oauth/authorize
-REDIRECT_URI=redirection-uri-for-callback
-FRONT_REDIRECT=redirection-for-after-callback
-SCOPE=
-PEPPER=
+SCOPE=code
+
+PEPPER=A-random-string-for-password-security
+
+EMAIL_PORT=587
+EMAIL_USE_TLS=True
+EMAIL_HOST='our-host-for-sending-the-mails'
+EMAIL_HOST_USER='our-awesome-email@gmail.com'
+EMAIL_HOST_PASSWORD='the-password-app-password-not-the-accounts'

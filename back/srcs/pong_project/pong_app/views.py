@@ -238,7 +238,7 @@ class authCreateUser(APIView):
 		# Could use the CustomUser.objects.get_or_create() and later check if the user exists 
 		refresh = RefreshToken.for_user(user)
 
-		redirect_url = f"{settings.FRONT_REDIRECT}?access={refresh.access_token}&refresh={refresh}"
+		redirect_url = f"http://{settings.HOST}:8000?access={refresh.access_token}&refresh={refresh}"
 		return Response({'status': 'success', 'redirect_url': redirect_url}, status=200)
 
 

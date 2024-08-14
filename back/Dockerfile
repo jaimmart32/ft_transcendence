@@ -15,7 +15,7 @@ COPY .hostname.txt .
 RUN echo "" >> .env; \
     echo -n "REDIRECT_URI='http://" >> .env; \ 
     cat .hostname.txt >> .env; \
-    echo ":8000/callback'" >> .env; \
+    echo ":8000/callback.html'" >> .env; \
     echo -n "HOST=" >> .env; \
     cat .hostname.txt >> .env; echo "" >> .env
 
