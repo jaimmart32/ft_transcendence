@@ -44,29 +44,23 @@ let ball = new Ball(board);
 
 const socket = new WebSocket('ws://' + window.location.host + '/ws/pong-socket/');
 
+
 function initializeGame(){
     socket.onmessage = function(event){
         const data = JSON.parse(event.data);
         console.log(data);
     }
-    
-    console.table(player1);
-    console.table(player2);
 
     player1.velocityY = 0;
     player2.velocityY = 0;
 
-    console.table(player1);
-    console.table(player2);
     let canvas = document.getElementById("board");
     context = canvas.getContext("2d");
-
 
     // draw players
     context.fillStyle = "skyblue";
     canvas.width = board.width;
     canvas.height = board.height;
-    console.log(player1.x);
     context.fillRect(player1.x, player1.y, player1.width, player1.height);
     context.fillRect(player2.x, player2.y, player2.width, player2.height);
 
@@ -74,28 +68,19 @@ function initializeGame(){
     //document.addEventListener("keyup", movePlayer);
     document.addEventListener("keyup", moveDjango);
         
-    async function moveDjango(e){
-        const response = await fetch('/move/',
+    function moveDjango(e){
+        socket.send(JSON.stringify(
         {
-                method: 'POST',
-                headers:
-                {
-                        'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(
-                {
-                        'Player1': player1.y,
-                        'Player2': player2.y,
-                        'key': e.code,
-                        'speed1': player1.velocityY,
-                        'speed2': player2.velocityY,
-                })
-        })
-        const data = await response.json();
-        player1.y = data['Player1'];
-        player2.y = data['Player2'];
-        player1.velocityY = data['speed1'];
-        player2.velocityY = data['speed2'];
+            'Player1': player1.y,
+            'Player2': player2.y,
+            'key': e.code,
+            'speed1': player1.velocityY,
+            'speed2': player2.velocityY,
+        }))
+        //player1.y = data['Player1'];
+        //player2.y = data['Player2'];
+        //player1.velocityY = data['speed1'];
+        //player2.velocityY = data['speed2'];
     }
             
     function update() {
