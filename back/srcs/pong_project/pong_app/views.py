@@ -173,10 +173,9 @@ def loginClass(request):
 		else:
 			return JsonResponse({'status': 'error', 'message': 'Invalid credentials'}, status=401)
 
-
-class verify2FA(APIView):
-	permission_classes = [AllowAny]
-	def post(self, request):
+@csrf_exempt
+def verify2FA(request):
+	if request.method == 'POST':
 		data = request.data
 		username = data.get('username')
 		otp = data.get('otp')
@@ -185,55 +184,53 @@ class verify2FA(APIView):
 
 		if user is not None:
 			if (user.otp == otp and user.otp_expDate is not None and user.otp_expDate > timezone.now()):
-				refresh = RefreshToken.for_user(user)
-				return Response({
+				token = create_jwt_token(user)
+				return JsonResponse({
+						'status': 'success',
 						'message': 'Logged in successfully!',
-						'access': str(refresh.access_token),
+						'access': token,
+						status=200
 					})
 			else:
-				return Response({'status': 'error', 'message': 'Expired code'})
+				return JsonResponse({'status': 'error', 'message': 'Expired code', status=400})
 		else:
-			return Response({'status': 'error', 'message': 'Invalid code'})
+			return JsonResponse({'status': 'error', 'message': 'Invalid code', status=400})
+	return JsonResponse({'status': 'error', 'message': 'Invalid request method', status=400})
 
-				
-class Home(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def get(self, request):
+def Home(request):
+    if request.method == 'GET':
         content = {'message': 'Welcome to the home page!', 'username': request.user.username}
-        return Response(content)
+        return JsonResponse(content)
+	return JsonResponse({'status': 'error', 'message': 'Invalid request method', status=400})
 
-class Profile(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def get(self, request):
+def Profile(request):
+    if request.method == 'GET':
         user = request.user
         content = {'username': user.username, 'email': user.email, 'tfa': user.tfa, 'avatar': user.avatar.url if user.avatar else None,}
 #'lang': request.user.lang,
 #'game_stats': request.user.game_stats,
 #'tournament_stats': request.user.tournament_stats
-        return Response(content)
+        return JsonResponse(content)
+	return JsonResponse({'status': 'error', 'message': 'Invalid request method', status=400})
 
 # View needed to edit the User's information. Auto-fills the current user's info, when new data
 # is entered, checks if it is valid (passes check for characters and if it's repeated or not).
 
-class	EditProfile(APIView):
-	permission_classes = [IsAuthenticated]
-
-	def put(self, request):
+def	EditProfile(request):
+	if request.method == 'PUT':
 		user = request.user
 		data = request.data
 
 		try:
 		# Do we need to check if the info entered is correct like in the front end?
-			user.username = request.POST.get('username', user.username)
+			user.username = request.PUT.get('username', user.username)
 			if CustomUser.objects.filter(username=user.username).exclude(id=user.id).exists():
-				return Response({'status': 'error', 'message': 'Username in use'})
-			if request.POST.get('twofa', user.tfa) == 'on':
+				return JsonResponse({'status': 'error', 'message': 'Username in use', status=400})
+			if request.PUT.get('twofa', user.tfa) == 'on':
 				user.tfa = True
 			else:
 				user.tfa = False 
-			if request.POST.get('password'):
+			if request.PUT.get('password'):
 				user.set_password(data.get('password'))
 			if 'avatar' in request.FILES:
 				avatar = request.FILES['avatar']
@@ -242,12 +239,13 @@ class	EditProfile(APIView):
 				else:
 					user.avatar = avatar
 			user.save()
-			return Response({'status': 'success', 'message': 'Profile updated successfully!'})
+			return JsonResponse({'status': 'success', 'message': 'Profile updated successfully!', status=200})
 		except IntegrityError as e:
-			return Response({'status': 'error', 'message': 'Username in use'})
+			return JsonResponse({'status': 'error', 'message': 'Username in use', status=400})
 		except ValidationError as e:
-			return Response({'status': 'error', 'message': 'File is empty'})
-		return Response({'status': 'error', 'message': 'An error ocurred'})
+			return JsonResponse({'status': 'error', 'message': 'File is empty,', status=400})
+		return JsonResponse({'status': 'error', 'message': 'An error ocurred', status=400})
+	return JsonResponse({'error': 'Invalid request method', status=400})
 
 
 class authSettings(APIView):
