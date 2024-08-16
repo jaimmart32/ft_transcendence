@@ -205,14 +205,9 @@ def verify2FA(request):
 				return JsonResponse({
 						'status': 'success',
 						'message': 'Logged in successfully!',
-<<<<<<< HEAD
 						'access': token},
 						status=200
 					)
-=======
-						'access': token,
-						}, status=200)
->>>>>>> 8f57a8cac34531004aeb015ab1e377831c233142
 			else:
 				return JsonResponse({'status': 'error', 'message': 'Expired code'}, status=400)
 		else:
@@ -224,11 +219,7 @@ def verify2FA(request):
 def Home(request):
 	if request.method == 'GET':
 		content = {'message': 'Welcome to the home page!', 'username': request.user.username}
-<<<<<<< HEAD
-		return JsonResponse(content)
-=======
 		return JsonResponse(content, status=200)
->>>>>>> 8f57a8cac34531004aeb015ab1e377831c233142
 	return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
 
 
@@ -237,16 +228,9 @@ def Profile(request):
 	if request.method == 'GET':
 		user = request.user
 		content = {'username': user.username, 'email': user.email, 'tfa': user.tfa, 'avatar': user.avatar.url if user.avatar else None,}
-<<<<<<< HEAD
-#'lang': request.user.lang,
-#'game_stats': request.user.game_stats,
-#'tournament_stats': request.user.tournament_stats
-		return JsonResponse(content)
-=======
 #'game_stats': request.user.game_stats,
 #'tournament_stats': request.user.tournament_stats
 		return JsonResponse(content, status=200)
->>>>>>> 8f57a8cac34531004aeb015ab1e377831c233142
 	return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
 
 # View needed to edit the User's information. Auto-fills the current user's info, when new data
@@ -264,11 +248,7 @@ def	EditProfile(request):
 			user.username = request.POST.get('username', user.username)
 			if CustomUser.objects.filter(username=user.username).exclude(id=user.id).exists():
 				return JsonResponse({'status': 'error', 'message': 'Username in use'}, status=400)
-<<<<<<< HEAD
-			if request.PUT.get('twofa', user.tfa) == 'on':
-=======
 			if request.POST.get('twofa', user.tfa) == 'on':
->>>>>>> 8f57a8cac34531004aeb015ab1e377831c233142
 				user.tfa = True
 			else:
 				user.tfa = False 
@@ -285,15 +265,9 @@ def	EditProfile(request):
 		except IntegrityError as e:
 			return JsonResponse({'status': 'error', 'message': 'Username in use'}, status=400)
 		except ValidationError as e:
-<<<<<<< HEAD
-			return JsonResponse({'status': 'error', 'message': 'File is empty,'}, status=400)
-		return JsonResponse({'status': 'error', 'message': 'An error ocurred'}, status=400)
-	return JsonResponse({'error': 'Invalid request method'}, status=400)
-=======
 			return JsonResponse({'status': 'error', 'message': 'File is empty'}, status=400)
 		return JsonResponse({'status': 'error', 'message': 'An error ocurred'}, status=400)
 	return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
->>>>>>> 8f57a8cac34531004aeb015ab1e377831c233142
 
 
 @csrf_exempt
@@ -364,20 +338,6 @@ def authCreateUser(request):
 	return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
 
 
-<<<<<<< HEAD
-def profile42(request):
-	access_token = request.session.get('access_token')
-	if not access_token:
-		return redirect('index')
-
-	user_info_response = requests.get(USER_INFO_URL, headers={
-		'Authorization': f'Bearer {access_token}'
-	}).json()
-
-	return JsonResponse(user_info_response)
-
-=======
->>>>>>> 8f57a8cac34531004aeb015ab1e377831c233142
 # FRIENDS
 
 @jwt_required
