@@ -11,9 +11,9 @@ services:
         image: postgres:13
         container_name: db
         environment:
-            POSTGRES_DB: PGdatabase
-            POSTGRES_USER: PGuser
-            POSTGRES_PASSWORD: PGpassword
+            - POSTGRES_DB=PGdatabase
+            - POSTGRES_USER=PGuser
+            - POSTGRES_PASSWORD=PGpassword
         ports:
             - '5432:5432'
         networks:
@@ -28,9 +28,9 @@ services:
         ports:
             - '8000:8000'
         environment:
-            - POSTGRES_DB=${POSTGRES_DB}
-            - POSTGRES_USER=${POSTGRES_USER}
-            - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+             POSTGRES_DB: ${POSTGRES_DB}
+             POSTGRES_USER: ${POSTGRES_USER}
+             POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
         depends_on:
             - db
         networks:

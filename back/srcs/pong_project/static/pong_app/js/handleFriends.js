@@ -4,12 +4,13 @@ function loadFriendsSection()
 
 	if (token)
 	{
-		fetch('/friends/', {
+		fetch('/friends/',
+		{
 			method: 'GET',
-			headers: {
+			headers:
+			{
 				'Authorization': `Bearer ${token}`,
 				'Content-Type': 'application/json'
-
 			}
 		})
 		.then(response => response.json())
@@ -55,17 +56,21 @@ function loadFriendsSection()
 function addFriend(username)
 {
 	const token = localStorage.getItem('access');
-	if (token) {
-		fetch('/friends/add/', {
+	if (token)
+	{
+		fetch('/friends/add/',
+		{
 			method: 'POST',
-			headers: {
+			headers:
+			{
 				'Authorization': `Bearer ${token}`,
 				'Content-Type': 'application/json'
 			},
 			body: JSON.stringify({friend_username: username})
 		})
 		.then(response => response.json())
-		.then(data => {
+		.then(data =>
+		{
 			alert(data.message);
 			loadFriendsSection();
 		})
@@ -76,17 +81,21 @@ function addFriend(username)
 function removeFriend(username)
 {
 	const token = localStorage.getItem('access');
-	if (token) {
-		fetch('/friends/remove/', {
+	if (token)
+	{
+		fetch('/friends/remove/',
+		{
 			method: 'POST',
-			headers: {
+			headers:
+			{
 				'Authorization': `Bearer ${token}`,
 				'Content-Type': 'application/json'
 			},
 			body: JSON.stringify({friend_username: username})
 		})
 		.then(response => response.json())
-		.then(data => {
+		.then(data =>
+		{
 			alert(data.message);
 			loadFriendsSection();
 		})

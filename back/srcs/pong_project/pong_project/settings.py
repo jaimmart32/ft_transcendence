@@ -98,9 +98,12 @@ ASGI_APPLICATION = 'pong_project.asgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('POSTGRES_DB'),
-        'USER': os.getenv('POSTGRES_USER'),
-        'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
+        'NAME': 'PGdatabase',
+        'USER': 'PGuser',
+        'PASSWORD': 'PGpassword',
+        #'NAME': os.getenv('POSTGRES_DB'),
+        #'USER': os.getenv('POSTGRES_USER'),
+        #'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
         'HOST': 'db',
         'PORT': '5432',
     }

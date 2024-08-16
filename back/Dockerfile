@@ -31,10 +31,10 @@ COPY ./srcs .
 COPY wait-for-it.sh /app/wait-for-it.sh
 RUN chmod +x /app/wait-for-it.sh
 
+COPY script.sh /app/script.sh
+RUN chmod +x /app/script.sh
+
 # Wait for db, then make migrations
-RUN sleep 90; \
-    python pong_project/manage.py makemigrations; \
-    python pong_project/manage.py migrate
 
 # Create superuser
 COPY create_superuser.py .
@@ -42,6 +42,5 @@ ENV DJANGO_SUPERUSER_USERNAME=admin
 ENV DJANGO_SUPERUSER_EMAIL=admin@example.com
 ENV DJANGO_SUPERUSER_PASSWORD=adminpass
 ENV PYTHONPATH=/app/pong_project
-RUN python create_superuser.py
 
-CMD ["python", "pong_project/manage.py", "runserver", "0.0.0.0:8000"] 
+ENTRYPOINT ["/app/script.sh"]
