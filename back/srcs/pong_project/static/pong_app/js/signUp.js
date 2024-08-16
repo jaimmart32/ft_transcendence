@@ -48,6 +48,8 @@ function signUpHandler()
                     console.error('Error:', error);
                 });
 	    }
+	    else
+	    	console.log('Non-valid credentials');
         });
     }
     else

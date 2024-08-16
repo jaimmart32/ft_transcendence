@@ -30,10 +30,8 @@ function logInHandler()
 		{
                     if (data.status === 'success')
 		    {
-		    	console.log('Inside success');
 			if (data.message === 'Verification code sent')
 			{
-				console.log('Inside the verification code sent');
 				code = prompt('Enter the verification code: ');
 				if (handle2FA(code))
 				{
@@ -51,7 +49,6 @@ function logInHandler()
 			else
 			{
 				localStorage.setItem('access', data.access);
-				localStorage.setItem('refresh', data.refresh);
 				alert('Log in successful!');
 				navigateTo('/home');
 			}
@@ -107,7 +104,6 @@ function handle2FA(code)
 	    if (data.status === 'success')
 	    {
 		localStorage.setItem('access', data.access);
-		localStorage.setItem('refresh', data.refresh);
 		alert('Log in successful!');
 		navigateTo('/home');
 		return (true);
