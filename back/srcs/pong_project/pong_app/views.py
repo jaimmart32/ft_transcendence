@@ -29,6 +29,21 @@ def main_view(request):
 			return render(request, 'pong_app/index.html')
 	return render(request, "pong_app/index.html")
 
+# This is a protection that will be used for almost all views after logging into the application
+# It will be used as decorator on top of the views
+@csrf_exempt
+def jwt_required(viewFunction):
+	def wrapper(request, *args, **kwargs):
+		auth_header = request.headers.get('Authorization')
+		if auth_header and auth_header.startswith('Bearer '):
+			token = 
+			user = get_user_from_jwt(token)
+			if user:
+				request.user = user
+				return viewFunction(request, *args, **kwargs)
+			return JsonResponse({'status': 'error', 'message': 'Unauthorized'}, status=401)
+	return wrapper
+
 # This view is in charge of checking the token received, if the token is valid and the user exists,
 # it will generate a new token for the user.
 @csrf_exempt
@@ -38,10 +53,10 @@ def refreshView(request):
 		user = get_user_from_jwt(token)
 		if user:
 			new_token = create_jwt_token(user)
-			return JsonResponse({'token': new_token, status=200})
+			return JsonResponse({'status': 'success', 'token': new_token, status=200})
 		else:
-			return JsonResponse({'error': 'Invalid or expired token', status=401})
-	return JsonResponse({'error': 'Invalid request method', status=400})
+			return JsonResponse({'status': 'error', 'message': 'Invalid or expired token', status=401})
+	return JsonResponse({'status': 'error', 'message': 'Invalid request method', status=400})
 
 @csrf_exempt
 class signupClass(APIView):
@@ -58,13 +73,13 @@ class signupClass(APIView):
 			validateEmail(email)
 			validatePassword(password)
 		except ValidationError as e:
-			return Response({'status': 'error', 'message': str(e)})
+			return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
 		if not password == confPass:
-			return Response({'status': 'error', 'message': 'Invalid password confirmation'})
+			return JsonResponse({'status': 'error', 'message': 'Invalid password confirmation'}, status=400)
 		if CustomUser.objects.filter(username=username).exists():
-			return Response({'status': 'error', 'message': 'Username already in use'})
+			return JsonResponse({'status': 'error', 'message': 'Username already in use'}, status=400)
 		if CustomUser.objects.filter(email=email).exists():
-			return Response({'status': 'error', 'message': 'Email already in use'})
+			return JsonResponse({'status': 'error', 'message': 'Email already in use'}, status=400)
 		# Create the user after passing all the requirements	
 		user = CustomUser.objects.create_user(username, email=email)
 		user.is_active = False 
@@ -89,8 +104,9 @@ class signupClass(APIView):
 		smtp_connection.send_message(message)
 		smtp_connection.quit()
 
-		return Response({'status': 'success', 'message': 'User created succesfully!'})
+		return JsonResponse({'status': 'success', 'message': 'User created succesfully!'}, status=200)
 
+@csrf_exempt
 class ActivateAccountView(APIView):
 	permission_classes = [AllowAny]
 	def get(self, request, uidb64, token):
@@ -113,22 +129,20 @@ class ActivateAccountView(APIView):
 			return redirect(f'http://{settings.HOST}:8000')
 
 @csrf_exempt
-class loginClass(APIView):
-	permission_classes = [AllowAny]
-	def post(self, request):
-		data = request.data
-		username = data.get('username')
-		password = data.get('password')
+def loginClass(request):
+	if request.method == 'POST':
+		username = request.POST.get('username')
+		password = request.POST.get('password')
 
 		try:
 			user = CustomUser.objects.get(username=username)
 		except CustomUser.DoesNotExist:
-			return Response({ 'status': 'error', 'message': 'Invalid username'})
+			return JsonResponse({'error': 'Invalid username', status=401})
 
 		# Check the attribute is_active, if it's false, means the user has not verified
 		# their email
 		if user.is_active is False:
-			return Response({'status': 'error', 'message': 'Email not verified'})
+			return JsonResponse({'error': 'Email not verified', status=401})
 
 		# The password is correct
 		if user.check_password(password + settings.PEPPER):
@@ -151,13 +165,13 @@ class loginClass(APIView):
 				smtp_connection.send_message(message)
 				smtp_connection.quit()
 
-				return Response({'status': 'success', 'message': 'Verification code sent'})
+				return JsonResponse({'status': 'success', 'message': 'Verification code sent'}, status=200)
 			token = create_jwt_token(user)
 			return JsonResponse({
 					'message': 'Logged in successfully!',
-					'access': token, status=200})
+					'access': token}, status=200)
 		else:
-			return JsonResponse({'error': 'Invalid credentials', status=401})
+			return JsonResponse({'status': 'error', 'message': 'Invalid credentials'}, status=401)
 
 
 class verify2FA(APIView):
@@ -173,10 +187,8 @@ class verify2FA(APIView):
 			if (user.otp == otp and user.otp_expDate is not None and user.otp_expDate > timezone.now()):
 				refresh = RefreshToken.for_user(user)
 				return Response({
-						'status': 'success',
 						'message': 'Logged in successfully!',
 						'access': str(refresh.access_token),
-						'refresh': str(refresh)
 					})
 			else:
 				return Response({'status': 'error', 'message': 'Expired code'})
