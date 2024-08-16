@@ -184,13 +184,9 @@ def loginView(request):
 					'message': 'Logged in successfully!',
 					'access': token}, status=200)
 		else:
-<<<<<<< HEAD
-			return JsonResponse({'error': 'Invalid credentials'}, status=401)
-=======
 			return JsonResponse({'status': 'error', 'message': 'Invalid credentials'}, status=401)
 	return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
 
->>>>>>> 8f57a8cac34531004aeb015ab1e377831c233142
 
 @csrf_exempt
 def verify2FA(request):
