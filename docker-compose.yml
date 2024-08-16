@@ -7,6 +7,18 @@ services:
 #        volumes:
 #            - transcendence:/app
 #        container_name: front
+    db:
+        image: postgres:13
+        container_name: db
+        environment:
+            POSTGRES_DB: PGdatabase
+            POSTGRES_USER: PGuser
+            POSTGRES_PASSWORD: PGpassword
+        ports:
+            - '5432:5432'
+        networks:
+            - app-network
+
     back:
         build:
             context: ./back/
@@ -21,16 +33,10 @@ services:
             - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
         depends_on:
             - db
+        networks:
+            - app-network
     
-    db:
-        image: postgres:13
-        container_name: db
-        environment:
-            POSTGRES_DB: PGdatabase
-            POSTGRES_USER: PGuser
-            POSTGRES_PASSWORD: PGpassword
-        ports:
-            - '5432:5432'
+
 
 
 volumes:
@@ -40,3 +46,7 @@ volumes:
            type: none
            o: bind
            device: ~/sgoinfre/transcendence
+
+networks:
+    app-network:
+        driver: bridge

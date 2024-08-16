@@ -32,7 +32,7 @@ COPY wait-for-it.sh /app/wait-for-it.sh
 RUN chmod +x /app/wait-for-it.sh
 
 # Wait for db, then make migrations
-RUN /app/wait-for-it.sh db:5432 -- \
+RUN sleep 90; \
     python pong_project/manage.py makemigrations; \
     python pong_project/manage.py migrate
 
