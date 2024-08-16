@@ -73,7 +73,6 @@ function loadProfileSettings(user_content)
 
 function updateUserInfo()
 {
-//	event.preventDefault();
 
 	const token = localStorage.getItem('access');
 
@@ -84,9 +83,6 @@ function updateUserInfo()
 		twofa = document.getElementById('twofa').value;
 		const form = document.getElementById('profile-settings');
 		const formData = new FormData(form);
-
-
-//			lang: document.getElementById('lang').value,
 
 		const userPic = document.getElementById('avatar').files[0];
 		if (userPic)

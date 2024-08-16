@@ -5,7 +5,10 @@ from django.db import IntegrityError
 from django.core.exceptions import ValidationError
 import requests
 import os
+
+from http import HTTPStatus
 from django.http import HttpResponse, JsonResponse
+
 from django.contrib.auth import authenticate, login, logout
 
 from .models import CustomUser
@@ -23,31 +26,50 @@ from django.views.decorators.csrf import csrf_exempt
 
 # Create your views here.
 
+@csrf_exempt
 def main_view(request):
+
 	if not request.user.is_authenticated:
 		if request.method == 'GET':
 			return render(request, 'pong_app/index.html')
 	return render(request, "pong_app/index.html")
 
+# This is a protection that will be used for almost all views after logging into the application
+# It will be used as decorator on top of the views
+@csrf_exempt
+def jwt_required(viewFunction):
+
+	def wrapper(request, *args, **kwargs):
+		auth_header = request.headers.get('Authorization')
+		if auth_header and auth_header.startswith('Bearer '):
+			token = auth_header.split(' ')[1]
+			user = get_user_from_jwt(token)
+			if user:
+				request.user = user
+				return viewFunction(request, *args, **kwargs)
+			return JsonResponse({'status': 'error', 'message': 'Unauthorized'}, status=401)
+	return wrapper
+
 # This view is in charge of checking the token received, if the token is valid and the user exists,
 # it will generate a new token for the user.
 @csrf_exempt
 def refreshView(request):
+
 	if request.method == 'POST':
 		token = request.POST.get('token')
 		user = get_user_from_jwt(token)
 		if user:
 			new_token = create_jwt_token(user)
-			return JsonResponse({'token': new_token}, status=200)
+			return JsonResponse({'status': 'success', 'token': new_token}, status=200)
 		else:
-			return JsonResponse({'error': 'Invalid or expired token'}, status=401)
-	return JsonResponse({'error': 'Invalid request method'}, status=400)
+			return JsonResponse({'status': 'error', 'message': 'Invalid or expired token'}, status=401)
+	return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
 
 @csrf_exempt
-class signupClass(APIView):
-	permission_classes = [AllowAny]
-	def post (self, request):
-		data = request.data
+def signupView(request):
+
+	if request.method == 'POST':
+		data = json.loads(request.body)
 		username = data.get('username')
 		email = data.get('email')
 		password = data.get('password')
@@ -58,13 +80,13 @@ class signupClass(APIView):
 			validateEmail(email)
 			validatePassword(password)
 		except ValidationError as e:
-			return Response({'status': 'error', 'message': str(e)})
+			return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
 		if not password == confPass:
-			return Response({'status': 'error', 'message': 'Invalid password confirmation'})
+			return JsonResponse({'status': 'error', 'message': 'Invalid password confirmation'}, status=400)
 		if CustomUser.objects.filter(username=username).exists():
-			return Response({'status': 'error', 'message': 'Username already in use'})
+			return JsonResponse({'status': 'error', 'message': 'Username already in use'}, status=400)
 		if CustomUser.objects.filter(email=email).exists():
-			return Response({'status': 'error', 'message': 'Email already in use'})
+			return JsonResponse({'status': 'error', 'message': 'Email already in use'}, status=400)
 		# Create the user after passing all the requirements	
 		user = CustomUser.objects.create_user(username, email=email)
 		user.is_active = False 
@@ -89,13 +111,15 @@ class signupClass(APIView):
 		smtp_connection.send_message(message)
 		smtp_connection.quit()
 
-		return Response({'status': 'success', 'message': 'User created succesfully!'})
+		return JsonResponse({'status': 'success', 'message': 'User created succesfully!'}, status=200)
 
-class ActivateAccountView(APIView):
-	permission_classes = [AllowAny]
-	def get(self, request, uidb64, token):
+
+@csrf_exempt
+def ActivateAccountView(request, uidb64, token):
+
+	if request.method == 'GET':
 		try:
-				# Decode the user ID from the URL
+			# Decode the user ID from the URL
 			uid = force_str(urlsafe_base64_decode(uidb64))
 			user = CustomUser.objects.get(pk=uid)
 		except (TypeError, ValueError, OverflowError, CustomUser.DoesNotExist):
@@ -111,24 +135,26 @@ class ActivateAccountView(APIView):
 		else:
 					# Render a template with an error message if the token is invalid
 			return redirect(f'http://{settings.HOST}:8000')
+	return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
+
 
 @csrf_exempt
-class loginClass(APIView):
-	permission_classes = [AllowAny]
-	def post(self, request):
-		data = request.data
+def loginView(request):
+
+	if request.method == 'POST':
+		data = json.loads(request.body)
 		username = data.get('username')
 		password = data.get('password')
 
 		try:
 			user = CustomUser.objects.get(username=username)
 		except CustomUser.DoesNotExist:
-			return Response({ 'status': 'error', 'message': 'Invalid username'})
+			return JsonResponse({'error': 'Invalid username'}, status=401)
 
 		# Check the attribute is_active, if it's false, means the user has not verified
 		# their email
 		if user.is_active is False:
-			return Response({'status': 'error', 'message': 'Email not verified'})
+			return JsonResponse({'error': 'Email not verified'}, status=401)
 
 		# The password is correct
 		if user.check_password(password + settings.PEPPER):
@@ -151,21 +177,26 @@ class loginClass(APIView):
 				smtp_connection.send_message(message)
 				smtp_connection.quit()
 
-				return Response({'status': 'success', 'message': 'Verification code sent'})
+				return JsonResponse({'status': 'success', 'message': 'Verification code sent'}, status=200)
 			token = create_jwt_token(user)
 			return JsonResponse({
+					'status': 'success',
 					'message': 'Logged in successfully!',
 					'access': token}, status=200)
 		else:
+<<<<<<< HEAD
 			return JsonResponse({'error': 'Invalid credentials'}, status=401)
+=======
+			return JsonResponse({'status': 'error', 'message': 'Invalid credentials'}, status=401)
+	return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
+
+>>>>>>> 8f57a8cac34531004aeb015ab1e377831c233142
 
 @csrf_exempt
 def verify2FA(request):
 	if request.method == 'POST':
-		data = request.data
-		username = data.get('username')
-		otp = data.get('otp')
-
+		username = request.POST.get('username')
+		otp = request.POST.get('otp')
 		user = CustomUser.objects.get(username=username)
 
 		if user is not None:
@@ -174,52 +205,77 @@ def verify2FA(request):
 				return JsonResponse({
 						'status': 'success',
 						'message': 'Logged in successfully!',
+<<<<<<< HEAD
 						'access': token},
 						status=200
 					)
+=======
+						'access': token,
+						}, status=200)
+>>>>>>> 8f57a8cac34531004aeb015ab1e377831c233142
 			else:
 				return JsonResponse({'status': 'error', 'message': 'Expired code'}, status=400)
 		else:
 			return JsonResponse({'status': 'error', 'message': 'Invalid code'}, status=400)
 	return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
 
+
+@jwt_required
 def Home(request):
 	if request.method == 'GET':
 		content = {'message': 'Welcome to the home page!', 'username': request.user.username}
+<<<<<<< HEAD
 		return JsonResponse(content)
+=======
+		return JsonResponse(content, status=200)
+>>>>>>> 8f57a8cac34531004aeb015ab1e377831c233142
 	return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
 
+
+@jwt_required
 def Profile(request):
 	if request.method == 'GET':
 		user = request.user
 		content = {'username': user.username, 'email': user.email, 'tfa': user.tfa, 'avatar': user.avatar.url if user.avatar else None,}
+<<<<<<< HEAD
 #'lang': request.user.lang,
 #'game_stats': request.user.game_stats,
 #'tournament_stats': request.user.tournament_stats
 		return JsonResponse(content)
+=======
+#'game_stats': request.user.game_stats,
+#'tournament_stats': request.user.tournament_stats
+		return JsonResponse(content, status=200)
+>>>>>>> 8f57a8cac34531004aeb015ab1e377831c233142
 	return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
 
 # View needed to edit the User's information. Auto-fills the current user's info, when new data
 # is entered, checks if it is valid (passes check for characters and if it's repeated or not).
 
+
+@csrf_exempt
+@jwt_required
 def	EditProfile(request):
 	if request.method == 'PUT':
 		user = request.user
-		data = request.data
 
 		try:
 		# Do we need to check if the info entered is correct like in the front end?
-			user.username = request.PUT.get('username', user.username)
+			user.username = request.POST.get('username', user.username)
 			if CustomUser.objects.filter(username=user.username).exclude(id=user.id).exists():
 				return JsonResponse({'status': 'error', 'message': 'Username in use'}, status=400)
+<<<<<<< HEAD
 			if request.PUT.get('twofa', user.tfa) == 'on':
+=======
+			if request.POST.get('twofa', user.tfa) == 'on':
+>>>>>>> 8f57a8cac34531004aeb015ab1e377831c233142
 				user.tfa = True
 			else:
 				user.tfa = False 
-			if request.PUT.get('password'):
-				user.set_password(data.get('password'))
+			if request.POST.get('password'):
+				user.set_password(request.POST.get('password'))
 			if 'avatar' in request.FILES:
-				avatar = request.FILES['avatar']
+				avatar = request.FILES.get('avatar')
 				if avatar.size == 0:
 					raise ValidationError("The uploaded file is empty!")
 				else:
@@ -229,15 +285,21 @@ def	EditProfile(request):
 		except IntegrityError as e:
 			return JsonResponse({'status': 'error', 'message': 'Username in use'}, status=400)
 		except ValidationError as e:
+<<<<<<< HEAD
 			return JsonResponse({'status': 'error', 'message': 'File is empty,'}, status=400)
 		return JsonResponse({'status': 'error', 'message': 'An error ocurred'}, status=400)
 	return JsonResponse({'error': 'Invalid request method'}, status=400)
+=======
+			return JsonResponse({'status': 'error', 'message': 'File is empty'}, status=400)
+		return JsonResponse({'status': 'error', 'message': 'An error ocurred'}, status=400)
+	return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
+>>>>>>> 8f57a8cac34531004aeb015ab1e377831c233142
 
 
-class authSettings(APIView):
+@csrf_exempt
+def  authSettings(request):
 
-	permission_classes = [AllowAny]
-	def get(self, request):
+	if request.method == 'GET':
 		data = {
 			'status': 'success',
 			'client_id': settings.CLIENT_ID,
@@ -245,15 +307,17 @@ class authSettings(APIView):
 			'auth_endpoint': settings.AUTH_ENDPOINT,
 			'scope': settings.SCOPE,
 		}
-		return Response(data)
+		return JsonResponse(data, status=200)
+	return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
 
-class authVerify(APIView):
+
+@csrf_exempt
+def authVerify(request):
 	
-	permission_classes = [AllowAny]
-	def post(self, request):
-		code = request.data.get('code')
+	if request.method == 'POST':
+		code = request.POST.get('code')
 		if not code:
-			return Response({'status': 'error', 'message': 'No code provided'})
+			return JsonResponse({'status': 'error', 'message': 'No code provided'}, status=400)
 		tokenResponse = requests.post(settings.TOKEN_URL, data=
 		{
 			'grant_type': 'authorization_code',
@@ -265,38 +329,42 @@ class authVerify(APIView):
 		tokenData = tokenResponse.json()
 		accessToken = tokenData.get('access_token')
 		if not accessToken:
-			return Response({'status': 'error', 'message': 'No access token was found'})
+			return JsonResponse({'status': 'error', 'message': 'No access token was found'}, status=400)
 		userResponse = requests.get(settings.USER_INFO_URL, headers=
 		{
 			'Authorization': f'Bearer {accessToken}'
 		})
 		if userResponse.status_code != 200:
-			return Response({'status': 'error', 'message': 'Could not retrieve the user data'})
+			return JsonResponse({'status': 'error', 'message': 'Could not retrieve the user data'}, status=400)
 		userInfo = userResponse.json()
-		return Response({'status': 'success', 'userInfo': userInfo}, status=200)
+		return JsonResponse({'status': 'success', 'userInfo': userInfo}, status=200)
+	return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
 
-class authCreateUser(APIView):
+
+@csrf_exempt
+def authCreateUser(request):
 	
-	permission_classes = [AllowAny]
-	def post(self, request):
-		userInfo = request.data.get('userInfo')
+	if request.method == 'POST':
+		userInfo = request.POST.get('userInfo')
 		if not userInfo:
-			return Response({'status': 'error', 'message': 'No user information'})
+			return JsonResponse({'status': 'error', 'message': 'No user information'}, status=401)
 		username = "ft_" + userInfo['login']
 		email = userInfo['email']
 		password = ""
 		if CustomUser.objects.filter(username=username).exists():
-			return Response({'status': 'error', 'message': 'Username already in use'})
+			return JsonResponse({'status': 'error', 'message': 'Username already in use'}, status=400)
 		if CustomUser.objects.filter(email=email).exists():
-			return Response({'status': 'error', 'message': 'Email already in use'})
+			return JsonResponse({'status': 'error', 'message': 'Email already in use'}, status=400)
 		user = CustomUser.objects.create_user(username, email=email, password=password)
 		# Could use the CustomUser.objects.get_or_create() and later check if the user exists 
-		refresh = RefreshToken.for_user(user)
+		token = create_jwt_token(user)
 
-		redirect_url = f"http://{settings.HOST}:8000?access={refresh.access_token}&refresh={refresh}"
-		return Response({'status': 'success', 'redirect_url': redirect_url}, status=200)
+		redirect_url = f"http://{settings.HOST}:8000?access={token}"
+		return JsonResponse({'status': 'success', 'redirect_url': redirect_url}, status=200)
+	return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
 
 
+<<<<<<< HEAD
 def profile42(request):
 	access_token = request.session.get('access_token')
 	if not access_token:
@@ -308,66 +376,72 @@ def profile42(request):
 
 	return JsonResponse(user_info_response)
 
+=======
+>>>>>>> 8f57a8cac34531004aeb015ab1e377831c233142
 # FRIENDS
 
-class FriendsList(APIView):
-	permission_classes = [IsAuthenticated]
+@jwt_required
+def FriendsList(request):
 
-	def get(self, request):
+	if request.method == 'GET':
 		user = request.user
 		friends = user.friends.all()
 		friends_data = [{'username': friend.username, 'online': friend.is_active} for friend in friends]
-		return Response(friends_data)
+		return JsonResponse(friends_data, status=200)
+	return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
 
-class AddFriend(APIView):
-	permission_classes = [IsAuthenticated]
 
-	def post(self, request):
+@jwt_required
+def AddFriend(request):
+
+	if request.method == 'POST':
 		user = request.user
-		friend_username = request.data.get('friend_username')
+		friend_username = request.POST.get('friend_username')
 		try:
 			friend = CustomUser.objects.get(username=friend_username)
 			user.friends.add(friend)
-			return Response({'status': 'success', 'message': f'{friend_username} added as a friend'})
+			return JsonResponse({'status': 'success', 'message': f'{friend_username} added as a friend'}, status=200)
 		except CustomUser.DoesNotExist:
-			return Response({'status': 'error', 'message': 'User not found'}, status=404)
+			return JsonResponse({'status': 'error', 'message': 'User not found'}, status=404)
+	return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
 
-class RemoveFriend(APIView):
-	permission_classes = [IsAuthenticated]
 
-	def post(self, request):
+@jwt_required
+def RemoveFriend(request):
+
+	if request.method == 'POST':
 		user = request.user
-		friend_username = request.data.get('friend_username')
+		friend_username = request.POST.get('friend_username')
 		try:
 			friend = CustomUser.objects.get(username=friend_username)
 			user.friends.remove(friend)
-			return Response({'status': 'success', 'message': f'{friend_username} removed from friends'})
+			return JsonResponse({'status': 'success', 'message': f'{friend_username} removed from friends'}, status=200)
 		except CustomUser.DoesNotExist:
-			return Response({'status': 'error', 'message': 'User not found'}, status=404)
+			return JsonResponse({'status': 'error', 'message': 'User not found'}, status=404)
+	return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
 
 
 
 def outOfBounds(yPosition, player, board):
 		return yPosition < 0 or yPosition + player > board
 
-class Move(APIView):
-	permission_classes = [AllowAny]
-	def post(self, request):   
-		player1 = request.data.get("Player1")
-		key = request.data.get('key')
-		player2 = request.data.get("Player2")
-		key = request.data.get("key")
-		speed1 = request.data.get("speed1")
-		speed2 = request.data.get("speed2")
+def Move(request):
+	if request.method == 'POST':
+		player1 = request.POST.get('Player1')
+		key = request.POST.get('key')
+		player2 = request.POST.get('Player2')
+		key = request.POST.get('key')
+		speed1 = request.POST.get('speed1')
+		speed2 = request.POST.get('speed2')
 		# player 1
-		if key == "KeyW":
+		if key == 'KeyW':
 			speed1 = -3
-		elif key == "KeyS":
+		elif key == 'KeyS':
 			speed1 = 3
 		# player 2
-		elif key == "ArrowUp":
+		elif key == 'ArrowUp':
 			speed2 = -3
-		elif key == "ArrowDown":
+		elif key == 'ArrowDown':
 			speed2 = 3
 		try:
 			speed1 = int(speed1)
