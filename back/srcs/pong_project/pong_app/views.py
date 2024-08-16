@@ -38,10 +38,10 @@ def refreshView(request):
 		user = get_user_from_jwt(token)
 		if user:
 			new_token = create_jwt_token(user)
-			return JsonResponse({'token': new_token, status=200})
+			return JsonResponse({'token': new_token}, status=200)
 		else:
-			return JsonResponse({'error': 'Invalid or expired token', status=401})
-	return JsonResponse({'error': 'Invalid request method', status=400})
+			return JsonResponse({'error': 'Invalid or expired token'}, status=401)
+	return JsonResponse({'error': 'Invalid request method'}, status=400)
 
 @csrf_exempt
 class signupClass(APIView):
@@ -106,10 +106,10 @@ class ActivateAccountView(APIView):
 		if user is not None and token_generator.check_token(user, token):
 			user.is_active = True
 			user.save()
-				    # Redirect to the login page or another page after successful activation
+					# Redirect to the login page or another page after successful activation
 			return redirect(f'http://{settings.HOST}:8000')
 		else:
-				    # Render a template with an error message if the token is invalid
+					# Render a template with an error message if the token is invalid
 			return redirect(f'http://{settings.HOST}:8000')
 
 @csrf_exempt
@@ -155,9 +155,9 @@ class loginClass(APIView):
 			token = create_jwt_token(user)
 			return JsonResponse({
 					'message': 'Logged in successfully!',
-					'access': token, status=200})
+					'access': token}, status=200)
 		else:
-			return JsonResponse({'error': 'Invalid credentials', status=401})
+			return JsonResponse({'error': 'Invalid credentials'}, status=401)
 
 @csrf_exempt
 def verify2FA(request):
@@ -174,30 +174,30 @@ def verify2FA(request):
 				return JsonResponse({
 						'status': 'success',
 						'message': 'Logged in successfully!',
-						'access': token,
+						'access': token},
 						status=200
-					})
+					)
 			else:
-				return JsonResponse({'status': 'error', 'message': 'Expired code', status=400})
+				return JsonResponse({'status': 'error', 'message': 'Expired code'}, status=400)
 		else:
-			return JsonResponse({'status': 'error', 'message': 'Invalid code', status=400})
-	return JsonResponse({'status': 'error', 'message': 'Invalid request method', status=400})
+			return JsonResponse({'status': 'error', 'message': 'Invalid code'}, status=400)
+	return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
 
 def Home(request):
-    if request.method == 'GET':
-        content = {'message': 'Welcome to the home page!', 'username': request.user.username}
-        return JsonResponse(content)
-	return JsonResponse({'status': 'error', 'message': 'Invalid request method', status=400})
+	if request.method == 'GET':
+		content = {'message': 'Welcome to the home page!', 'username': request.user.username}
+		return JsonResponse(content)
+	return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
 
 def Profile(request):
-    if request.method == 'GET':
-        user = request.user
-        content = {'username': user.username, 'email': user.email, 'tfa': user.tfa, 'avatar': user.avatar.url if user.avatar else None,}
+	if request.method == 'GET':
+		user = request.user
+		content = {'username': user.username, 'email': user.email, 'tfa': user.tfa, 'avatar': user.avatar.url if user.avatar else None,}
 #'lang': request.user.lang,
 #'game_stats': request.user.game_stats,
 #'tournament_stats': request.user.tournament_stats
-        return JsonResponse(content)
-	return JsonResponse({'status': 'error', 'message': 'Invalid request method', status=400})
+		return JsonResponse(content)
+	return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
 
 # View needed to edit the User's information. Auto-fills the current user's info, when new data
 # is entered, checks if it is valid (passes check for characters and if it's repeated or not).
@@ -211,7 +211,7 @@ def	EditProfile(request):
 		# Do we need to check if the info entered is correct like in the front end?
 			user.username = request.PUT.get('username', user.username)
 			if CustomUser.objects.filter(username=user.username).exclude(id=user.id).exists():
-				return JsonResponse({'status': 'error', 'message': 'Username in use', status=400})
+				return JsonResponse({'status': 'error', 'message': 'Username in use'}, status=400)
 			if request.PUT.get('twofa', user.tfa) == 'on':
 				user.tfa = True
 			else:
@@ -225,13 +225,13 @@ def	EditProfile(request):
 				else:
 					user.avatar = avatar
 			user.save()
-			return JsonResponse({'status': 'success', 'message': 'Profile updated successfully!', status=200})
+			return JsonResponse({'status': 'success', 'message': 'Profile updated successfully!'}, status=200)
 		except IntegrityError as e:
-			return JsonResponse({'status': 'error', 'message': 'Username in use', status=400})
+			return JsonResponse({'status': 'error', 'message': 'Username in use'}, status=400)
 		except ValidationError as e:
-			return JsonResponse({'status': 'error', 'message': 'File is empty,', status=400})
-		return JsonResponse({'status': 'error', 'message': 'An error ocurred', status=400})
-	return JsonResponse({'error': 'Invalid request method', status=400})
+			return JsonResponse({'status': 'error', 'message': 'File is empty,'}, status=400)
+		return JsonResponse({'status': 'error', 'message': 'An error ocurred'}, status=400)
+	return JsonResponse({'error': 'Invalid request method'}, status=400)
 
 
 class authSettings(APIView):
@@ -298,15 +298,15 @@ class authCreateUser(APIView):
 
 
 def profile42(request):
-    access_token = request.session.get('access_token')
-    if not access_token:
-        return redirect('index')
+	access_token = request.session.get('access_token')
+	if not access_token:
+		return redirect('index')
 
-    user_info_response = requests.get(USER_INFO_URL, headers={
-        'Authorization': f'Bearer {access_token}'
-    }).json()
+	user_info_response = requests.get(USER_INFO_URL, headers={
+		'Authorization': f'Bearer {access_token}'
+	}).json()
 
-    return JsonResponse(user_info_response)
+	return JsonResponse(user_info_response)
 
 # FRIENDS
 

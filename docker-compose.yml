@@ -15,6 +15,24 @@ services:
         container_name: back 
         ports:
             - '8000:8000'
+        environment:
+            - POSTGRES_DB=${POSTGRES_DB}
+            - POSTGRES_USER=${POSTGRES_USER}
+            - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+        depends_on:
+            - db
+    
+    db:
+        image: postgres:13
+        container_name: db
+        environment:
+            POSTGRES_DB: PGdatabase
+            POSTGRES_USER: PGuser
+            POSTGRES_PASSWORD: PGpassword
+        ports:
+            - '5432:5432'
+
+
 volumes:
      transcendence:
         driver: local

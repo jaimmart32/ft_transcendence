@@ -2,6 +2,11 @@ FROM python:3.9-slim
 
 WORKDIR /app
 
+# Install dependencies needed for psycopg2
+RUN apt-get update && apt-get install -y \
+    libpq-dev gcc python3-dev && \
+    apt-get clean
+
 COPY dfiles/requirements.txt .
 
 COPY .env .
@@ -23,7 +28,12 @@ EXPOSE 8000
 
 COPY ./srcs .
 
-RUN python pong_project/manage.py makemigrations; \
+COPY wait-for-it.sh /app/wait-for-it.sh
+RUN chmod +x /app/wait-for-it.sh
+
+# Wait for db, then make migrations
+RUN /app/wait-for-it.sh db:5432 -- \
+    python pong_project/manage.py makemigrations; \
     python pong_project/manage.py migrate
 
 # Create superuser
