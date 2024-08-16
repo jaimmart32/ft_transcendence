@@ -13,3 +13,8 @@ EMAIL_USE_TLS=True
 EMAIL_HOST='our-host-for-sending-the-mails'
 EMAIL_HOST_USER='our-awesome-email@gmail.com'
 EMAIL_HOST_PASSWORD='the-password-app-password-not-the-accounts'
+
+JWT_SECRET_JEY='Another-random-string-for-JWT-encoding'
+JWT_ALGORITHM='JWT-encoding/decoding-algorithm'
+JWT_EXPIRATION_DELTA=timedelta(amount-of-time-before-access-token-expires)
+JWT_REFRESH_EXPIRATION_DELTA=timedelta(amount-of-time-before-refresh-token-expires)

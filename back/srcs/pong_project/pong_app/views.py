@@ -6,12 +6,7 @@ from django.core.exceptions import ValidationError
 import requests
 import os
 from django.http import HttpResponse, JsonResponse
-from rest_framework.views import APIView
-from rest_framework.response import Response 
-from rest_framework.permissions import AllowAny, IsAuthenticated
-from rest_framework import status
 from django.contrib.auth import authenticate, login, logout
-from rest_framework_simplejwt.tokens import RefreshToken
 
 from .models import CustomUser
 from django.conf import settings
@@ -23,6 +18,8 @@ from django.utils.encoding import force_bytes, force_str
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from datetime import timedelta
 from django.utils import timezone
+from .jwtUtils import create_jwt_token, get_user_from_jwt
+from django.views.decorators.csrf import csrf_exempt
 
 # Create your views here.
 
@@ -31,7 +28,22 @@ def main_view(request):
 		if request.method == 'GET':
 			return render(request, 'pong_app/index.html')
 	return render(request, "pong_app/index.html")
-		
+
+# This view is in charge of checking the token received, if the token is valid and the user exists,
+# it will generate a new token for the user.
+@csrf_exempt
+def refreshView(request):
+	if request.method == 'POST':
+		token = request.POST.get('token')
+		user = get_user_from_jwt(token)
+		if user:
+			new_token = create_jwt_token(user)
+			return JsonResponse({'token': new_token, status=200})
+		else:
+			return JsonResponse({'error': 'Invalid or expired token', status=401})
+	return JsonResponse({'error': 'Invalid request method', status=400})
+
+@csrf_exempt
 class signupClass(APIView):
 	permission_classes = [AllowAny]
 	def post (self, request):
@@ -64,8 +76,7 @@ class signupClass(APIView):
 		domain = settings.HOST
 		uid = urlsafe_base64_encode(force_bytes(user.id))
 		token = token_generator.make_token(user)
-		activation_link = f'http://localhost:8000/activate/{uid}/{token}/'
-		#activation_link = f'http://{domain}:8000/activate/{uid}/{token}/'
+		activation_link = f'http://{domain}:8000/activate/{uid}/{token}/'
 		message = MIMEText(f'Please click the following link to activate your account\n {activation_link}')
 		message['Subject'] = 'Account confirmation'
 		message['From'] = settings.EMAIL_HOST_USER 
@@ -101,6 +112,7 @@ class ActivateAccountView(APIView):
 				    # Render a template with an error message if the token is invalid
 			return redirect(f'http://{settings.HOST}:8000')
 
+@csrf_exempt
 class loginClass(APIView):
 	permission_classes = [AllowAny]
 	def post(self, request):
@@ -140,15 +152,12 @@ class loginClass(APIView):
 				smtp_connection.quit()
 
 				return Response({'status': 'success', 'message': 'Verification code sent'})
-			refresh = RefreshToken.for_user(user)
-			return Response({
-					'status': 'success',
+			token = create_jwt_token(user)
+			return JsonResponse({
 					'message': 'Logged in successfully!',
-					'access': str(refresh.access_token),
-					'refresh': str(refresh)
-				})
+					'access': token, status=200})
 		else:
-			return Response({'status': 'error', 'message': 'Invalid credentials'})
+			return JsonResponse({'error': 'Invalid credentials', status=401})
 
 
 class verify2FA(APIView):
