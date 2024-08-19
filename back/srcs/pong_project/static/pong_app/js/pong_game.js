@@ -42,10 +42,21 @@ let player1 = new Player(1, board);
 let player2 = new Player(2, board);
 let ball = new Ball(board);
 
-const socket = new WebSocket('ws://' + window.location.host + '/ws/pong-socket/');
 
 
 function initializeGame(){
+    const socket = new WebSocket('ws://' + window.location.host + '/ws/pong-socket/');
+    socket.onopen = function(event) {
+        console.log("WebSocket is open now.");
+    };
+    
+    socket.onclose = function(event) {
+        console.log("WebSocket is closed now.");
+    };
+    
+    socket.onerror = function(error) {
+        console.error("WebSocket Error: ", error);
+    };
     socket.onmessage = function(event){
         const data = JSON.parse(event.data);
         console.log(data);
@@ -69,6 +80,7 @@ function initializeGame(){
     document.addEventListener("keyup", moveDjango);
         
     function moveDjango(e){
+        //socket.send(JSON.stringify({'Player1': 'test'}));
         socket.send(JSON.stringify(
         {
             'Player1': player1.y,

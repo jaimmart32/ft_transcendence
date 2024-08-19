@@ -35,3 +35,4 @@ ENV PYTHONPATH=/app/pong_project
 RUN python create_superuser.py
 
 CMD ["python", "pong_project/manage.py", "runserver", "0.0.0.0:8000"] 
+#daphne myproject.asgi:application

@@ -4,4 +4,5 @@ djangorestframework-simplejwt==5.2.0
 python-dotenv
 requests
 Pillow
-channels==3.0.5
+channels
+daphne
