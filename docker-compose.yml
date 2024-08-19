@@ -28,9 +28,9 @@ services:
         ports:
             - '8000:8000'
         environment:
-             POSTGRES_DB: ${POSTGRES_DB}
-             POSTGRES_USER: ${POSTGRES_USER}
-             POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+             POSTGRES_DB: "PGdatabase"
+             POSTGRES_USER: "PGuser"
+             POSTGRES_PASSWORD: "PGpassword"
         depends_on:
             - db
         networks:

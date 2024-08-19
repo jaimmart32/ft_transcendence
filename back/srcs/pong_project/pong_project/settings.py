@@ -84,7 +84,7 @@ WSGI_APPLICATION = 'pong_project.wsgi.application'
 # Define the ASGI application
 ASGI_APPLICATION = 'pong_project.asgi.application'
 
-
+env = load_dotenv(".env")
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
@@ -98,12 +98,12 @@ ASGI_APPLICATION = 'pong_project.asgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'PGdatabase',
-        'USER': 'PGuser',
-        'PASSWORD': 'PGpassword',
-        #'NAME': os.getenv('POSTGRES_DB'),
-        #'USER': os.getenv('POSTGRES_USER'),
-        #'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
+        #'NAME': 'PGdatabase',
+        #'USER': 'PGuser',
+        #'PASSWORD': 'PGpassword',
+        'NAME': os.getenv('POSTGRES_DB'),
+        'USER': os.getenv('POSTGRES_USER'),
+        'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
         'HOST': 'db',
         'PORT': '5432',
     }
@@ -186,7 +186,7 @@ REST_FRAMEWORK = {
 
 AUTH_USER_MODEL = 'pong_app.CustomUser'
 
-env = load_dotenv(".env")
+
 
 PEPPER = os.getenv('PEPPER')
 
