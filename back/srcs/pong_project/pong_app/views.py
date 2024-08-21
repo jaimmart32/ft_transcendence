@@ -238,6 +238,8 @@ def Profile(request):
 def	EditProfile(request):
 	if request.method == 'PUT':
 		user = request.user
+		username = request.POST.get('username')
+		print(username, flush=True)
 
 		try:
 		# Do we need to check if the info entered is correct like in the front end?
@@ -285,7 +287,9 @@ def  authSettings(request):
 def authVerify(request):
 	
 	if request.method == 'POST':
-		code = request.POST.get('code')
+		data = json.loads(request.body)
+		code = data.get('code')
+		print(code, flush=True)
 		if not code:
 			return JsonResponse({'status': 'error', 'message': 'No code provided'}, status=400)
 		tokenResponse = requests.post(settings.TOKEN_URL, data=
@@ -315,13 +319,15 @@ def authVerify(request):
 def authCreateUser(request):
 	
 	if request.method == 'POST':
-		userInfo = request.POST.get('userInfo')
+		data = json.loads(request.body)
+		userInfo = data.get('userInfo')
 		if not userInfo:
 			return JsonResponse({'status': 'error', 'message': 'No user information'}, status=401)
 		username = "ft_" + userInfo['login']
 		email = userInfo['email']
 		password = ""
 		if CustomUser.objects.filter(username=username).exists():
+			
 			return JsonResponse({'status': 'error', 'message': 'Username already in use'}, status=400)
 		if CustomUser.objects.filter(email=email).exists():
 			return JsonResponse({'status': 'error', 'message': 'Email already in use'}, status=400)

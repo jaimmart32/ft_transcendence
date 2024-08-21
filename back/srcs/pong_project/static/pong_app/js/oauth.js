@@ -141,13 +141,11 @@ document.addEventListener('DOMContentLoaded', () =>
 	const urlParams = new URLSearchParams(window.location.search);
 	const code = urlParams.get('code');
 	const access = urlParams.get('access');
-	const refresh = urlParams.get('refresh');
 
-	if (access && refresh)
+	if (access)
 	{
 		console.log('Inside event listener, found tokens');
 		localStorage.setItem('access', access);
-		localStorage.setItem('refresh', refresh);
 		window.history.replaceState({}, document.title, "/home");
 		navigateTo('/home');
 	}
