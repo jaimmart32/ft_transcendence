@@ -1,7 +1,7 @@
 //board
 
 class Board{
-    constructor(width=500, height=500){
+    constructor(width=900, height=500){
         this.width = width;
         this.height = height;
     }
@@ -28,7 +28,7 @@ class Player{
 class Ball{
     constructor(board){
         this.width = board.width / 50;
-        this.height = board.height / 50;
+        this.height = this.width;
         this.x = (board.width / 2) - (this.height / 2);
         this.y = (board.height / 2) - (this.height / 2);
         this.velocityX = 1;
@@ -37,7 +37,7 @@ class Ball{
 }
            
 let context;
-let board = new Board(300, 300);
+let board = new Board(900, 500);
 let player1 = new Player(1, board);
 let player2 = new Player(2, board);
 let ball = new Ball(board);

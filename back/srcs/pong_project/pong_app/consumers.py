@@ -43,13 +43,13 @@ class PongConsumer(WebsocketConsumer):
             speed2 = 3
         try:
             speed1 = int(speed1)
-            if not outOfBounds(player1 + speed1, 10, 500):
+            if not outOfBounds(player1 + speed1, 90, 500):
                 player1 += int(speed1)
         except:
-                pass
+            pass
         try:
             speed2 = int(speed2)
-            if not outOfBounds(player2 + speed2, 10, 500):
+            if not outOfBounds(player2 + speed2, 90, 500):
                 player2 += int(speed2)
         except:
             pass
