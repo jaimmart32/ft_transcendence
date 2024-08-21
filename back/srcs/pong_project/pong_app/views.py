@@ -341,10 +341,6 @@ class RemoveFriend(APIView):
 			return Response({'status': 'error', 'message': 'User not found'}, status=404)
 
 
-
-def outOfBounds(yPosition, player, board):
-		return yPosition < 0 or yPosition + player > board
-
 class Move(APIView):
 	permission_classes = [AllowAny]
 	def post(self, request):   

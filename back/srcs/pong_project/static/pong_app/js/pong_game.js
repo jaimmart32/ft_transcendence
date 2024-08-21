@@ -37,7 +37,7 @@ class Ball{
 }
            
 let context;
-let board = new Board(500, 500);
+let board = new Board(300, 300);
 let player1 = new Player(1, board);
 let player2 = new Player(2, board);
 let ball = new Ball(board);
@@ -45,6 +45,8 @@ let ball = new Ball(board);
 
 
 function initializeGame(){
+    player1.velocityY = 0;
+    player2.velocityY = 0;
     const socket = new WebSocket('ws://' + window.location.host + '/ws/pong-socket/');
     socket.onopen = function(event) {
         console.log("WebSocket is open now.");
@@ -57,13 +59,23 @@ function initializeGame(){
     socket.onerror = function(error) {
         console.error("WebSocket Error: ", error);
     };
-    socket.onmessage = function(event){
-        const data = JSON.parse(event.data);
-        console.log(data);
-    }
 
-    player1.velocityY = 0;
-    player2.velocityY = 0;
+    socket.onmessage = function(event) {
+        // Parse the JSON data received from the server
+        const data = JSON.parse(event.data);
+
+        // Update player1's position with the received data
+        player1.y = data['Player1'];
+
+        // Update player2's position with the received data
+        player2.y = data['Player2'];
+    
+        // Update player1's speed (velocityY) with the received data
+        player1.velocityY = data['Speed1'];
+    
+        // Update player2's speed (velocityY) with the received data
+        player2.velocityY = data['Speed2'];
+    }
 
     let canvas = document.getElementById("board");
     context = canvas.getContext("2d");
@@ -89,10 +101,6 @@ function initializeGame(){
             'speed1': player1.velocityY,
             'speed2': player2.velocityY,
         }))
-        //player1.y = data['Player1'];
-        //player2.y = data['Player2'];
-        //player1.velocityY = data['speed1'];
-        //player2.velocityY = data['speed2'];
     }
             
     function update() {
