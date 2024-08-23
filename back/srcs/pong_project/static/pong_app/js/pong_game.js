@@ -88,11 +88,10 @@ function initializeGame(){
     context.fillRect(player2.x, player2.y, player2.width, player2.height);
 
     requestAnimationFrame(update);
-    //document.addEventListener("keyup", movePlayer);
     document.addEventListener("keyup", moveDjango);
+    document.addEventListener("keydown", moveDjango);
         
     function moveDjango(e){
-        //socket.send(JSON.stringify({'Player1': 'test'}));
         socket.send(JSON.stringify(
         {
             'Player1': player1.y,
@@ -114,9 +113,24 @@ function initializeGame(){
 
         //ball
         context.fillStyle = "White"
+        socket.send(JSON.stringify(
+            {
+                'Player1': player1.y,
+                'Player2': player2.y,
+                'ballX': ball.x,
+                'ballY': ball.y,
+                'velocityX': ball.velocityX,
+                'velocityY': ball.velocityY,
+            }))
         ball.x += ball.velocityX;
         if (ballOutOfBounds(ball.y + ball.velocityY, ball, board)){
             ball.velocityY = ball.velocityY * -1;    
+        }
+        if (ballSaved()){
+            // create logic to check if the ball was saved by the paddle so it has to bounce
+        }
+        if (score()){
+            // create logic to check if the ball was not saved and was scored
         }
         ball.y += ball.velocityY;
         context.fillRect(ball.x, ball.y, ball.width, ball.height);

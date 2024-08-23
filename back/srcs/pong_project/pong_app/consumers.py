@@ -41,6 +41,8 @@ class PongConsumer(WebsocketConsumer):
             speed2 = -3
         elif key == "ArrowDown":
             speed2 = 3
+        else:
+             pass
         try:
             speed1 = int(speed1)
             if not outOfBounds(player1 + speed1, 90, 500):
