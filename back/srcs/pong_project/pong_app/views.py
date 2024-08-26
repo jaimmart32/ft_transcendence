@@ -239,7 +239,6 @@ def	EditProfile(request):
 	if request.method == 'PUT':
 		user = request.user
 		username = request.POST.get('username')
-		print(username, flush=True)
 
 		try:
 		# Do we need to check if the info entered is correct like in the front end?
@@ -311,6 +310,7 @@ def authVerify(request):
 		if userResponse.status_code != 200:
 			return JsonResponse({'status': 'error', 'message': 'Could not retrieve the user data'}, status=400)
 		userInfo = userResponse.json()
+		print(userInfo, flush=True)
 		return JsonResponse({'status': 'success', 'userInfo': userInfo}, status=200)
 	return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
 
@@ -325,13 +325,13 @@ def authCreateUser(request):
 			return JsonResponse({'status': 'error', 'message': 'No user information'}, status=401)
 		username = "ft_" + userInfo['login']
 		email = userInfo['email']
-		password = ""
-		if CustomUser.objects.filter(username=username).exists():
-			
-			return JsonResponse({'status': 'error', 'message': 'Username already in use'}, status=400)
-		if CustomUser.objects.filter(email=email).exists():
-			return JsonResponse({'status': 'error', 'message': 'Email already in use'}, status=400)
-		user = CustomUser.objects.create_user(username, email=email, password=password)
+		auth_id = userInfo['id']
+		user, created = CustomUser.objects.get_or_create(username=username, email=email)
+		if created is True:
+			user.set_unusable_password()
+			user.intra = True
+			user.is_active = True
+			user.save()
 		# Could use the CustomUser.objects.get_or_create() and later check if the user exists 
 		token = create_jwt_token(user)
 
@@ -349,7 +349,7 @@ def FriendsList(request):
 		user = request.user
 		friends = user.friends.all()
 		friends_data = [{'username': friend.username, 'online': friend.is_active} for friend in friends]
-		return JsonResponse(friends_data, status=200)
+		return JsonResponse(friends_data, status=200, safe=False)
 	return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
 
 

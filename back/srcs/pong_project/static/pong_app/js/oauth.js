@@ -110,7 +110,7 @@ async function handle42Info(userInfo)
 			const jsonData = JSON.parse(data);
 			if (jsonData.status === 'success')
 			{
-				alert('Success to create user');
+				alert('Successfully authenticated');
 				window.location.href = jsonData.redirect_url;
 			}
 			else
