@@ -23,6 +23,7 @@ from datetime import timedelta
 from django.utils import timezone
 from .jwtUtils import create_jwt_token, get_user_from_jwt
 from django.views.decorators.csrf import csrf_exempt
+from .avatar import handle_avatar_upload
 
 # Create your views here.
 
@@ -235,36 +236,40 @@ def Profile(request):
 
 @csrf_exempt
 @jwt_required
-def	EditProfile(request):
+def EditProfile(request):
 	if request.method == 'PUT':
-		user = request.user
-		username = request.POST.get('username')
-		print(username, flush=True)
-
 		try:
-		# Do we need to check if the info entered is correct like in the front end?
-			user.username = request.POST.get('username', user.username)
+			# Decodificar el cuerpo JSON
+			data = json.loads(request.body)
+
+			user = request.user
+			username = data.get('username', user.username)
+			password = data.get('password')
+			twofa = data.get('twofa', user.tfa)
+			avatar_data = data.get('avatar')
+
+			user.username = username
+
 			if CustomUser.objects.filter(username=user.username).exclude(id=user.id).exists():
 				return JsonResponse({'status': 'error', 'message': 'Username in use'}, status=400)
-			if request.POST.get('twofa', user.tfa) == 'on':
-				user.tfa = True
-			else:
-				user.tfa = False 
-			if request.POST.get('password'):
-				user.set_password(request.POST.get('password'))
-			if 'avatar' in request.FILES:
-				avatar = request.FILES.get('avatar')
-				if avatar.size == 0:
-					raise ValidationError("The uploaded file is empty!")
-				else:
-					user.avatar = avatar
+
+			user.tfa = True if twofa == 'on' else False
+
+			if password:
+				user.set_password(password)
+
+			
+			if avatar_data:
+				handle_avatar_upload(user, avatar_data)
+
 			user.save()
 			return JsonResponse({'status': 'success', 'message': 'Profile updated successfully!'}, status=200)
+		except json.JSONDecodeError as e:
+			return JsonResponse({'status': 'error', 'message': 'Invalid JSON'}, status=400)
 		except IntegrityError as e:
 			return JsonResponse({'status': 'error', 'message': 'Username in use'}, status=400)
 		except ValidationError as e:
-			return JsonResponse({'status': 'error', 'message': 'File is empty'}, status=400)
-		return JsonResponse({'status': 'error', 'message': 'An error ocurred'}, status=400)
+			return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
 	return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
 
 
