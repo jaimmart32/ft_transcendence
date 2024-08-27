@@ -31,6 +31,9 @@ document.addEventListener('DOMContentLoaded', function() {
 		});
 	}
 
+	window.addEventListener('beforeunload', function(event) {
+		this.navigator.sendBeacon('/logout', JSON.stringify({ easter_egg: 'Como estan los maquinas'}));
+	});
 //	This event listener is in charge of receiving any event regarding the 
 //	browser buttons (forward/backward/refresh)
 	window.addEventListener('popstate', function(event)
@@ -41,3 +44,4 @@ document.addEventListener('DOMContentLoaded', function() {
 
 	loadPage(window.location.pathname);
 });
+

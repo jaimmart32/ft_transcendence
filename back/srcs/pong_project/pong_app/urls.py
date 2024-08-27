@@ -6,6 +6,7 @@ urlpatterns = [
 	path('signup/', views.signupView, name='signup'),
 	path('activate/<uidb64>/<token>/', views.ActivateAccountView, name='activate'),
 	path('login/', views.loginView, name='login'),
+	path('logout/', views.logoutView, name='logout'),
 	path('login/verify-2fa/', views.verify2FA, name='verify2FA'),
 	path('', views.main_view, name='main'),
 

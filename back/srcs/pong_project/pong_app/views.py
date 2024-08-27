@@ -48,6 +48,7 @@ def jwt_required(viewFunction):
 			if user:
 				request.user = user
 				return viewFunction(request, *args, **kwargs)
+			
 			return JsonResponse({'status': 'error', 'message': 'Unauthorized'}, status=401)
 	return wrapper
 
@@ -68,7 +69,12 @@ def refreshView(request):
 
 @csrf_exempt
 def signupView(request):
-
+	"""auth_header = request.headers.get('Authorization')
+    if auth_header and auth_header.startswith('Bearer '):
+        token = auth_header.split(' ')[1]
+        user = get_user_from_jwt(token)
+        if user:
+            return redirect('/home/')"""
 	if request.method == 'POST':
 		data = json.loads(request.body)
 		username = data.get('username')
@@ -180,12 +186,24 @@ def loginView(request):
 
 				return JsonResponse({'status': 'success', 'message': 'Verification code sent'}, status=200)
 			token = create_jwt_token(user)
+			user.is_online = True
 			return JsonResponse({
 					'status': 'success',
 					'message': 'Logged in successfully!',
 					'access': token}, status=200)
 		else:
 			return JsonResponse({'status': 'error', 'message': 'Invalid credentials'}, status=401)
+	return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
+
+@jwt_required
+def	logoutView(request):
+	if request.method == 'POST':
+		user = request.user
+		if user:
+			user.is_online = False
+			user.save()
+			return JsonResponse({'status': 'success'}, status=200)
+		return JsonResponse({'status': 'error', 'message': 'User not found'}, status=404)
 	return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
 
 
@@ -199,6 +217,7 @@ def verify2FA(request):
 		if user is not None:
 			if (user.otp == otp and user.otp_expDate is not None and user.otp_expDate > timezone.now()):
 				token = create_jwt_token(user)
+				user.is_online = True
 				return JsonResponse({
 						'status': 'success',
 						'message': 'Logged in successfully!',
@@ -347,24 +366,25 @@ def authCreateUser(request):
 
 
 # FRIENDS
-
+@csrf_exempt
 @jwt_required
 def FriendsList(request):
 
 	if request.method == 'GET':
 		user = request.user
 		friends = user.friends.all()
-		friends_data = [{'username': friend.username, 'online': friend.is_active} for friend in friends]
+		friends_data = [{'username': friend.username, 'online': friend.is_online} for friend in friends]
 		return JsonResponse(friends_data, status=200, safe=False)
 	return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
 
-
+@csrf_exempt
 @jwt_required
 def AddFriend(request):
 
 	if request.method == 'POST':
 		user = request.user
-		friend_username = request.POST.get('friend_username')
+		data = json.loads(request.body)
+		friend_username = data.get('friend_username')
 		try:
 			friend = CustomUser.objects.get(username=friend_username)
 			user.friends.add(friend)
@@ -373,13 +393,14 @@ def AddFriend(request):
 			return JsonResponse({'status': 'error', 'message': 'User not found'}, status=404)
 	return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
 
-
+@csrf_exempt
 @jwt_required
 def RemoveFriend(request):
 
 	if request.method == 'POST':
 		user = request.user
-		friend_username = request.POST.get('friend_username')
+		data = json.loads(request.body)
+		friend_username = data.get('friend_username')
 		try:
 			friend = CustomUser.objects.get(username=friend_username)
 			user.friends.remove(friend)
@@ -388,7 +409,7 @@ def RemoveFriend(request):
 			return JsonResponse({'status': 'error', 'message': 'User not found'}, status=404)
 	return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
 
-
+# GAME
 
 def outOfBounds(yPosition, player, board):
 		return yPosition < 0 or yPosition + player > board
