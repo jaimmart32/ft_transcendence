@@ -39,5 +39,6 @@ document.addEventListener('DOMContentLoaded', function() {
 //		loadPage(window.location.pathname);
 	});
 
-	loadPage(window.location.pathname);
+	navigateTo(window.location.pathname);
+	//loadPage(window.location.pathname);
 });
