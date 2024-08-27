@@ -25,6 +25,15 @@ def decode_jwt_token(token):
 		payload = jwt.decode(token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
 		return payload
 	except jwt.ExpiredSignatureError:
+		payload = jwt.decode(token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM], options={"verify_exp": False})
+		user_id = payload.get('id')
+		if user_id:
+			try:
+				user = CustomUser.objects.get(id=user_id)
+				user.is_online = False
+				user.save()
+			except CustomUser.DoesNotExist:
+				pass
 		return None
 	except jwt.InvalidTokenError:
 		return None
@@ -37,4 +46,5 @@ def get_user_from_jwt(token):
 			return user
 		except CustomUser.DoesNotExist:
 			return None
+	
 	return None

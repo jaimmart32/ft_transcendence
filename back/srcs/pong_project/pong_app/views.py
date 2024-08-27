@@ -42,12 +42,22 @@ def jwt_required(viewFunction):
 
 	def wrapper(request, *args, **kwargs):
 		auth_header = request.headers.get('Authorization')
+		token = None
 		if auth_header and auth_header.startswith('Bearer '):
 			token = auth_header.split(' ')[1]
+		else:
+			try:
+				if request.body:
+					body_data = json.loads(request.body)
+					token = body_data.get('token')
+			except json.JSONDecodeError:
+				return JsonResponse({'status': 'error', 'message': 'Invalid JSON'}, status=400)
+		if token:
 			user = get_user_from_jwt(token)
 			if user:
 				request.user = user
 				return viewFunction(request, *args, **kwargs)
+			
 			return JsonResponse({'status': 'error', 'message': 'Unauthorized'}, status=401)
 	return wrapper
 
@@ -72,8 +82,13 @@ def signupView(request):
 	if request.method == 'GET':
 		return render(request, "pong_app/index.html")
 
+	"""auth_header = request.headers.get('Authorization')
+    if auth_header and auth_header.startswith('Bearer '):
+        token = auth_header.split(' ')[1]
+        user = get_user_from_jwt(token)
+        if user:
+            return redirect('/home/')"""
 	elif request.method == 'POST':
-	#if request.method == 'POST':
 		data = json.loads(request.body)
 		username = data.get('username', '')
 		email = data.get('email', '')
@@ -185,6 +200,8 @@ def loginView(request):
 
 				return JsonResponse({'status': 'success', 'message': 'Verification code sent'}, status=200)
 			token = create_jwt_token(user)
+			user.is_online = True
+			user.save()
 			return JsonResponse({
 					'status': 'success',
 					'message': 'Logged in successfully!',
@@ -193,6 +210,18 @@ def loginView(request):
 			return JsonResponse({'status': 'error', 'message': 'Invalid credentials'}, status=401)
 	elif request.method == 'GET':
 		return render(request, "pong_app/index.html")
+	return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
+
+@csrf_exempt
+@jwt_required
+def	logoutView(request):
+	if request.method == 'POST':
+		user = request.user
+		if user:
+			user.is_online = False
+			user.save()
+			return JsonResponse({'status': 'success'}, status=200)
+		return JsonResponse({'status': 'error', 'message': 'User not found'}, status=404)
 	return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
 
 
@@ -206,6 +235,8 @@ def verify2FA(request):
 		if user is not None:
 			if (user.otp == otp and user.otp_expDate is not None and user.otp_expDate > timezone.now()):
 				token = create_jwt_token(user)
+				user.is_online = True
+				user.save()
 				return JsonResponse({
 						'status': 'success',
 						'message': 'Logged in successfully!',
@@ -352,24 +383,25 @@ def authCreateUser(request):
 
 
 # FRIENDS
-
+@csrf_exempt
 @jwt_required
 def FriendsList(request):
 
 	if request.method == 'GET':
 		user = request.user
 		friends = user.friends.all()
-		friends_data = [{'username': friend.username, 'online': friend.is_active} for friend in friends]
+		friends_data = [{'username': friend.username, 'online': friend.is_online} for friend in friends]
 		return JsonResponse(friends_data, status=200, safe=False)
 	return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
 
-
+@csrf_exempt
 @jwt_required
 def AddFriend(request):
 
 	if request.method == 'POST':
 		user = request.user
-		friend_username = request.POST.get('friend_username')
+		data = json.loads(request.body)
+		friend_username = data.get('friend_username')
 		try:
 			friend = CustomUser.objects.get(username=friend_username)
 			user.friends.add(friend)
@@ -378,13 +410,14 @@ def AddFriend(request):
 			return JsonResponse({'status': 'error', 'message': 'User not found'}, status=404)
 	return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
 
-
+@csrf_exempt
 @jwt_required
 def RemoveFriend(request):
 
 	if request.method == 'POST':
 		user = request.user
-		friend_username = request.POST.get('friend_username')
+		data = json.loads(request.body)
+		friend_username = data.get('friend_username')
 		try:
 			friend = CustomUser.objects.get(username=friend_username)
 			user.friends.remove(friend)
@@ -393,8 +426,9 @@ def RemoveFriend(request):
 			return JsonResponse({'status': 'error', 'message': 'User not found'}, status=404)
 	return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
 
-def Move(request):
-	if request.method == 'POST':
+"""class Move(APIView):
+	permission_classes = [AllowAny]
+	def post(self, request):   
 		player1 = request.data.get("Player1")
 		key = request.data.get('key')
 		player2 = request.data.get("Player2")
@@ -430,5 +464,4 @@ def Move(request):
 			'Speed2': speed2,
 		}
 
-		return JsonResponse(position_updated)
-	return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
+		return JsonResponse(position_updated)"""
