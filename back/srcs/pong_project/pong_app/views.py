@@ -42,8 +42,17 @@ def jwt_required(viewFunction):
 
 	def wrapper(request, *args, **kwargs):
 		auth_header = request.headers.get('Authorization')
+		token = None
 		if auth_header and auth_header.startswith('Bearer '):
 			token = auth_header.split(' ')[1]
+		else:
+			try:
+				if request.body:
+					body_data = json.loads(request.body)
+					token = body_data.get('token')
+			except json.JSONDecodeError:
+				return JsonResponse({'status': 'error', 'message': 'Invalid JSON'}, status=400)
+		if token:
 			user = get_user_from_jwt(token)
 			if user:
 				request.user = user
@@ -196,6 +205,7 @@ def loginView(request):
 			return JsonResponse({'status': 'error', 'message': 'Invalid credentials'}, status=401)
 	return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
 
+@csrf_exempt
 @jwt_required
 def	logoutView(request):
 	if request.method == 'POST':

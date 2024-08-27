@@ -32,7 +32,8 @@ document.addEventListener('DOMContentLoaded', function() {
 	}
 
 	window.addEventListener('beforeunload', function(event) {
-		this.navigator.sendBeacon('/logout', JSON.stringify({ easter_egg: 'Como estan los maquinas'}));
+		const token = this.localStorage.getItem('access')
+		this.navigator.sendBeacon('/logout/', JSON.stringify({ easter_egg: 'Como estan los maquinas', token: token}));
 	});
 //	This event listener is in charge of receiving any event regarding the 
 //	browser buttons (forward/backward/refresh)
