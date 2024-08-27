@@ -187,6 +187,7 @@ def loginView(request):
 				return JsonResponse({'status': 'success', 'message': 'Verification code sent'}, status=200)
 			token = create_jwt_token(user)
 			user.is_online = True
+			user.save()
 			return JsonResponse({
 					'status': 'success',
 					'message': 'Logged in successfully!',
@@ -218,6 +219,7 @@ def verify2FA(request):
 			if (user.otp == otp and user.otp_expDate is not None and user.otp_expDate > timezone.now()):
 				token = create_jwt_token(user)
 				user.is_online = True
+				user.save()
 				return JsonResponse({
 						'status': 'success',
 						'message': 'Logged in successfully!',
@@ -410,7 +412,7 @@ def RemoveFriend(request):
 	return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
 
 
-class Move(APIView):
+"""class Move(APIView):
 	permission_classes = [AllowAny]
 	def post(self, request):   
 		player1 = request.data.get("Player1")
@@ -448,4 +450,4 @@ class Move(APIView):
 			'Speed2': speed2,
 		}
 
-		return JsonResponse(position_updated)
+		return JsonResponse(position_updated)"""

@@ -21,7 +21,7 @@ urlpatterns = [
 	path('api/auth/verify/', views.authVerify, name='verify'),
 	path('api/auth/create-user/', views.authCreateUser, name='create-user'),
 
-	path('move/', views.Move, name='move'),
+	#path('move/', views.Move, name='move'),
 	
 	path('callback.html', TemplateView.as_view(template_name='callback.html'), name='callback_html'),
 	path('index.html', TemplateView.as_view(template_name='index.html'), name='index_html'),
