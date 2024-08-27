@@ -39,9 +39,7 @@ function signUpHandler()
 			navigateTo('/login');
                     }
 		    else
-		    {
                         alert('Signup failed: ' + data.message);
-                    }
                 })
                 .catch(error =>
 		{

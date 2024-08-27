@@ -1,11 +1,15 @@
 function loadPage(url, data)
 {
+	console.log('INSIDE LOAD PAGE');
 	if (url === '/home')
 		loadHome();
 	else if (url === '/login')
 		loadLoginForm();
-	else if (url === '/signup')
+	else if (url === '/signup/')
+	{
+		console.log('INSIDE SIGNUP BEFORE LOAD');
 		loadSignupForm();
+	}
 	else if (url === '/signup/email/activate/')
 	{
 		console.log('Activation');
@@ -24,6 +28,7 @@ function loadPage(url, data)
 
 function navigateTo(url, data)
 {
+	console.log('INSIDE NAVIGATE TO ', url);
 	window.history.pushState({}, '', url);
 	loadPage(url, data);
 }

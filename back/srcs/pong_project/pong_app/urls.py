@@ -13,8 +13,6 @@ urlpatterns = [
 	path('home/profile/', views.Profile, name='profile'),
 	path('home/profile/edit/', views.EditProfile, name='edit_profile'),
 
-	#path('token/', TokenObtainPairView.as_view, name='token_obtain_pair'),
-	#path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 
 	path('api/auth-settings/', views.authSettings, name='auth_settings'),
 	path('api/auth/verify/', views.authVerify, name='verify'),

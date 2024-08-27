@@ -4,6 +4,15 @@ document.addEventListener('DOMContentLoaded', function() {
     const signupLink = document.getElementById('signup-link');
     const login42Link = document.getElementById('login42-link');
 
+	
+	navigateTo(window.location.pathname);
+//	This event listener is in charge of receiving any event regarding the 
+//	browser buttons (forward/backward/refresh)
+	window.addEventListener('popstate', function(event)
+	{
+		navigateTo(window.location.pathname);
+	});
+
 	if (loginLink)
 	{
 		loginLink.addEventListener('click', function(event)
@@ -18,7 +27,7 @@ document.addEventListener('DOMContentLoaded', function() {
 		signupLink.addEventListener('click', function(event)
 		{
 			event.preventDefault();
-			navigateTo('/signup');
+			navigateTo('/signup/');
 		});
 	}
 
@@ -30,15 +39,17 @@ document.addEventListener('DOMContentLoaded', function() {
 			await handleAuth();
 		});
 	}
-
-//	This event listener is in charge of receiving any event regarding the 
-//	browser buttons (forward/backward/refresh)
-	window.addEventListener('popstate', function(event)
-	{
-		navigateTo(window.location.pathname);
-//		loadPage(window.location.pathname);
-	});
-
-	navigateTo(window.location.pathname);
-	//loadPage(window.location.pathname);
+//	monitorUrlChanges();
 });
+
+function monitorUrlChanges() {
+    let currentPath = window.location.pathname;
+
+    console.log('INSIDE MONITOR URL');
+    setInterval(() => {
+        if (window.location.pathname !== currentPath) {
+            currentPath = window.location.pathname;
+            loadPage(currentPath);  // Trigger page load when URL changes
+        }
+    }, 100);  // Check every 100ms if the URL has changed
+}

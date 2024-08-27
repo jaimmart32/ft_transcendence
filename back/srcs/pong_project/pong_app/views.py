@@ -69,12 +69,16 @@ def refreshView(request):
 @csrf_exempt
 def signupView(request):
 
-	if request.method == 'POST':
+	if request.method == 'GET':
+		return render(request, "pong_app/index.html")
+
+	elif request.method == 'POST':
+	#if request.method == 'POST':
 		data = json.loads(request.body)
-		username = data.get('username')
-		email = data.get('email')
-		password = data.get('password')
-		confPass = data.get('confPass')
+		username = data.get('username', '')
+		email = data.get('email', '')
+		password = data.get('password', '')
+		confPass = data.get('confPass', '')
 		# Validating the new user's credentials
 		try:
 			validateUsername(username)
@@ -113,6 +117,7 @@ def signupView(request):
 		smtp_connection.quit()
 
 		return JsonResponse({'status': 'success', 'message': 'User created succesfully!'}, status=200)
+	return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
 
 
 @csrf_exempt
@@ -186,6 +191,8 @@ def loginView(request):
 					'access': token}, status=200)
 		else:
 			return JsonResponse({'status': 'error', 'message': 'Invalid credentials'}, status=401)
+	elif request.method == 'GET':
+		return render(request, "pong_app/index.html")
 	return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
 
 
@@ -316,7 +323,6 @@ def authVerify(request):
 		if userResponse.status_code != 200:
 			return JsonResponse({'status': 'error', 'message': 'Could not retrieve the user data'}, status=400)
 		userInfo = userResponse.json()
-		print(userInfo, flush=True)
 		return JsonResponse({'status': 'success', 'userInfo': userInfo}, status=200)
 	return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
 
@@ -331,7 +337,6 @@ def authCreateUser(request):
 			return JsonResponse({'status': 'error', 'message': 'No user information'}, status=401)
 		username = "ft_" + userInfo['login']
 		email = userInfo['email']
-		auth_id = userInfo['id']
 		user, created = CustomUser.objects.get_or_create(username=username, email=email)
 		if created is True:
 			user.set_unusable_password()
@@ -388,10 +393,8 @@ def RemoveFriend(request):
 			return JsonResponse({'status': 'error', 'message': 'User not found'}, status=404)
 	return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
 
-
-class Move(APIView):
-	permission_classes = [AllowAny]
-	def post(self, request):   
+def Move(request):
+	if request.method == 'POST':
 		player1 = request.data.get("Player1")
 		key = request.data.get('key')
 		player2 = request.data.get("Player2")
@@ -428,3 +431,4 @@ class Move(APIView):
 		}
 
 		return JsonResponse(position_updated)
+	return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
