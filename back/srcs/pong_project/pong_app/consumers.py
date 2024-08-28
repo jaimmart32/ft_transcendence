@@ -1,11 +1,15 @@
 import json
 from channels.generic.websocket import WebsocketConsumer
 import logging
+import time
 
 logger = logging.getLogger(__name__)
 
 def outOfBounds(yPosition, player, board):
 		return yPosition < 0 or yPosition + player > board
+
+def ballOutOfBounds(yPosition, ball, board):
+        return yPosition < 0 or yPosition + ball> board
 
 class PongConsumer(WebsocketConsumer):
     def connect(self):
@@ -31,35 +35,46 @@ class PongConsumer(WebsocketConsumer):
         player2 = text_data_json["Player2"]
         speed1 = text_data_json["speed1"]
         speed2 = text_data_json["speed2"]
+        ball = [text_data_json['ballX'], text_data_json['ballY']]
+        ballspeed = [text_data_json["velocityX"], text_data_json["velocityY"]]
         # player 1
-        if key == "KeyW":
-            speed1 = -3
-        elif key == "KeyS":
-            speed1 = 3
-        # player 2
-        elif key == "ArrowUp":
-            speed2 = -3
-        elif key == "ArrowDown":
-            speed2 = 3
-        else:
-             pass
-        try:
-            speed1 = int(speed1)
-            if not outOfBounds(player1 + speed1, 90, 500):
-                player1 += int(speed1)
-        except:
-            pass
-        try:
-            speed2 = int(speed2)
-            if not outOfBounds(player2 + speed2, 90, 500):
-                player2 += int(speed2)
-        except:
-            pass
+        if key in ["KeyW", "KeyS", "ArrowUp", "ArrowDown"]:
+            if key == "KeyW":
+                speed1 = -3
+            elif key == "KeyS":
+                speed1 = 3
+            # player 2
+            elif key == "ArrowUp":
+                speed2 = -3
+            elif key == "ArrowDown":
+                speed2 = 3
+            try:
+                speed1 = int(speed1)
+                if not outOfBounds(player1 + speed1, 90, 500):
+                    player1 += int(speed1)
+            except:
+                pass
+            try:
+                speed2 = int(speed2)
+                if not outOfBounds(player2 + speed2, 90, 500):
+                    player2 += int(speed2)
+            except:
+                pass
+        if not ballOutOfBounds(ball[1], 18, 500):
+            ballspeed[1] = ballspeed[1] * -1
+        ball[1] += ballspeed[1]
+        ball[0] += ballspeed[0]
         position_updated = {
-            'Player1': player1,
-            'Player2': player2,
-            'Speed1': speed1,
-            'Speed2': speed2,
-        }
+                'Player1': player1,
+                'Player2': player2,
+                'Speed1': speed1,
+                'Speed2': speed2,
+                'ballX': ball[0],
+                'ballY': ball[1],
+                'velocityX': ballspeed[0],
+                'velocityY': ballspeed[1],
+            }
 
         self.send(text_data=json.dumps(position_updated))
+
+        time.sleep(0.016)  # Approx 60 FPS

@@ -75,6 +75,9 @@ function initializeGame(){
     
         // Update player2's speed (velocityY) with the received data
         player2.velocityY = data['Speed2'];
+
+        ball.x = data['ballX'];
+        ball.y = data['ballY'];
     }
 
     let canvas = document.getElementById("board");
@@ -93,13 +96,17 @@ function initializeGame(){
         
     function moveDjango(e){
         socket.send(JSON.stringify(
-        {
-            'Player1': player1.y,
-            'Player2': player2.y,
-            'key': e.code,
-            'speed1': player1.velocityY,
-            'speed2': player2.velocityY,
-        }))
+            {
+                'Player1': player1.y,
+                'Player2': player2.y,
+                'speed1': player1.velocityY,
+                'speed2': player2.velocityY,
+                'key': e.code,
+                'ballX': ball.x,
+                'ballY': ball.y,
+                'velocityX': ball.velocityX,
+                'velocityY': ball.velocityY,
+            }))
     }
             
     function update() {
@@ -117,15 +124,14 @@ function initializeGame(){
             {
                 'Player1': player1.y,
                 'Player2': player2.y,
+                'speed1': player1.velocityY,
+                'speed2': player2.velocityY,
+                'key': "other",
                 'ballX': ball.x,
                 'ballY': ball.y,
                 'velocityX': ball.velocityX,
                 'velocityY': ball.velocityY,
             }))
-        ball.x += ball.velocityX;
-        if (ballOutOfBounds(ball.y + ball.velocityY, ball, board)){
-            ball.velocityY = ball.velocityY * -1;    
-        }
         if (ballSaved()){
             // create logic to check if the ball was saved by the paddle so it has to bounce
         }
@@ -134,10 +140,6 @@ function initializeGame(){
         }
         ball.y += ball.velocityY;
         context.fillRect(ball.x, ball.y, ball.width, ball.height);
-    }
-
-    function ballOutOfBounds(yPosition, ball, board) {
-        return (yPosition < 0 || yPosition + ball.height > board.height)
     }
 }
 
