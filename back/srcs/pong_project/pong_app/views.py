@@ -59,6 +59,7 @@ def jwt_required(viewFunction):
 				return viewFunction(request, *args, **kwargs)
 			
 			return JsonResponse({'status': 'error', 'message': 'Unauthorized'}, status=401)
+		return render(request, "pong_app/index.html")
 	return wrapper
 
 # This view is in charge of checking the token received, if the token is valid and the user exists,
