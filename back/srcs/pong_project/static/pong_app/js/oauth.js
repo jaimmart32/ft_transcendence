@@ -147,7 +147,7 @@ document.addEventListener('DOMContentLoaded', () =>
 		console.log('Inside event listener, found tokens');
 		localStorage.setItem('access', access);
 		window.history.replaceState({}, document.title, "/home");
-		navigateTo('/home');
+		navigateTo('/home/');
 	}
 	if (code)
 	{

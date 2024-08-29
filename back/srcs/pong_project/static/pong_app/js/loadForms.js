@@ -87,7 +87,7 @@ function loadPlayGame()
 		back.addEventListener('click', function(event)
 		{
 			event.preventDefault();
-			navigateTo('/home');
+			navigateTo('/home/');
 		});
 	}
 
@@ -131,7 +131,7 @@ function loadCreateTournament()
 		back.addEventListener('click', function(event)
 		{
 			event.preventDefault();
-			navigateTo('/home');
+			navigateTo('/home/');
 		});
 	}
 }
@@ -184,7 +184,7 @@ function loadHome()
 			profile.addEventListener('click', function(event)
 			{
 				event.preventDefault();
-				navigateTo('/home/profile');
+				navigateTo('/home/profile/');
 			});
 		}
 		if (play)
@@ -192,7 +192,7 @@ function loadHome()
 	    		play.addEventListener('click', function(event)
 			{
 				event.preventDefault();
-				navigateTo('/home/game');
+				navigateTo('/home/game/');
 			});
 		}
 		if (friends)
@@ -200,7 +200,7 @@ function loadHome()
 			friends.addEventListener('click', function(event)
 			{
 				event.preventDefault();
-				navigateTo('/home/friends');
+				navigateTo('/home/friends/');
 			});
 		}
 		if (tournament)
@@ -208,7 +208,7 @@ function loadHome()
 	    		tournament.addEventListener('click', function(event)
 			{
 				event.preventDefault();
-				navigateTo('/home/game');
+				navigateTo('/home/game/');
 			});
 		}
 	 })
@@ -216,13 +216,13 @@ function loadHome()
 		 {
 			console.error('Error:', error);
 			alert('You are not authorized to view this page. Please log in.');
-			navigateTo('/login');
+			navigateTo('/login/');
 		});
 	}
 	else
 	{
 		alert('You are not authorized to view this page. Please log in.');
-		navigateTo('/login');
+		navigateTo('/login/');
 	}
 }
 

@@ -1,9 +1,9 @@
 function loadPage(url, data)
 {
 	console.log('INSIDE LOAD PAGE');
-	if (url === '/home')
+	if (url === '/home/')
 		loadHome();
-	else if (url === '/login')
+	else if (url === '/login/')
 		loadLoginForm();
 	else if (url === '/signup/')
 	{
@@ -15,13 +15,13 @@ function loadPage(url, data)
 		console.log('Activation');
 		loadLoginForm();
 	}
-	else if (url === '/home/profile')
+	else if (url === '/home/profile/')
 		loadProfile(data);
-	else if (url === '/home/profile/edit')
+	else if (url === '/home/profile/edit/')
 		loadProfileSettings(data);
-	else if (url === '/home/game')
+	else if (url === '/home/game/')
 		loadPlayGame();
-	else if (url === '/home/friends')
+	else if (url === '/home/friends/')
 		loadFriendsSection();
 
 }

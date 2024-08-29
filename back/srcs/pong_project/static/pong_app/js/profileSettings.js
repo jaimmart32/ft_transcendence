@@ -71,60 +71,71 @@ function loadProfileSettings(user_content)
 			}
 }
 
-function updateUserInfo() {
-	const token = localStorage.getItem('access');
+function updateUserInfo()
+{
+    const token = localStorage.getItem('access');
 
-	if (token) {
-		const username = document.getElementById('username').value;
-		const password = document.getElementById('password').value;
-		const twofa = document.getElementById('twofa').checked ? 'on' : 'off';
-		const userPic = document.getElementById('avatar').files[0];
+    if (token) {
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+        const twofa = document.getElementById('twofa').checked ? 'on' : 'off';
+        const userPic = document.getElementById('avatar').files[0];
 
-		// Crear un lector para convertir la imagen a base64
-		const reader = new FileReader();
-		reader.readAsDataURL(userPic);
 
-		reader.onloadend = function () {
-			const userDict = {
-				username: username,
-				password: password,
-				twofa: twofa,
-				avatar: reader.result // Convertido a base64
-			};
+        const userDict = {
+            username: username,
+            password: password,
+            twofa: twofa,
+        };
 
-			fetch('/home/profile/edit/', {
-				method: 'PUT',
-				headers: {
-					'Authorization': `Bearer ${token}`,
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify(userDict)
-			})
-			.then(response => response.json())
-			.then(data => {
-				if (data.status === 'success') {
-					alert('Info updated correctly!');
-					navigateTo('/home/profile', userDict);
-				} else {
-					if (data.message) {
-						if (data.message.includes('file')) {
-							showMessage('file-error', data.message);
-						}
-					}
-					// Maneja errores aquí
-					console.error(data.message);
-				}
-			})
-			.catch(error => {
-				console.log('Inside the error');
-				console.error('Error:', error);
-				alert('Access denied');
-			});
-		};
-	} else {
-		alert('You are not authorized to view this page. Please log in.');
-		navigateTo('/login');
-	}
+        if (userPic) {
+            // Crear un lector para convertir la imagen a base64
+            const reader = new FileReader();
+            reader.readAsDataURL(userPic);
+
+            reader.onloadend = function () {
+                userDict.avatar = reader.result;// Convertido a base64
+
+                sendUserData(userDict, token);
+            };
+        } else {
+            sendUserData(userDict, token);
+        }
+    } else {
+        alert('You are not authorized to view this page. Please log in.');
+        navigateTo('/login/');
+    }
+}
+
+function sendUserData(userDict, token)
+{
+    fetch('/home/profile/edit/', {
+        method: 'PUT',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userDict)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            alert('Info updated correctly!');
+            navigateTo('/home/profile/', userDict);
+        } else {
+            if (data.message) {
+                if (data.message.includes('file')) {
+                    showMessage('file-error', data.message);
+                }
+            }
+            console.error(data.message);
+        }
+    })
+    .catch(error => {
+        console.log('Inside the error');
+        console.error('Error:', error);
+        alert('Access denied');
+    });
 }
 
 window.loadProfileSettings = loadProfileSettings;

@@ -82,12 +82,6 @@ def signupView(request):
 	if request.method == 'GET':
 		return render(request, "pong_app/index.html")
 
-	"""auth_header = request.headers.get('Authorization')
-    if auth_header and auth_header.startswith('Bearer '):
-        token = auth_header.split(' ')[1]
-        user = get_user_from_jwt(token)
-        if user:
-            return redirect('/home/')"""
 	elif request.method == 'POST':
 		data = json.loads(request.body)
 		username = data.get('username', '')

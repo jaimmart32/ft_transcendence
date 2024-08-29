@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const login42Link = document.getElementById('login42-link');
 
 	
-	navigateTo(window.location.pathname);
+
 //	This event listener is in charge of receiving any event regarding the 
 //	browser buttons (forward/backward/refresh)
 	window.addEventListener('popstate', function(event)
@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', function() {
 		loginLink.addEventListener('click', function(event)
 		{
 			event.preventDefault();
-			navigateTo('/login');
+			navigateTo('/login/');
 		});
 	}
 
@@ -39,10 +39,11 @@ document.addEventListener('DOMContentLoaded', function() {
 			await handleAuth();
 		});
 	}
+	navigateTo(window.location.pathname);
 //	monitorUrlChanges();
 });
 
-function monitorUrlChanges() {
+/*function monitorUrlChanges() {
     let currentPath = window.location.pathname;
 
     console.log('INSIDE MONITOR URL');
@@ -68,4 +69,4 @@ function monitorUrlChanges() {
 
 	navigateTo(window.location.pathname);
 	//loadPage(window.location.pathname);
-});
+});*/

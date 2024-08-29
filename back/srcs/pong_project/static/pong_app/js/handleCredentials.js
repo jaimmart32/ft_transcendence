@@ -51,7 +51,7 @@ function logInHandler()
 			{
 				localStorage.setItem('access', data.access);
 				alert('Log in successful!');
-				navigateTo('/home');
+				navigateTo('/home/');
 			}
                     }
 		    else
@@ -106,7 +106,7 @@ function handle2FA(code)
 	    {
 		localStorage.setItem('access', data.access);
 		alert('Log in successful!');
-		navigateTo('/home');
+		navigateTo('/home/');
 		return (true);
 	    }
 	    else

@@ -43,13 +43,13 @@ function loadFriendsSection()
 		.catch(error => {
 			console.error('Error:', error);
 			alert('You are not authorized to view this page. Please log in.');
-			navigateTo('/login');
+			navigateTo('/login/');
 		});
 	}
 	else
 	{
 		alert('You are not authorized to view this page. Please log in.');
-		navigateTo('/login');
+		navigateTo('/login/');
 	}
 }
 

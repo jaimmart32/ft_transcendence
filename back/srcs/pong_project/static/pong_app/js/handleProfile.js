@@ -66,7 +66,7 @@ function loadProfile()
 				edit.addEventListener('click', function(event)
 				{
 					event.preventDefault();	
-					navigateTo('/home/profile/edit', data);
+					navigateTo('/home/profile/edit/', data);
 				});
 			}
 		})
@@ -74,12 +74,12 @@ function loadProfile()
 		{
 			console.error('Error:', error);
 			alert('You are not authorized to view this page. Please log in.');
-			navigateTo('/login');
+			navigateTo('/login/');
 		});
 	}
 	else
 	{
 		alert('You are not authorized to view this page. Please log in.');
-		navigateTo('/login');
+		navigateTo('/login/');
 	}
 }

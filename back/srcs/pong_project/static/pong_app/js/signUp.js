@@ -36,7 +36,7 @@ function signUpHandler()
                     if (data.status == 'success')
 		    {
 		    	alert('Signup correct');
-			navigateTo('/login');
+			navigateTo('/login/');
                     }
 		    else
                         alert('Signup failed: ' + data.message);
