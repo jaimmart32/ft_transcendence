@@ -4,7 +4,7 @@ function loadFriendsSection()
 
 	if (token)
 	{
-		fetch('/friends/',
+		fetch('/home/friends/',
 		{
 			method: 'GET',
 			headers:
@@ -58,7 +58,7 @@ function addFriend(username)
 	const token = localStorage.getItem('access');
 	if (token)
 	{
-		fetch('/friends/add/',
+		fetch('/home/friends/add/',
 		{
 			method: 'POST',
 			headers:
@@ -83,7 +83,7 @@ function removeFriend(username)
 	const token = localStorage.getItem('access');
 	if (token)
 	{
-		fetch('/friends/remove/',
+		fetch('/home/friends/remove/',
 		{
 			method: 'POST',
 			headers:

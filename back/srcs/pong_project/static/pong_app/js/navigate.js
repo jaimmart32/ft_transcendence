@@ -18,7 +18,7 @@ function loadPage(url, data)
 	else if (url === '/home/profile/')
 		loadProfile(data);
 	else if (url === '/home/profile/edit/')
-		loadProfileSettings(data);
+		loadProfileSettings();
 	else if (url === '/home/game/')
 		loadPlayGame();
 	else if (url === '/home/friends/')

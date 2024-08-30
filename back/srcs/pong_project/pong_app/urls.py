@@ -13,6 +13,7 @@ urlpatterns = [
 	path('home/', views.Home, name='home'),
 	path('home/profile/', views.Profile, name='profile'),
 	path('home/profile/edit/', views.EditProfile, name='edit_profile'),
+	path('get_user_info/', views.getUserInfo, name='get_user_info'),
 
 
 	path('api/auth-settings/', views.authSettings, name='auth_settings'),
@@ -25,7 +26,7 @@ urlpatterns = [
 	path('index.html', TemplateView.as_view(template_name='index.html'), name='index_html'),
 	
 	# Friends
-	path('friends/', views.FriendsList, name='friends-list'),
-	path('friends/add/', views.AddFriend, name='add-friend'),
-	path('friends/remove/', views.RemoveFriend, name='remove-friend'),
+	path('home/friends/', views.FriendsList, name='friends-list'),
+	path('home/friends/add/', views.AddFriend, name='add-friend'),
+	path('home/friends/remove/', views.RemoveFriend, name='remove-friend'),
 ]

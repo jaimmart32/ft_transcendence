@@ -77,6 +77,14 @@ def refreshView(request):
 			return JsonResponse({'status': 'error', 'message': 'Invalid or expired token'}, status=401)
 	return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
 
+@jwt_required
+def	getUserInfo(request):
+	if request.method == 'GET':
+		user = request.user
+		username = user.username
+		return JsonResponse({'status': 'success', 'username': username}, status=200)
+	return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
+
 @csrf_exempt
 def signupView(request):
 

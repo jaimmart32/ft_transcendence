@@ -1,5 +1,27 @@
-function loadProfileSettings(user_content)
+function loadProfileSettings()
 {
+	const token = localStorage.getItem('access');
+	if (token) {
+		console.log('INSIDE PROFILESETTINGS!!!!')
+		fetch('/get_user_info/',
+			{
+				method: 'GET',
+			headers:
+			{
+				'Authorization': `Bearer ${token}`,
+				'Content-Type': 'application/json'
+			}
+        	})
+	.then(response =>
+	{
+		if (!response.ok)
+		{
+			throw new Error('Access denied');
+		}
+		return response.json();
+	})
+	.then(data =>
+	{
 		app.innerHTML = `
 		<div class="container mt-2">
 				<h2>Profile Settings</h2>
@@ -9,7 +31,7 @@ function loadProfileSettings(user_content)
 				<div class="form-group row">
 					<label for="username" class="col-sm-2 col-form-label">Username</label>
 					<div class="col-sm-10">
-					<input type="text" class="form-control" id="username" value=${user_content.username}>
+					<input type="text" class="form-control" id="username" value=${data.username}>
 						<span id="username-error" class="error-message"></span>
 					</div>
 				</div>
@@ -69,6 +91,19 @@ function loadProfileSettings(user_content)
 				updateUserInfo();
 			});
 			}
+	 })
+		 .catch(error =>
+		 {
+			console.error('Error:', error);
+			alert('You are not authorized to view this page. Please log in.');
+			navigateTo('/login/');
+		});
+	}
+	else {
+		console.error('Error:', error);
+			alert('You are not authorized to view this page. Please log in.');
+			navigateTo('/login/');
+	}
 }
 
 function updateUserInfo()
