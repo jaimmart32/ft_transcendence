@@ -1,24 +1,75 @@
 // HTML for the Login page
 function loadLoginForm()
 {
-	app.innerHTML = `
-	    <h2>Login</h2>
-	    <form id="login-form">
-		<div class="form-group">
-		    <label for="username">Username</label>
-		    <input type="username" class="form-control" id="username" aria-describedby="usernameHelp" placeholder="Enter username">
-		    <span id="username-error" class="error-message"></span>
-		</div>
-		<div class="form-group">
-		    <label for="password">Password</label>
-		    <input type="password" class="form-control" id="password" placeholder="Password">
-		    <span id="password-error" class="error-message"></span>
-		</div>
-		<span id="email-error" class="error-message"></span>
-		<button type="submit" class="btn btn-primary">Login</button>
-	    </form>
-	`;
-	logInHandler();
+	const app = document.getElementById('app');
+	const token = localStorage.getItem('access');
+
+	if (token)
+	{
+		fetch('/home/',
+		{
+			method: 'GET',
+			headers:
+			{
+				'Authorization': `Bearer ${token}`,
+				'Content-Type': 'application/json'
+			}
+        	})
+	.then(response =>
+	{
+		if (!response.ok)
+		{
+			throw new Error('Access denied');
+		}
+		return response.json();
+	})
+	.then(data =>
+	{
+		loadHome()
+	 })
+		 .catch(() =>
+		 {
+			app.innerHTML = `
+		    <h2>Login</h2>
+		    <form id="login-form">
+			<div class="form-group">
+			    <label for="username">Username</label>
+			    <input type="username" class="form-control" id="username" aria-describedby="usernameHelp" placeholder="Enter username">
+			    <span id="username-error" class="error-message"></span>
+			</div>
+			<div class="form-group">
+			    <label for="password">Password</label>
+			    <input type="password" class="form-control" id="password" placeholder="Password">
+			    <span id="password-error" class="error-message"></span>
+			</div>
+			<span id="email-error" class="error-message"></span>
+			<button type="submit" class="btn btn-primary">Login</button>
+		    </form>
+		`;
+		logInHandler();
+		});
+	}
+	else
+	{
+		app.innerHTML = `
+		    <h2>Login</h2>
+		    <form id="login-form">
+			<div class="form-group">
+			    <label for="username">Username</label>
+			    <input type="username" class="form-control" id="username" aria-describedby="usernameHelp" placeholder="Enter username">
+			    <span id="username-error" class="error-message"></span>
+			</div>
+			<div class="form-group">
+			    <label for="password">Password</label>
+			    <input type="password" class="form-control" id="password" placeholder="Password">
+			    <span id="password-error" class="error-message"></span>
+			</div>
+			<span id="email-error" class="error-message"></span>
+			<button type="submit" class="btn btn-primary">Login</button>
+		    </form>
+		`;
+		logInHandler();
+	}
 }
 
 function loadEmailConfirmation()
@@ -40,33 +91,93 @@ function loadEmailConfirmation()
 // HTML for the SignUp page
 function loadSignupForm()
 {
-	app.innerHTML = `
-	    <h2>Sign Up</h2>
-	    <form id="signup-form">
-		<div class="form-group">
-		    <label for="username">Username</label>
-		    <input type="text" class="form-control" id="username" placeholder="Enter username">
-		    <span id="username-error" class="error-message"></span>
-		</div>
-		<div class="form-group">
-		    <label for="email">Email address</label>
-		    <input type="email" class="form-control" id="email" aria-describedby="emailHelp" placeholder="Enter email">
-		    <span id="email-error" class="error-message"></span>
-		</div>
-		<div class="form-group">
-		    <label for="password">Password</label>
-		    <input type="password" class="form-control" id="password" placeholder="Password">
-		    <span id="password-error" class="error-message"></span>
-		</div>
-		<div class="form-group">
-		    <label for="confirm password">Confirm password</label>
-		    <input type="password" class="form-control" id="confirm-password" placeholder="Confirm password">
-		    <span id="conf-password-error" class="error-message"></span>
-		</div>
-		<button type="submit" class="btn btn-primary">Sign Up</button>
-	    </form>
-	`;
-	signUpHandler();
+	const app = document.getElementById('app');
+	const token = localStorage.getItem('access');
+
+	if (token)
+	{
+		fetch('/home/',
+		{
+			method: 'GET',
+			headers:
+			{
+				'Authorization': `Bearer ${token}`,
+				'Content-Type': 'application/json'
+			}
+        	})
+	.then(response =>
+	{
+		if (!response.ok)
+		{
+			throw new Error('Access denied');
+		}
+		return response.json();
+	})
+	.then(data =>
+	{
+		loadHome()
+	 })
+		 .catch(() =>
+		 {
+			app.innerHTML = `
+		    <h2>Sign Up</h2>
+		    <form id="signup-form">
+			<div class="form-group">
+			    <label for="username">Username</label>
+			    <input type="text" class="form-control" id="username" placeholder="Enter username">
+			    <span id="username-error" class="error-message"></span>
+			</div>
+			<div class="form-group">
+			    <label for="email">Email address</label>
+			    <input type="email" class="form-control" id="email" aria-describedby="emailHelp" placeholder="Enter email">
+			    <span id="email-error" class="error-message"></span>
+			</div>
+			<div class="form-group">
+			    <label for="password">Password</label>
+			    <input type="password" class="form-control" id="password" placeholder="Password">
+			    <span id="password-error" class="error-message"></span>
+			</div>
+			<div class="form-group">
+			    <label for="confirm password">Confirm password</label>
+			    <input type="password" class="form-control" id="confirm-password" placeholder="Confirm password">
+			    <span id="conf-password-error" class="error-message"></span>
+			</div>
+			<button type="submit" class="btn btn-primary">Sign Up</button>
+		    </form>
+		`;
+		signUpHandler();
+		});
+	}
+	else
+	{
+		app.innerHTML = `
+		    <h2>Sign Up</h2>
+		    <form id="signup-form">
+			<div class="form-group">
+			    <label for="username">Username</label>
+			    <input type="text" class="form-control" id="username" placeholder="Enter username">
+			    <span id="username-error" class="error-message"></span>
+			</div>
+			<div class="form-group">
+			    <label for="email">Email address</label>
+			    <input type="email" class="form-control" id="email" aria-describedby="emailHelp" placeholder="Enter email">
+			    <span id="email-error" class="error-message"></span>
+			</div>
+			<div class="form-group">
+			    <label for="password">Password</label>
+			    <input type="password" class="form-control" id="password" placeholder="Password">
+			    <span id="password-error" class="error-message"></span>
+			</div>
+			<div class="form-group">
+			    <label for="confirm password">Confirm password</label>
+			    <input type="password" class="form-control" id="confirm-password" placeholder="Confirm password">
+			    <span id="conf-password-error" class="error-message"></span>
+			</div>
+			<button type="submit" class="btn btn-primary">Sign Up</button>
+		    </form>
+		`;
+		signUpHandler();
+	}
 }
 
 function loadPlayGame()
