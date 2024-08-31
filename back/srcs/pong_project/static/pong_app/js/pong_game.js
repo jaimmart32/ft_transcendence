@@ -83,6 +83,7 @@ function initializeGame(){
 
         console.log(player2.y);
         console.log(ball.x);
+        update();
     }
 
     let canvas = document.getElementById("board");
@@ -141,7 +142,7 @@ function initializeGame(){
             // Send ball and player data every frame
             sendPlayerData("update");
         }
-        requestAnimationFrame(update);
+        //requestAnimationFrame(update);
     }
     update();
 }
