@@ -78,6 +78,11 @@ function initializeGame(){
 
         ball.x = data['ballX'];
         ball.y = data['ballY'];
+        ball.velocityX = data['velocityX'];
+        ball.velocityY = data['velocityY'];
+
+        console.log(player2.y);
+        console.log(ball.x);
     }
 
     let canvas = document.getElementById("board");
@@ -90,57 +95,55 @@ function initializeGame(){
     context.fillRect(player1.x, player1.y, player1.width, player1.height);
     context.fillRect(player2.x, player2.y, player2.width, player2.height);
 
-    requestAnimationFrame(update);
-    document.addEventListener("keyup", moveDjango);
+    //document.addEventListener("keyup", moveDjango);
     document.addEventListener("keydown", moveDjango);
         
     function moveDjango(e){
+        sendPlayerData(e.code);
+    }
+
+    function sendPlayerData(keycode){
         socket.send(JSON.stringify(
             {
                 'Player1': player1.y,
                 'Player2': player2.y,
                 'speed1': player1.velocityY,
                 'speed2': player2.velocityY,
-                'key': e.code,
+                'key': keycode,
                 'ballX': ball.x,
                 'ballY': ball.y,
                 'velocityX': ball.velocityX,
                 'velocityY': ball.velocityY,
             }))
     }
+
+    let lastUpdateTime = Date.now();
+    const updateInterval = 1000 / 30;  // 30 FPS
             
     function update() {
+        let now = Date.now();
+        let deltaTime = now - lastUpdateTime;
+
+        if (deltaTime >= updateInterval){
+            lastUpdateTime = Date.now()
+            //requestAnimationFrame(update);
+            context.clearRect(0, 0, board.width, board.height);
+    
+            // draw players
+            context.fillStyle = "skyblue";
+            context.fillRect(player1.x, player1.y, player1.width, player1.height);
+            context.fillRect(player2.x, player2.y, player2.width, player2.height);
+    
+            //ball
+            context.fillStyle = "White"
+            context.fillRect(ball.x, ball.y, ball.width, ball.height);
+    
+            // Send ball and player data every frame
+            sendPlayerData("update");
+        }
         requestAnimationFrame(update);
-        context.clearRect(0, 0, board.width, board.height);
-
-        // draw players
-        context.fillStyle = "skyblue";
-        context.fillRect(player1.x, player1.y, player1.width, player1.height);
-        context.fillRect(player2.x, player2.y, player2.width, player2.height);
-
-        //ball
-        context.fillStyle = "White"
-        socket.send(JSON.stringify(
-            {
-                'Player1': player1.y,
-                'Player2': player2.y,
-                'speed1': player1.velocityY,
-                'speed2': player2.velocityY,
-                'key': "other",
-                'ballX': ball.x,
-                'ballY': ball.y,
-                'velocityX': ball.velocityX,
-                'velocityY': ball.velocityY,
-            }))
-        if (ballSaved()){
-            // create logic to check if the ball was saved by the paddle so it has to bounce
-        }
-        if (score()){
-            // create logic to check if the ball was not saved and was scored
-        }
-        ball.y += ball.velocityY;
-        context.fillRect(ball.x, ball.y, ball.width, ball.height);
     }
+    update();
 }
 
 window.initializeGame = initializeGame;

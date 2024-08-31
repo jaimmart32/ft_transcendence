@@ -41,12 +41,16 @@ class PongConsumer(WebsocketConsumer):
         if key in ["KeyW", "KeyS", "ArrowUp", "ArrowDown"]:
             if key == "KeyW":
                 speed1 = -3
+                speed2 = 0
             elif key == "KeyS":
                 speed1 = 3
+                speed2 = 0
             # player 2
             elif key == "ArrowUp":
+                speed1 = 0
                 speed2 = -3
             elif key == "ArrowDown":
+                speed1 = 0
                 speed2 = 3
             try:
                 speed1 = int(speed1)
@@ -61,7 +65,8 @@ class PongConsumer(WebsocketConsumer):
             except:
                 pass
         if not ballOutOfBounds(ball[1], 18, 500):
-            ballspeed[1] = ballspeed[1] * -1
+            ballspeed[1] = -ballspeed[1]
+        # check if the ball was saved or if it was scored
         ball[1] += ballspeed[1]
         ball[0] += ballspeed[0]
         position_updated = {
@@ -75,6 +80,7 @@ class PongConsumer(WebsocketConsumer):
                 'velocityY': ballspeed[1],
             }
 
+        time.sleep(0.016)  # Approx 60 FPS
+
         self.send(text_data=json.dumps(position_updated))
 
-        time.sleep(0.016)  # Approx 60 FPS
