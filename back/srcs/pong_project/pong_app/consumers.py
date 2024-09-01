@@ -1,7 +1,10 @@
 import json
 from channels.generic.websocket import WebsocketConsumer
+#from channels.generic.websocket import AsyncWebsocketConsumer
 import logging
 import time
+import threading
+from .models import Paddle, Board, Ball
 
 logger = logging.getLogger(__name__)
 
@@ -15,11 +18,50 @@ class PongConsumer(WebsocketConsumer):
     def connect(self):
         logger.info(self.scope)  # Print the scope to debug the connection
         self.accept()
+        self.game_thread = threading.Thread(target=self.game_loop)
+        self.game_thread.start()
 
+    def game_loop(self):
+        self.running = True
+        board = Board()
+        ball = Ball(board=board)
+        player1 = Paddle(number=1, board=board)
+        player2 = Paddle(number=2, board=board)
+        while self.running:
+            if not ballOutOfBounds(ball.y, player1.height, board.height):
+                ball.velocityY = -ball.velocityY
+            # check if the ball was saved or if it was scored
+            ball.x += ball.velocityX
+            ball.y += ball.velocityY
+            print("Ballx:", ball.x)
+            position_updated = {
+                    'Player1': player1.y,
+                    'Player2': player2.y,
+                    'Speed1': 3,
+                    'Speed2': 3,
+                    'ballX': ball.x,
+                    'ballY': ball.y,
+                    'velocityX': ball.velocityX,
+                    'velocityY': ball.velocityY,
+                }
+
+            time.sleep(0.016)  # Approx 60 FPS
+
+            self.send(text_data=json.dumps(position_updated))
+             
+    
     def disconnect(self, close_code):
         logger.info(f"Disconnected: {close_code}")
+        self.running = False
+
+    def move_ball(self):
+        while True:
+            zzz
 
     def receive(self, text_data):
+        pass
+
+    def other():
         try:
             text_data_json = json.loads(text_data)
             message = text_data_json["Player1"]

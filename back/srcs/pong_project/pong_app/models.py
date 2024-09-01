@@ -47,3 +47,30 @@ class	Game(models.Model):
 
 	def __str__(self):
 		return f"Winner: {self.winner}!"
+
+
+class Board:
+	def __init__(self, width=900, height=500) -> None:
+		self.width = width
+		self.height = height
+
+class Ball:
+	def __init__(self, board) -> None:
+		self.width = board.width / 50
+		self.height = self.width
+		self.x = (board.width / 2) - (self.height / 2)
+		self.y = (board.height / 2) - (self.height / 2)
+		self.velocityX = 1
+		self.velocityY = 2
+
+class Paddle:
+	def __init__(self, number, board) -> None:
+		self.width = board.width / 50
+		self.height = self.width * 5
+		self.velocityY = 0
+		if number is 1:
+			self.x = 10
+			self.y = (board.height / 2) - (self.height / 2)
+		else:
+			self.x = board.width - (self.width * 2)
+			self.y = (board.height / 2) - (self.height / 2)

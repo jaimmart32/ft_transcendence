@@ -97,7 +97,6 @@ function initializeGame(){
     context.fillRect(player2.x, player2.y, player2.width, player2.height);
 
     //document.addEventListener("keyup", moveDjango);
-    document.addEventListener("keydown", moveDjango);
         
     function moveDjango(e){
         sendPlayerData(e.code);
@@ -117,32 +116,22 @@ function initializeGame(){
                 'velocityY': ball.velocityY,
             }))
     }
-
-    let lastUpdateTime = Date.now();
-    const updateInterval = 1000 / 30;  // 30 FPS
             
     function update() {
-        let now = Date.now();
-        let deltaTime = now - lastUpdateTime;
-
-        if (deltaTime >= updateInterval){
-            lastUpdateTime = Date.now()
-            //requestAnimationFrame(update);
-            context.clearRect(0, 0, board.width, board.height);
-    
-            // draw players
-            context.fillStyle = "skyblue";
-            context.fillRect(player1.x, player1.y, player1.width, player1.height);
-            context.fillRect(player2.x, player2.y, player2.width, player2.height);
-    
-            //ball
-            context.fillStyle = "White"
-            context.fillRect(ball.x, ball.y, ball.width, ball.height);
-    
-            // Send ball and player data every frame
-            sendPlayerData("update");
-        }
         //requestAnimationFrame(update);
+        context.clearRect(0, 0, board.width, board.height);
+
+        // draw players
+        context.fillStyle = "skyblue";
+        context.fillRect(player1.x, player1.y, player1.width, player1.height);
+        context.fillRect(player2.x, player2.y, player2.width, player2.height);
+
+        //ball
+        context.fillStyle = "White"
+        context.fillRect(ball.x, ball.y, ball.width, ball.height);
+
+        // Send ball and player data every frame
+        sendPlayerData("update");
     }
     update();
 }
