@@ -12,7 +12,7 @@ def outOfBounds(yPosition, player, board):
 		return yPosition < 0 or yPosition + player > board
 
 def ballOutOfBounds(yPosition, ball, board):
-        return yPosition < 0 or yPosition + ball> board
+        return yPosition < 0 or yPosition + ball > board
 
 class PongConsumer(WebsocketConsumer):
     def connect(self):
@@ -28,12 +28,11 @@ class PongConsumer(WebsocketConsumer):
         player1 = Paddle(number=1, board=board)
         player2 = Paddle(number=2, board=board)
         while self.running:
-            if not ballOutOfBounds(ball.y, player1.height, board.height):
+            if ballOutOfBounds(ball.y, ball.height, board.height):
                 ball.velocityY = -ball.velocityY
             # check if the ball was saved or if it was scored
             ball.x += ball.velocityX
             ball.y += ball.velocityY
-            print("Ballx:", ball.x)
             position_updated = {
                     'Player1': player1.y,
                     'Player2': player2.y,
@@ -53,10 +52,6 @@ class PongConsumer(WebsocketConsumer):
     def disconnect(self, close_code):
         logger.info(f"Disconnected: {close_code}")
         self.running = False
-
-    def move_ball(self):
-        while True:
-            zzz
 
     def receive(self, text_data):
         pass
