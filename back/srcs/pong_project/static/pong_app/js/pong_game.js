@@ -75,6 +75,15 @@ function initializeGame(){
     
         // Update player2's speed (velocityY) with the received data
         player2.velocityY = data['Speed2'];
+
+        ball.x = data['ballX'];
+        ball.y = data['ballY'];
+        ball.velocityX = data['velocityX'];
+        ball.velocityY = data['velocityY'];
+
+        console.log(player2.y);
+        console.log(ball.x);
+        update();
     }
 
     let canvas = document.getElementById("board");
@@ -87,23 +96,29 @@ function initializeGame(){
     context.fillRect(player1.x, player1.y, player1.width, player1.height);
     context.fillRect(player2.x, player2.y, player2.width, player2.height);
 
-    requestAnimationFrame(update);
-    document.addEventListener("keyup", moveDjango);
-    document.addEventListener("keydown", moveDjango);
+    //document.addEventListener("keyup", moveDjango);
         
     function moveDjango(e){
+        sendPlayerData(e.code);
+    }
+
+    function sendPlayerData(keycode){
         socket.send(JSON.stringify(
-        {
-            'Player1': player1.y,
-            'Player2': player2.y,
-            'key': e.code,
-            'speed1': player1.velocityY,
-            'speed2': player2.velocityY,
-        }))
+            {
+                'Player1': player1.y,
+                'Player2': player2.y,
+                'speed1': player1.velocityY,
+                'speed2': player2.velocityY,
+                'key': keycode,
+                'ballX': ball.x,
+                'ballY': ball.y,
+                'velocityX': ball.velocityX,
+                'velocityY': ball.velocityY,
+            }))
     }
             
     function update() {
-        requestAnimationFrame(update);
+        //requestAnimationFrame(update);
         context.clearRect(0, 0, board.width, board.height);
 
         // draw players
@@ -113,32 +128,12 @@ function initializeGame(){
 
         //ball
         context.fillStyle = "White"
-        socket.send(JSON.stringify(
-            {
-                'Player1': player1.y,
-                'Player2': player2.y,
-                'ballX': ball.x,
-                'ballY': ball.y,
-                'velocityX': ball.velocityX,
-                'velocityY': ball.velocityY,
-            }))
-        ball.x += ball.velocityX;
-        if (ballOutOfBounds(ball.y + ball.velocityY, ball, board)){
-            ball.velocityY = ball.velocityY * -1;    
-        }
-        if (ballSaved()){
-            // create logic to check if the ball was saved by the paddle so it has to bounce
-        }
-        if (score()){
-            // create logic to check if the ball was not saved and was scored
-        }
-        ball.y += ball.velocityY;
         context.fillRect(ball.x, ball.y, ball.width, ball.height);
-    }
 
-    function ballOutOfBounds(yPosition, ball, board) {
-        return (yPosition < 0 || yPosition + ball.height > board.height)
+        // Send ball and player data every frame
+        sendPlayerData("update");
     }
+    update();
 }
 
 window.initializeGame = initializeGame;
