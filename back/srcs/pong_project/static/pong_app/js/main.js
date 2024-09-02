@@ -35,12 +35,12 @@ document.addEventListener('DOMContentLoaded', function() {
 	{
 		login42Link.addEventListener('click', async function(event)
 		{
+			alert('clicked 42 auth');
 			event.preventDefault();
 			await handleAuth();
 		});
 	}
-	navigateTo(window.location.pathname);
-//	monitorUrlChanges();
+	navigateTo(window.location.pathname + window.location.search);
 });
 
 /*function monitorUrlChanges() {

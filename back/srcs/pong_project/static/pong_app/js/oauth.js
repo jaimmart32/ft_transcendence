@@ -110,13 +110,11 @@ async function handle42Info(userInfo)
 			const jsonData = JSON.parse(data);
 			if (jsonData.status === 'success')
 			{
-				alert('Successfully authenticated');
 				window.location.href = jsonData.redirect_url;
 			}
 			else
 			{
 				console.log('Error: ', jsonData.message);
-				alert('Failed to create the user');
 			}
 		}
 		catch(e)
@@ -146,7 +144,7 @@ document.addEventListener('DOMContentLoaded', () =>
 	{
 		console.log('Inside event listener, found tokens');
 		localStorage.setItem('access', access);
-		window.history.replaceState({}, document.title, "/home");
+		window.history.replaceState({}, document.title, "/home/");
 		navigateTo('/home/');
 	}
 	if (code)

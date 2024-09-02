@@ -23,7 +23,6 @@ function loadPage(url, data)
 		loadPlayGame();
 	else if (url === '/home/friends/')
 		loadFriendsSection();
-
 }
 
 function navigateTo(url, data)
