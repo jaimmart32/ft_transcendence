@@ -254,7 +254,7 @@ function loadHome()
 	const token = localStorage.getItem('access');
 	console.log('Token in localstorage: ', token);
 
-	if (token)
+	if (token && checkToken(token))
 	{
 		console.log('Token in localstorage: ', token);
 		fetch('/home/',

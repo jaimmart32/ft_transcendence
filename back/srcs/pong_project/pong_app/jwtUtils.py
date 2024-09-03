@@ -20,26 +20,39 @@ def create_jwt_token(user):
 	token = jwt.encode(payload, settings.JWT_SECRET_KEY, algorithm=settings.JWT_ALGORITHM)
 	return token
 
-def decode_jwt_token(token):
+def create_jwt_refresh_token(user):
+
+
+	payload = {
+			'id': user.id,
+			'exp': datetime.datetime.utcnow() + settings.JWT_REFRESH_EXPIRATION_DELTA,
+			'iat': datetime.datetime.utcnow()}
+
+
+	token = jwt.encode(payload, settings.JWT_SECRET_KEY, algorithm=settings.JWT_ALGORITHM)
+	return token
+
+def decode_jwt_token(token, refreshType=None):
 	try:
 		payload = jwt.decode(token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
 		return payload
 	except jwt.ExpiredSignatureError:
-		payload = jwt.decode(token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM], options={"verify_exp": False})
-		user_id = payload.get('id')
-		if user_id:
-			try:
-				user = CustomUser.objects.get(id=user_id)
-				user.is_online = False
-				user.save()
-			except CustomUser.DoesNotExist:
-				pass
+		if refreshType is not None:
+			payload = jwt.decode(token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM], options={"verify_exp": False})
+			user_id = payload.get('id')
+			if user_id:
+				try:
+					user = CustomUser.objects.get(id=user_id)
+					user.is_online = False
+					user.save()
+				except CustomUser.DoesNotExist:
+					pass
 		return None
 	except jwt.InvalidTokenError:
 		return None
 
-def get_user_from_jwt(token):
-	payload = decode_jwt_token(token)
+def get_user_from_jwt(token, refreshType=None):
+	payload = decode_jwt_token(token, refreshType)
 	if payload:
 		try:
 			user = CustomUser.objects.get(id=payload['id'])

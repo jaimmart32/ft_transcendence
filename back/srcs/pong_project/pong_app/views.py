@@ -21,7 +21,7 @@ from django.utils.encoding import force_bytes, force_str
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from datetime import timedelta
 from django.utils import timezone
-from .jwtUtils import create_jwt_token, get_user_from_jwt
+from .jwtUtils import create_jwt_token, get_user_from_jwt, create_jwt_refresh_token, decode_jwt_token
 from django.views.decorators.csrf import csrf_exempt
 from .avatar import handle_avatar_upload
 
@@ -42,6 +42,7 @@ def jwt_required(viewFunction):
 
 	def wrapper(request, *args, **kwargs):
 		auth_header = request.headers.get('Authorization')
+		refresh_token = request.COOKIES.get('refresh_token')
 		token = None
 		if auth_header and auth_header.startswith('Bearer '):
 			token = auth_header.split(' ')[1]
@@ -53,7 +54,10 @@ def jwt_required(viewFunction):
 			except json.JSONDecodeError:
 				return JsonResponse({'status': 'error', 'message': 'Invalid JSON'}, status=400)
 		if token:
-			user = get_user_from_jwt(token)
+			if refresh_token is not None:
+				user = get_user_from_jwt(refresh_token, refreshType=True)
+			else:
+				user = get_user_from_jwt(token)
 			if user:
 				request.user = user
 				return viewFunction(request, *args, **kwargs)
@@ -62,19 +66,26 @@ def jwt_required(viewFunction):
 		return render(request, "pong_app/index.html")
 	return wrapper
 
-# This view is in charge of checking the token received, if the token is valid and the user exists,
-# it will generate a new token for the user.
-@csrf_exempt
-def refreshView(request):
-
+def	verifyToken(request):
 	if request.method == 'POST':
-		token = request.POST.get('token')
-		user = get_user_from_jwt(token)
-		if user:
-			new_token = create_jwt_token(user)
-			return JsonResponse({'status': 'success', 'token': new_token}, status=200)
-		else:
-			return JsonResponse({'status': 'error', 'message': 'Invalid or expired token'}, status=401)
+		try:
+			auth_header = request.headers.get('Authorization')
+			token = None
+			if auth_header and auth_header.startswith('Bearer '):
+				token = auth_header.split(' ')[1]
+			payload = decode_jwt_token(token)
+			return JsonResponse({'status': 'success', 'message': 'Valid access token'}, status=200)
+		except jwt.ExpiredSignatureError:
+			return JsonResponse({'status': 'accessExpired', 'message': 'Expired access token'}, status=400)
+		except jwt.InvalidTokenError:
+			return JsonResponse({'status': 'error', 'message': 'Non-valid token'}, status=400)
+		
+		
+@jwt_required
+def	verifyRefresh(request):
+	if request.method == 'POST':
+		newToken = create_jwt_token(request.user)
+		return JsonResponse({'status': 'success', 'newToken': newToken, 'message': 'New access token was generated'}, status=200)
 	return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
 
 @jwt_required
@@ -203,12 +214,21 @@ def loginView(request):
 
 				return JsonResponse({'status': 'success', 'message': 'Verification code sent'}, status=200)
 			token = create_jwt_token(user)
+			refresh_token = create_jwt_refresh_token(user)
 			user.is_online = True
 			user.save()
-			return JsonResponse({
+			response = JsonResponse({
 					'status': 'success',
 					'message': 'Logged in successfully!',
 					'access': token}, status=200)
+			response.set_cookie(
+				key = 'refresh_token',
+				value = refresh_token,
+				httponly = True,
+				#secure = True,
+				max_age = (settings.JWT_REFRESH_EXPIRATION_DELTA) * 24 * 60 * 60,
+				samesite = 'Strict')
+			return response
 		else:
 			return JsonResponse({'status': 'error', 'message': 'Invalid credentials'}, status=401)
 	elif request.method == 'GET':

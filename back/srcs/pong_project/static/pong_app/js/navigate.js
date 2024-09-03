@@ -1,20 +1,13 @@
 function loadPage(url, data)
 {
-	console.log('INSIDE LOAD PAGE');
 	if (url === '/home/')
 		loadHome();
 	else if (url === '/login/')
 		loadLoginForm();
 	else if (url === '/signup/')
-	{
-		console.log('INSIDE SIGNUP BEFORE LOAD');
 		loadSignupForm();
-	}
 	else if (url === '/signup/email/activate/')
-	{
-		console.log('Activation');
 		loadLoginForm();
-	}
 	else if (url === '/home/profile/')
 		loadProfile(data);
 	else if (url === '/home/profile/edit/')
@@ -27,7 +20,6 @@ function loadPage(url, data)
 
 function navigateTo(url, data)
 {
-	console.log('INSIDE NAVIGATE TO ', url);
 	window.history.pushState({}, '', url);
 	loadPage(url, data);
 	updateLogoutButtonVisibility();

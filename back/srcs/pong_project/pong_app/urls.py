@@ -10,6 +10,9 @@ urlpatterns = [
 	path('login/verify-2fa/', views.verify2FA, name='verify2FA'),
 	path('', views.main_view, name='main'),
 
+	path('verify-token', views.verifyToken, name='verify-token'),
+	path('verify-refresh', views.verifyRefresh, name='verify-refresh'),
+
 	path('home/', views.Home, name='home'),
 	path('home/profile/', views.Profile, name='profile'),
 	path('home/profile/edit/', views.EditProfile, name='edit_profile'),
