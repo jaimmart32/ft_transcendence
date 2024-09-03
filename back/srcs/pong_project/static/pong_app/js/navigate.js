@@ -30,6 +30,7 @@ function navigateTo(url, data)
 	console.log('INSIDE NAVIGATE TO ', url);
 	window.history.pushState({}, '', url);
 	loadPage(url, data);
+	updateLogoutButtonVisibility();
 }
 
 window.loadPage = loadPage;

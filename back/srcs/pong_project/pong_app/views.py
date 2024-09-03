@@ -82,7 +82,7 @@ def	getUserInfo(request):
 	if request.method == 'GET':
 		user = request.user
 		username = user.username
-		return JsonResponse({'status': 'success', 'username': username}, status=200)
+		return JsonResponse({'status': 'success', 'username': username, 'is_online': user.is_online}, status=200)
 	return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
 
 @csrf_exempt
@@ -223,6 +223,7 @@ def	logoutView(request):
 		if user:
 			user.is_online = False
 			user.save()
+			print("USER JUST LOGGEDOUT!!!", flush=True)
 			return JsonResponse({'status': 'success'}, status=200)
 		return JsonResponse({'status': 'error', 'message': 'User not found'}, status=404)
 	return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
