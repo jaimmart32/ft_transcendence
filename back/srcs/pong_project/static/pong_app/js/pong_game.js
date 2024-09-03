@@ -69,17 +69,9 @@ function initializeGame(){
 
         // Update player2's position with the received data
         player2.y = data['Player2'];
-    
-        // Update player1's speed (velocityY) with the received data
-        player1.velocityY = data['Speed1'];
-    
-        // Update player2's speed (velocityY) with the received data
-        player2.velocityY = data['Speed2'];
 
         ball.x = data['ballX'];
         ball.y = data['ballY'];
-        ball.velocityX = data['velocityX'];
-        ball.velocityY = data['velocityY'];
 
         console.log(player2.y);
         console.log(ball.x);
@@ -96,7 +88,7 @@ function initializeGame(){
     context.fillRect(player1.x, player1.y, player1.width, player1.height);
     context.fillRect(player2.x, player2.y, player2.width, player2.height);
 
-    //document.addEventListener("keyup", moveDjango);
+    document.addEventListener("keyup", moveDjango);
         
     function moveDjango(e){
         sendPlayerData(e.code);
@@ -105,15 +97,7 @@ function initializeGame(){
     function sendPlayerData(keycode){
         socket.send(JSON.stringify(
             {
-                'Player1': player1.y,
-                'Player2': player2.y,
-                'speed1': player1.velocityY,
-                'speed2': player2.velocityY,
                 'key': keycode,
-                'ballX': ball.x,
-                'ballY': ball.y,
-                'velocityX': ball.velocityX,
-                'velocityY': ball.velocityY,
             }))
     }
             

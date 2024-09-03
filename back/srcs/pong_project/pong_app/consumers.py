@@ -9,39 +9,58 @@ from .models import Paddle, Board, Ball
 logger = logging.getLogger(__name__)
 
 def outOfBounds(yPosition, player, board):
-		return yPosition < 0 or yPosition + player > board
+    return yPosition < 0 or yPosition + player > board
 
 def ballOutOfBounds(yPosition, ball, board):
-        return yPosition < 0 or yPosition + ball > board
+    return yPosition < 0 or yPosition + ball > board
+
+def ballSaved(ball, player1, player2):
+    if (ball.x is player1.x + player1.width) and (ball.y >= player1.y and ball.y <= player1.y + player1.height):
+        return True
+    elif (ball.x is player2.x - ball.width) and (ball.y >= player2.y and ball.y <= player2.y + player2.height):
+        return True
+    return False
 
 class PongConsumer(WebsocketConsumer):
     def connect(self):
         logger.info(self.scope)  # Print the scope to debug the connection
         self.accept()
+        self.running = True
+        self.board = Board()
+        self.ball = Ball(board=self.board)
+        self.player1 = Paddle(number=1, board=self.board)
+        self.player2 = Paddle(number=2, board=self.board)
+        self.lock = threading.Lock()  # Initialize the lock
         self.game_thread = threading.Thread(target=self.game_loop)
         self.game_thread.start()
 
+    def move_players(self):
+        with self.lock:  # Acquire the lock before modifying shared resources
+            if not outOfBounds(self.player1.y + self.player1.velocityY, self.player1.height, self.board.height):
+                self.player1.y += self.player1.velocityY
+            if not outOfBounds(self.player2.y + self.player2.velocityY, self.player1.height, self.board.height):
+                self.player2.y += self.player2.velocityY
+
+    def move_ball(self):
+        with self.lock:  # Acquire the lock before modifying shared resources
+            if ballOutOfBounds(self.ball.y, self.ball.height, self.board.height):
+                self.ball.velocityY = -self.ball.velocityY
+            if ballSaved(self.ball, self.player1, self.player2):
+                self.ball.velocityX = -self.ball.velocityX
+            # check if the ball was saved or if it was scored
+            self.ball.x += self.ball.velocityX
+            self.ball.y += self.ball.velocityY
+    
     def game_loop(self):
         self.running = True
-        board = Board()
-        ball = Ball(board=board)
-        player1 = Paddle(number=1, board=board)
-        player2 = Paddle(number=2, board=board)
         while self.running:
-            if ballOutOfBounds(ball.y, ball.height, board.height):
-                ball.velocityY = -ball.velocityY
-            # check if the ball was saved or if it was scored
-            ball.x += ball.velocityX
-            ball.y += ball.velocityY
+            self.move_ball()
+            self.move_players()
             position_updated = {
-                    'Player1': player1.y,
-                    'Player2': player2.y,
-                    'Speed1': 3,
-                    'Speed2': 3,
-                    'ballX': ball.x,
-                    'ballY': ball.y,
-                    'velocityX': ball.velocityX,
-                    'velocityY': ball.velocityY,
+                    'Player1': self.player1.y,
+                    'Player2': self.player2.y,
+                    'ballX': self.ball.x,
+                    'ballY': self.ball.y,
                 }
 
             time.sleep(0.016)  # Approx 60 FPS
@@ -54,70 +73,29 @@ class PongConsumer(WebsocketConsumer):
         self.running = False
 
     def receive(self, text_data):
-        pass
-
-    def other():
         try:
             text_data_json = json.loads(text_data)
-            message = text_data_json["Player1"]
-            logger.info("Message received: %s", message)
         except json.JSONDecodeError as e:
             logger.error("Failed to parse JSON: %s", e)
         except Exception as e:
             logger.error("Unexpected error: %s", e)
-
-        # Logic to update position
-        player1 = text_data_json["Player1"]
         key = text_data_json["key"]
-        player2 = text_data_json["Player2"]
-        speed1 = text_data_json["speed1"]
-        speed2 = text_data_json["speed2"]
-        ball = [text_data_json['ballX'], text_data_json['ballY']]
-        ballspeed = [text_data_json["velocityX"], text_data_json["velocityY"]]
-        # player 1
         if key in ["KeyW", "KeyS", "ArrowUp", "ArrowDown"]:
-            if key == "KeyW":
-                speed1 = -3
-                speed2 = 0
-            elif key == "KeyS":
-                speed1 = 3
-                speed2 = 0
-            # player 2
-            elif key == "ArrowUp":
-                speed1 = 0
-                speed2 = -3
-            elif key == "ArrowDown":
-                speed1 = 0
-                speed2 = 3
-            try:
-                speed1 = int(speed1)
-                if not outOfBounds(player1 + speed1, 90, 500):
-                    player1 += int(speed1)
-            except:
-                pass
-            try:
-                speed2 = int(speed2)
-                if not outOfBounds(player2 + speed2, 90, 500):
-                    player2 += int(speed2)
-            except:
-                pass
-        if not ballOutOfBounds(ball[1], 18, 500):
-            ballspeed[1] = -ballspeed[1]
-        # check if the ball was saved or if it was scored
-        ball[1] += ballspeed[1]
-        ball[0] += ballspeed[0]
+            with self.lock:  # Acquire the lock before modifying shared resources
+                if key == "KeyW":
+                    self.player1.velocityY = -3
+                elif key == "KeyS":
+                    self.player1.velocityY = 3
+                # player 2
+                elif key == "ArrowUp":
+                    self.player2.velocityY = -3
+                elif key == "ArrowDown":
+                    self.player2.velocityY = 3
         position_updated = {
-                'Player1': player1,
-                'Player2': player2,
-                'Speed1': speed1,
-                'Speed2': speed2,
-                'ballX': ball[0],
-                'ballY': ball[1],
-                'velocityX': ballspeed[0],
-                'velocityY': ballspeed[1],
+                'Player1': self.player1.y,
+                'Player2': self.player2.y,
+                'ballX': self.ball.x,
+                'ballY': self.ball.y,
             }
-
-        time.sleep(0.016)  # Approx 60 FPS
-
         self.send(text_data=json.dumps(position_updated))
 
