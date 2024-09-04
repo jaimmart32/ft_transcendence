@@ -80,17 +80,29 @@ class PongConsumer(WebsocketConsumer):
         except Exception as e:
             logger.error("Unexpected error: %s", e)
         key = text_data_json["key"]
+        action = text_data_json["action"]
         if key in ["KeyW", "KeyS", "ArrowUp", "ArrowDown"]:
             with self.lock:  # Acquire the lock before modifying shared resources
-                if key == "KeyW":
-                    self.player1.velocityY = -3
-                elif key == "KeyS":
-                    self.player1.velocityY = 3
-                # player 2
-                elif key == "ArrowUp":
-                    self.player2.velocityY = -3
-                elif key == "ArrowDown":
-                    self.player2.velocityY = 3
+                if action == 'move':
+                    if key == "KeyW":
+                        self.player1.velocityY = -3
+                    elif key == "KeyS":
+                        self.player1.velocityY = 3
+                    # player 2
+                    elif key == "ArrowUp":
+                        self.player2.velocityY = -3
+                    elif key == "ArrowDown":
+                        self.player2.velocityY = 3
+                else:
+                    if key == "KeyW":
+                        self.player1.velocityY = 0
+                    elif key == "KeyS":
+                        self.player1.velocityY = 0
+                    # player 2
+                    elif key == "ArrowUp":
+                        self.player2.velocityY = 0
+                    elif key == "ArrowDown":
+                        self.player2.velocityY = 0
         position_updated = {
                 'Player1': self.player1.y,
                 'Player2': self.player2.y,

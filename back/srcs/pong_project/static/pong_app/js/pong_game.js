@@ -89,16 +89,22 @@ function initializeGame(){
     context.fillRect(player2.x, player2.y, player2.width, player2.height);
 
     document.addEventListener("keyup", moveDjango);
+    document.addEventListener("keydown", stopDjango);
         
     function moveDjango(e){
-        sendPlayerData(e.code);
+        sendPlayerData(e.code, "move");
     }
 
-    function sendPlayerData(keycode){
+    function stopDjango(e){
+        sendPlayerData(e.code, "stop")
+    }
+
+    function sendPlayerData(keycode, action){
         socket.send(JSON.stringify(
-            {
-                'key': keycode,
-            }))
+        {
+            'key': keycode,
+            'action': action
+        }))
     }
             
     function update() {
