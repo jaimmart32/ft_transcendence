@@ -29,11 +29,18 @@ class PongConsumer(WebsocketConsumer):
         self.game_thread.start()
 
     def ballSaved(self):
-        if (self.ball.x is self.player1.x + self.player1.width) and (self.ball.y >= self.player1.y and self.ball.y <= self.player1.y + self.player1.height):
+    # Check if the ball is within the vertical range of player 1 and at their x-coordinate
+        if (self.ball.x == self.player1.x + self.player1.width) and \
+        (self.player1.y <= self.ball.y <= self.player1.y + self.player1.height):
             return True
-        elif (self.ball.x is self.player2.x - self.ball.width) and (self.ball.y >= self.player2.y and self.ball.y <= self.player2.y + self.player2.height):
+        
+        # Check if the ball is within the vertical range of player 2 and at their x-coordinate
+        elif (self.ball.x == self.player2.x - self.ball.width) and \
+            (self.player2.y <= self.ball.y <= self.player2.y + self.player2.height):
             return True
+        
         return False
+
 
     def move_players(self):
         with self.lock:  # Acquire the lock before modifying shared resources
