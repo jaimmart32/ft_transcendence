@@ -88,8 +88,8 @@ function initializeGame(){
     context.fillRect(player1.x, player1.y, player1.width, player1.height);
     context.fillRect(player2.x, player2.y, player2.width, player2.height);
 
-    document.addEventListener("keyup", moveDjango);
-    document.addEventListener("keydown", stopDjango);
+    document.addEventListener("keyup", stopDjango);
+    document.addEventListener("keydown", moveDjango);
         
     function moveDjango(e){
         sendPlayerData(e.code, "move");
