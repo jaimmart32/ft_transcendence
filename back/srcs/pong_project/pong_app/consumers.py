@@ -14,12 +14,6 @@ def outOfBounds(yPosition, player, board):
 def ballOutOfBounds(yPosition, ball, board):
     return yPosition < 0 or yPosition + ball > board
 
-def ballSaved(ball, player1, player2):
-    if (ball.x is player1.x + player1.width) and (ball.y >= player1.y and ball.y <= player1.y + player1.height):
-        return True
-    elif (ball.x is player2.x - ball.width) and (ball.y >= player2.y and ball.y <= player2.y + player2.height):
-        return True
-    return False
 
 class PongConsumer(WebsocketConsumer):
     def connect(self):
@@ -34,20 +28,32 @@ class PongConsumer(WebsocketConsumer):
         self.game_thread = threading.Thread(target=self.game_loop)
         self.game_thread.start()
 
+    def ballSaved(self):
+        if (self.ball.x is self.player1.x + self.player1.width) and (self.ball.y >= self.player1.y and self.ball.y <= self.player1.y + self.player1.height):
+            return True
+        elif (self.ball.x is self.player2.x - self.ball.width) and (self.ball.y >= self.player2.y and self.ball.y <= self.player2.y + self.player2.height):
+            return True
+        return False
+
     def move_players(self):
         with self.lock:  # Acquire the lock before modifying shared resources
             if not outOfBounds(self.player1.y + self.player1.velocityY, self.player1.height, self.board.height):
                 self.player1.y += self.player1.velocityY
             if not outOfBounds(self.player2.y + self.player2.velocityY, self.player1.height, self.board.height):
                 self.player2.y += self.player2.velocityY
+    
+    def score(self):
+        return self.ball.x >= self.board.width or self.ball.x <= 0
 
     def move_ball(self):
         with self.lock:  # Acquire the lock before modifying shared resources
             if ballOutOfBounds(self.ball.y, self.ball.height, self.board.height):
                 self.ball.velocityY = -self.ball.velocityY
-            if ballSaved(self.ball, self.player1, self.player2):
+            if self.ballSaved():
                 self.ball.velocityX = -self.ball.velocityX
             # check if the ball was saved or if it was scored
+            if self.score():
+                exit() # TODO: this must be changed
             self.ball.x += self.ball.velocityX
             self.ball.y += self.ball.velocityY
     
