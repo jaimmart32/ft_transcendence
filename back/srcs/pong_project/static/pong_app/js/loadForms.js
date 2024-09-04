@@ -247,91 +247,115 @@ function loadCreateTournament()
 	}
 }
 
-function loadHome()
+async function loadHome()
 {
 	console.log('Inside loadHome');
 	const app = document.getElementById('app');
 	const token = localStorage.getItem('access');
 	console.log('Token in localstorage: ', token);
 
-	if (token && checkToken(token))
+	if (token)
 	{
-		console.log('Token in localstorage: ', token);
-		fetch('/home/',
+		try
 		{
-			method: 'GET',
-			headers:
+			const response = await fetch('/home/',
 			{
-				'Authorization': `Bearer ${token}`,
-				'Content-Type': 'application/json'
-			}
-        	})
-	.then(response =>
-	{
-		if (!response.ok)
-		{
-			throw new Error('Access denied');
-		}
-		return response.json();
-	})
-	.then(data =>
-	{
-		app.innerHTML = `
-                <h2>Welcome, ${data.username}!</h2>
-                <div class="btn-group-vertical">
-                    <button class="btn btn-primary" id="profile">Profile</button>
-                    <button class="btn btn-primary" id="play-game">Play Game</button>
-                    <button class="btn btn-primary" id="friends-section">Friends</button>
-                    <button class="btn btn-primary" id="create-tournament">Create Tournament</button>
-                </div>
-            `;	
-	    const profile = document.getElementById('profile');
-		const play = document.getElementById('play-game');
-		const friends = document.getElementById('friends-section');
-		const tournament = document.getElementById('create-tournament');
+				method: 'GET',
+				headers:
+				{
+					'Authorization': `Bearer ${token}`,
+					'Content-Type': 'application/json'
+				}
+			})
+			
+//			if (!response.ok)
+//				throw new Error('Access denied');
 
-		if (profile)
-		{
-			profile.addEventListener('click', function(event)
+			const data = await response.json();
+
+			if (data.status === 'success')
 			{
-				event.preventDefault();
-				navigateTo('/home/profile/');
-			});
-		}
-		if (play)
-		{
-	    		play.addEventListener('click', function(event)
+				app.innerHTML = `
+				<h2>Welcome, ${data.username}!</h2>
+				<div class="btn-group-vertical">
+				    <button class="btn btn-primary" id="profile">Profile</button>
+				    <button class="btn btn-primary" id="play-game">Play Game</button>
+				    <button class="btn btn-primary" id="friends-section">Friends</button>
+				    <button class="btn btn-primary" id="create-tournament">Create Tournament</button>
+				</div>
+			    `;	
+			    const profile = document.getElementById('profile');
+				const play = document.getElementById('play-game');
+				const friends = document.getElementById('friends-section');
+				const tournament = document.getElementById('create-tournament');
+
+				if (profile)
+				{
+					profile.addEventListener('click', function(event)
+					{
+						event.preventDefault();
+						navigateTo('/home/profile/');
+					});
+				}
+				if (play)
+				{
+					play.addEventListener('click', function(event)
+					{
+						event.preventDefault();
+						navigateTo('/home/game/');
+					});
+				}
+				if (friends)
+				{
+					friends.addEventListener('click', function(event)
+					{
+						event.preventDefault();
+						navigateTo('/home/friends/');
+					});
+				}
+				if (tournament)
+				{
+					tournament.addEventListener('click', function(event)
+					{
+						event.preventDefault();
+						navigateTo('/home/game/');
+					});
+				}
+			}
+			else
 			{
-				event.preventDefault();
-				navigateTo('/home/game/');
-			});
+				console.log(data.status);
+				console.log(data.message);
+				console.log('Inside the else for the data message')
+				if (data.message === 'Access unauthorized')
+				{
+					const result = await checkRefreshToken(token);
+					console.log('Inside the access unauthorized')
+					if (result)
+					{
+						console.log('Inside result');
+						console.log(result);
+						navigateTo('/home/');
+					}
+				}
+				else
+				{
+					console.log('Inside the else for unauthorized')
+					alert('You are not authorized to view this page. Please log in.');
+					navigateTo('/login/');
+				}
+			}
 		}
-		if (friends)
-		{
-			friends.addEventListener('click', function(event)
-			{
-				event.preventDefault();
-				navigateTo('/home/friends/');
-			});
-		}
-		if (tournament)
-		{
-	    		tournament.addEventListener('click', function(event)
-			{
-				event.preventDefault();
-				navigateTo('/home/game/');
-			});
-		}
-	 })
-		 .catch(error =>
+		 catch(error)
 		 {
 			console.error('Error:', error);
 			alert('You are not authorized to view this page. Please log in.');
 			navigateTo('/login/');
-		});
+		}
 	}
 	else
 	{
+		console.log('INSIDE NO TOKEN')
 		alert('You are not authorized to view this page. Please log in.');
 		navigateTo('/login/');
 	}

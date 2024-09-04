@@ -1,6 +1,6 @@
 #!/bin/bash
 
-sleep 20;
+sleep 10;
 
 python pong_project/manage.py makemigrations;
 python pong_project/manage.py migrate

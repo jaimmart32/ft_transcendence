@@ -37,6 +37,7 @@ function loadProfile()
 					    <li class="list-group-item">Games Lost: <span id="games-lost">0</span></li>
 					</ul>
 					<button id='edit-profile' type="button" class="btn btn-primary">Edit Profile</button>
+					<button class="btn btn-secondary" id="back-to-home">Back to Home</button>
 				    </div>
 				</div>
 			    </div>
@@ -67,6 +68,15 @@ function loadProfile()
 				{
 					event.preventDefault();	
 					navigateTo('/home/profile/edit/');
+				});
+			}
+			const back = document.getElementById('back-to-home');
+			if (back)
+			{
+				back.addEventListener('click', function(event)
+				{
+					event.preventDefault();	
+					navigateTo('/home/');
 				});
 			}
 		})

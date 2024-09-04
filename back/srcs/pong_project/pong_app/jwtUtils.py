@@ -33,12 +33,11 @@ def create_jwt_refresh_token(user):
 	return token
 
 def decode_jwt_token(token, refreshType=None):
+
+	payload = None
 	try:
-		payload = jwt.decode(token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
-		return payload
-	except jwt.ExpiredSignatureError:
-		if refreshType is not None:
-			payload = jwt.decode(token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM], options={"verify_exp": False})
+		payload = jwt.decode(token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM], options={"verify_exp": False})
+		if check_expiry(token) is True and refreshType is not None:
 			user_id = payload.get('id')
 			if user_id:
 				try:
@@ -46,10 +45,19 @@ def decode_jwt_token(token, refreshType=None):
 					user.is_online = False
 					user.save()
 				except CustomUser.DoesNotExist:
-					pass
-		return None
+					return None	
+		return payload
 	except jwt.InvalidTokenError:
 		return None
+
+def check_expiry(token):
+	try:
+		payload = jwt.decode(token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
+		return False 
+	except jwt.ExpiredSignatureError:
+		return True 
+	except jwt.InvalidTokenError:
+		return True 
 
 def get_user_from_jwt(token, refreshType=None):
 	payload = decode_jwt_token(token, refreshType)

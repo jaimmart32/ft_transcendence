@@ -22,7 +22,7 @@ function navigateTo(url, data)
 {
 	window.history.pushState({}, '', url);
 	loadPage(url, data);
-	updateLogoutButtonVisibility();
+//	updateLogoutButtonVisibility();
 }
 
 window.loadPage = loadPage;

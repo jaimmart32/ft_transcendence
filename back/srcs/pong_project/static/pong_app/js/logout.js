@@ -1,4 +1,5 @@
-function updateLogoutButtonVisibility() {
+function updateLogoutButtonVisibility()
+{
     const logoutItem = document.getElementById('logout-item');
     const token = localStorage.getItem('access');
 

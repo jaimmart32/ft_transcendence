@@ -10,8 +10,7 @@ urlpatterns = [
 	path('login/verify-2fa/', views.verify2FA, name='verify2FA'),
 	path('', views.main_view, name='main'),
 
-	path('verify-token', views.verifyToken, name='verify-token'),
-	path('verify-refresh', views.verifyRefresh, name='verify-refresh'),
+	path('verify-refresh/', views.verifyRefresh, name='verify-refresh'),
 
 	path('home/', views.Home, name='home'),
 	path('home/profile/', views.Profile, name='profile'),
@@ -23,8 +22,6 @@ urlpatterns = [
 	path('api/auth/verify/', views.authVerify, name='verify'),
 	path('api/auth/create-user/', views.authCreateUser, name='create-user'),
 
-	#path('move/', views.Move, name='move'),
-	
 	path('callback.html', TemplateView.as_view(template_name='callback.html'), name='callback_html'),
 	path('index.html', TemplateView.as_view(template_name='index.html'), name='index_html'),
 	

@@ -21,7 +21,7 @@ from django.utils.encoding import force_bytes, force_str
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from datetime import timedelta
 from django.utils import timezone
-from .jwtUtils import create_jwt_token, get_user_from_jwt, create_jwt_refresh_token, decode_jwt_token
+from .jwtUtils import create_jwt_token, get_user_from_jwt, create_jwt_refresh_token, decode_jwt_token, check_expiry
 from django.views.decorators.csrf import csrf_exempt
 from .avatar import handle_avatar_upload
 
@@ -44,47 +44,46 @@ def jwt_required(viewFunction):
 		auth_header = request.headers.get('Authorization')
 		refresh_token = request.COOKIES.get('refresh_token')
 		token = None
+		tokenType = None
 		if auth_header and auth_header.startswith('Bearer '):
 			token = auth_header.split(' ')[1]
 		else:
 			try:
 				if request.body:
 					body_data = json.loads(request.body)
+					tokenType = body_data.get('tokenType')
 					token = body_data.get('token')
 			except json.JSONDecodeError:
 				return JsonResponse({'status': 'error', 'message': 'Invalid JSON'}, status=400)
 		if token:
-			if refresh_token is not None:
-				user = get_user_from_jwt(refresh_token, refreshType=True)
+			user = None
+			if check_expiry(token) is True:	
+				print('Inside wrapper, checking access', flush=True)
+				if refresh_token is not None and tokenType == 'Refresh':
+					if check_expiry(refresh_token) is True:
+						return JsonResponse({'status': 'expired', 'message': 'Refresh expired'}, status=402)
+					else:
+						user = get_user_from_jwt(token)
+						return viewFunction(request, *args, **kwargs)
+				else:
+					return JsonResponse({'status': 'error', 'message': 'Access unauthorized'}, status=401)
+					
 			else:
 				user = get_user_from_jwt(token)
-			if user:
 				request.user = user
 				return viewFunction(request, *args, **kwargs)
-			
-			return JsonResponse({'status': 'error', 'message': 'Unauthorized'}, status=401)
 		return render(request, "pong_app/index.html")
 	return wrapper
 
-def	verifyToken(request):
-	if request.method == 'POST':
-		try:
-			auth_header = request.headers.get('Authorization')
-			token = None
-			if auth_header and auth_header.startswith('Bearer '):
-				token = auth_header.split(' ')[1]
-			payload = decode_jwt_token(token)
-			return JsonResponse({'status': 'success', 'message': 'Valid access token'}, status=200)
-		except jwt.ExpiredSignatureError:
-			return JsonResponse({'status': 'accessExpired', 'message': 'Expired access token'}, status=400)
-		except jwt.InvalidTokenError:
-			return JsonResponse({'status': 'error', 'message': 'Non-valid token'}, status=400)
-		
-		
+@csrf_exempt
 @jwt_required
 def	verifyRefresh(request):
 	if request.method == 'POST':
+		print('Inside verify Refresh', flush=True)
 		newToken = create_jwt_token(request.user)
+		print('-------------------------------------', flush=True)
+		print(newToken, flush=True)
+		print('-------------------------------------', flush=True)
 		return JsonResponse({'status': 'success', 'newToken': newToken, 'message': 'New access token was generated'}, status=200)
 	return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
 
@@ -277,7 +276,7 @@ def verify2FA(request):
 @jwt_required
 def Home(request):
 	if request.method == 'GET':
-		content = {'message': 'Welcome to the home page!', 'username': request.user.username}
+		content = {'status': 'success', 'message': 'Welcome to the home page!', 'username': request.user.username}
 		return JsonResponse(content, status=200)
 	return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
 
