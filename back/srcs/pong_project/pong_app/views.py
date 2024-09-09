@@ -47,29 +47,43 @@ def jwt_required(viewFunction):
 		tokenType = None
 		if auth_header and auth_header.startswith('Bearer '):
 			token = auth_header.split(' ')[1]
+			print('There is a token in header!', flush=True)
 		else:
+			print('No token in header, checking if it is in body!', flush=True)
 			try:
 				if request.body:
 					body_data = json.loads(request.body)
 					tokenType = body_data.get('tokenType')
 					token = body_data.get('token')
 			except json.JSONDecodeError:
+				print('Invalid JSON!', flush=True)
 				return JsonResponse({'status': 'error', 'message': 'Invalid JSON'}, status=400)
 		if token:
+			print('Token founded!', flush=True)
 			user = None
-			if check_expiry(token) is True:	
+			if check_expiry(token) is True:
+				print('Token expired', flush=True)
 				print('Inside wrapper, checking access', flush=True)
 				if refresh_token is not None and tokenType == 'Refresh':
+					print('Refresh token sent!', flush=True)
 					if check_expiry(refresh_token) is True:
+						print('Refresh has expired!', flush=True)
 						return JsonResponse({'status': 'expired', 'message': 'Refresh expired'}, status=402)
 					else:
+						print('Refresh is still active!', flush=True)
 						user = get_user_from_jwt(token)
+						if user is None:
+							print('couldnt get user from token!!!', flush=True)
 						return viewFunction(request, *args, **kwargs)
 				else:
+					print('Access token expired!', flush=True)
 					return JsonResponse({'status': 'error', 'message': 'Access unauthorized'}, status=401)
 					
 			else:
+				print('there is a token and it didn`t expire!', flush=True)
 				user = get_user_from_jwt(token)
+				if user is None:
+					print('couldnt get user from token!!!', flush=True)
 				request.user = user
 				return viewFunction(request, *args, **kwargs)
 		return render(request, "pong_app/index.html")

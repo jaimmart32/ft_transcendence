@@ -45,9 +45,11 @@ def decode_jwt_token(token, refreshType=None):
 					user.is_online = False
 					user.save()
 				except CustomUser.DoesNotExist:
+					print('decode_jwt_token: user does not exist', flush=True)
 					return None	
 		return payload
 	except jwt.InvalidTokenError:
+		print('deocde_jwt_token: invalid token error', flush=True)
 		return None
 
 def check_expiry(token):
@@ -66,6 +68,7 @@ def get_user_from_jwt(token, refreshType=None):
 			user = CustomUser.objects.get(id=payload['id'])
 			return user
 		except CustomUser.DoesNotExist:
+			print('get_user_from_jwt: user doesnt exist', flush=True)
 			return None
-	
+	print('get_user_from_jwt: No payload retrieved', flush=True)
 	return None

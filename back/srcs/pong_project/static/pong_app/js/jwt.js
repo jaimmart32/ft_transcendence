@@ -1,4 +1,4 @@
-async function checkRefreshToken(token)
+/*async function checkRefreshToken(token)
 {
 	console.log('inside refreshToken');
 	try
@@ -10,12 +10,13 @@ async function checkRefreshToken(token)
 			method: 'POST',
 			headers:
 			{
-				'Authorization': `Bearer ${token}`,
+//				'Authorization': `Bearer ${token}`,
 				'Content-Type': 'application/json'
 			},
 			credentials: 'include',
 			body:
 			{
+				'token': `${token}`,
 				'tokenType': 'Refresh'
 			}
 		});
@@ -46,33 +47,38 @@ async function checkRefreshToken(token)
 		console.error('Error', error);
 		return (false);
 	}
-}
-
-/*function checkRefreshToken(token) {
-    return new Promise((resolve, reject) => {
-        const refreshToken = localStorage.getItem('refresh');
-        fetch('/verify-refresh/', {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ refresh: refreshToken })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.status === 'success') {
-                localStorage.setItem('access', data.new_access_token); // Save the new access token
-                resolve(data.new_access_token); // Return the new token
-            } else {
-                reject(false); // Failed to refresh token
-            }
-        })
-        .catch(error => {
-            console.error('Error refreshing token:', error);
-            reject(false);
-        });
-    });
 }*/
+
+function checkRefreshToken(token) {
+	return new Promise((resolve, reject) => {
+		fetch('/verify-refresh/', {
+			method: 'POST',
+			headers: {
+//				'Authorization': `Bearer ${token}`,
+				'Content-Type': 'application/json'
+			},
+			credentials: 'include',
+			body: JSON.stringify(
+			{
+				'token': `${token}`,
+				'tokenType': 'Refresh'
+			})
+		})
+		.then(response => response.json())
+		.then(data => {
+			if (data.status === 'success') {
+				localStorage.setItem('access', data.newToken); // Save the new access token
+				console.log('inside success for refresh check,saved new token!!!')
+				resolve(true/*data.new_access_token*/); // Return the new token
+			} else {
+				reject(false); // Failed to refresh token
+			}
+		})
+		.catch(error => {
+			console.error('Error refreshing token:', error);
+			reject(false);
+		});
+	});
+}
 
 window.checkRefreshToken = checkRefreshToken;
