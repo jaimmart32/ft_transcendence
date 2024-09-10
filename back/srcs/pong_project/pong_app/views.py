@@ -300,7 +300,7 @@ def Home(request):
 def Profile(request):
 	if request.method == 'GET':
 		user = request.user
-		content = {'username': user.username, 'email': user.email, 'tfa': user.tfa, 'avatar': user.avatar.url if user.avatar else None,}
+		content = {'status': 'success', 'username': user.username, 'email': user.email, 'tfa': user.tfa, 'avatar': user.avatar.url if user.avatar else None,}
 #'game_stats': request.user.game_stats,
 #'tournament_stats': request.user.tournament_stats
 		return JsonResponse(content, status=200)
