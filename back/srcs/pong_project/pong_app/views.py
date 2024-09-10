@@ -72,6 +72,7 @@ def jwt_required(viewFunction):
 					else:
 						print('Refresh is still active!', flush=True)
 						user = get_user_from_jwt(token)
+						request.user = user
 						if user is None:
 							print('couldnt get user from token!!!', flush=True)
 						return viewFunction(request, *args, **kwargs)

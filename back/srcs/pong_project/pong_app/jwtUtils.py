@@ -34,9 +34,11 @@ def create_jwt_refresh_token(user):
 
 def decode_jwt_token(token, refreshType=None):
 
+	print(f'decode_jwt_token, TOKEN to be decode: {token}', flush=True)
 	payload = None
 	try:
 		payload = jwt.decode(token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM], options={"verify_exp": False})
+		print(f"Payload ID, AFTER jwt.decode	: {payload['id']}", flush=True)
 		if check_expiry(token) is True and refreshType is not None:
 			user_id = payload.get('id')
 			if user_id:
@@ -62,8 +64,10 @@ def check_expiry(token):
 		return True 
 
 def get_user_from_jwt(token, refreshType=None):
+	print(f'get_user_from_jwt, TOKEN to be decode: {token}', flush=True)
 	payload = decode_jwt_token(token, refreshType)
 	if payload:
+		print(f"Payload ID: {payload['id']}", flush=True)
 		try:
 			user = CustomUser.objects.get(id=payload['id'])
 			return user
