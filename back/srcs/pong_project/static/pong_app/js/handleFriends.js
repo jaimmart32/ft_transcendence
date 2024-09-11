@@ -73,7 +73,6 @@ function addFriend(username)
 		{
 			method: 'POST',
 			headers:
-# Create your views here.
 			{
 				'Authorization': `Bearer ${token}`,
 				'Content-Type': 'application/json'
