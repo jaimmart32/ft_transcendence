@@ -104,6 +104,17 @@ function loadGenericHTML(type)
 	}
 }
 
+function loadNotFoundHTML()
+{
+}
+
+function loadNotAuthorizedHTML()
+{
+	return(`
+		<h2>Not Authorized to view this page. Please authenticate.</h2>
+	    `);
+}
 window.homeHTML = homeHTML;
 window.profileHTML = profileHTML;
 window.loadGenericHTML = loadGenericHTML;
+window.loadNotAuthorizedHTML = loadNotAuthorizedHTML;

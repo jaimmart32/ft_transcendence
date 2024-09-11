@@ -210,26 +210,7 @@ async function loadHome()
 			}
 			else
 			{
-				console.log(data.status);
-				console.log(data.message);
-				console.log('Inside the else for the data message')
-				if (data.message === 'Access unauthorized')
-				{
-					const result = await checkRefreshToken(token);
-					console.log('Inside the access unauthorized')
-					if (result)
-					{
-						console.log('Inside result');
-						console.log(result);
-						navigateTo('/home/');
-					}
-				}
-				else
-				{
-					console.log('Inside the else for unauthorized')
-					alert('You are not authorized to view this page. Please log in.');
-					navigateTo('/login/');
-				}
+				await notAuthorized(data, '/home/', token);
 			}
 		}
 		 catch(error)
