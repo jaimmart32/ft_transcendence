@@ -1,5 +1,6 @@
 import json
 from channels.generic.websocket import WebsocketConsumer
+import random
 #from channels.generic.websocket import AsyncWebsocketConsumer
 import logging
 import time
@@ -30,17 +31,30 @@ class PongConsumer(WebsocketConsumer):
 
     def ballSaved(self):
         # Check if the ball is within the vertical range of player 1 and near their paddle (on the left side)
-        if (self.ball.x <= self.player1.x + self.player1.width) and (self.ball.x >= self.player1.x) and \
-            (self.player1.y <= self.ball.y <= self.player1.y + self.player1.height):
+        if (self.ball.x + self.ball.velocityX <= self.player1.x + self.player1.width) and (self.ball.x >= self.player1.x) and \
+                (self.player1.y <= self.ball.y <= self.player1.y + self.player1.height):
+            # Calculate the hit position relative to the paddle's center
+            paddle_center = self.player1.y + self.player1.height / 2
+            hit_pos = (self.ball.y - paddle_center) / (self.player1.height / 2)  # Get a value between -1 and 1
+            self.ball.velocityY += hit_pos * 5  # Modify the vertical velocity
+            
+            # Ensure the ball is moved outside of the paddle to prevent getting stuck
+            self.ball.x = self.player1.x + self.player1.width + 1
             return True
-        
-        # Check if the ball is within the vertical range of player 2 and near their paddle (on the right side)
-        elif (self.ball.x >= self.player2.x - self.ball.width) and (self.ball.x <= self.player2.x) and \
-            (self.player2.y <= self.ball.y <= self.player2.y + self.player2.height):
-            return True
-        
-        return False
 
+        # Check if the ball is within the vertical range of player 2 and near their paddle (on the right side)
+        elif (self.ball.x + self.ball.velocityX >= self.player2.x - self.ball.width) and (self.ball.x <= self.player2.x) and \
+                (self.player2.y <= self.ball.y <= self.player2.y + self.player2.height):
+            # Calculate the hit position relative to the paddle's center
+            paddle_center = self.player2.y + self.player2.height / 2
+            hit_pos = (self.ball.y - paddle_center) / (self.player2.height / 2)
+            self.ball.velocityY += hit_pos * 5  # Modify the vertical velocity
+            
+            # Ensure the ball is moved outside of the paddle to prevent getting stuck
+            self.ball.x = self.player2.x - self.ball.width - 1
+            return True
+
+        return False
 
 
     def move_players(self):
@@ -63,13 +77,25 @@ class PongConsumer(WebsocketConsumer):
         with self.lock:  # Acquire the lock before modifying shared resources
             if ballOutOfBounds(self.ball.y, self.ball.height, self.board.height):
                 self.ball.velocityY = -self.ball.velocityY
+
             if self.ballSaved():
+                # Reverse the horizontal velocity when the ball hits the paddle
                 self.ball.velocityX = -self.ball.velocityX
-            # check if the ball was saved or if it was scored
-            if self.score():
-                self.ball = Ball(board=self.board)
+
+                # Ensure that the ball has a minimum speed to avoid getting stuck
+                if abs(self.ball.velocityX) < 5:
+                    self.ball.velocityX = 5 if self.ball.velocityX > 0 else -5
+
+            # Move the ball as usual
             self.ball.x += self.ball.velocityX
             self.ball.y += self.ball.velocityY
+
+            # Check if the ball is out of bounds to score
+            if self.score():
+                if self.player1.score == 7 or self.player2.score == 7:
+                    self.disconnect("game over")
+                # Reset the ball after scoring
+                self.ball = Ball(board=self.board)
     
     def game_loop(self):
         self.running = True
@@ -103,14 +129,14 @@ class PongConsumer(WebsocketConsumer):
                 with self.lock:  # Acquire the lock before modifying shared resources
                     if action == "move":
                         if key == "KeyW":
-                            self.player1.velocityY = -3
+                            self.player1.velocityY = -10
                         elif key == "KeyS":
-                            self.player1.velocityY = 3
+                            self.player1.velocityY = 10
                         # player 2
                         elif key == "ArrowUp":
-                            self.player2.velocityY = -3
+                            self.player2.velocityY = -10
                         elif key == "ArrowDown":
-                            self.player2.velocityY = 3
+                            self.player2.velocityY = 10
                     else:
                         if key == "KeyW":
                             self.player1.velocityY = 0

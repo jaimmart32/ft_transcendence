@@ -65,9 +65,9 @@ class Ball:
 		self.y = (board.height / 2) - (self.height / 2)
 		#self.velocityX = 1
 		#self.velocityY = 2
-		list1 = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-		self.velocityX = random.choice(list1) 
-		self.velocityY = random.choice(list1)
+		list1 = [1, -1]
+		self.velocityX = 5 * random.choice(list1) 
+		self.velocityY = 6 * random.choice(list1)
 
 class Paddle:
 	def __init__(self, number, board) -> None:
