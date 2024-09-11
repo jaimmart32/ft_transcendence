@@ -93,7 +93,7 @@ class PongConsumer(WebsocketConsumer):
             # Check if the ball is out of bounds to score
             if self.score():
                 if self.player1.score == 7 or self.player2.score == 7:
-                    self.disconnect("game over")
+                    self.disconnect("game over") # TODO: when you restart the game it gets a bit weird so it has to be improved
                 # Reset the ball after scoring
                 self.ball = Ball(board=self.board)
     
