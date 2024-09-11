@@ -1,54 +1,3 @@
-/*async function checkRefreshToken(token)
-{
-	console.log('inside refreshToken');
-	try
-	{
-		console.log('inside try for refreshToken');
-
-		const response = await fetch('/verify-refresh/',
-		{
-			method: 'POST',
-			headers:
-			{
-//				'Authorization': `Bearer ${token}`,
-				'Content-Type': 'application/json'
-			},
-			credentials: 'include',
-			body:
-			{
-				'token': `${token}`,
-				'tokenType': 'Refresh'
-			}
-		});
-
-		const data = await response.json();
-
-		if (data.status === 'success')
-		{
-			console.log('success');
-	//		This means that access was expired, refresh was NOT
-			newToken = data.newToken;
-			localStorage.setItem('access', newToken);
-			alert('NEW ACCESS TOKEN: ', newToken);
-			return (true);
-		}
-		else if (data.status === 'expired')
-		{
-			console.log('expired');
-	//		Refresh token is expired
-			alert('REFRESH TOKEN IS EXPIRED, BYE-BYE');
-//			logoutUser();
-		}
-	//	Token does not correspond to any user
-		return (false);
-	}
-	catch (error) 
-	{
-		console.error('Error', error);
-		return (false);
-	}
-}*/
-
 function checkRefreshToken(token) {
 	return new Promise((resolve, reject) => {
 		fetch('/verify-refresh/', {
@@ -81,4 +30,25 @@ function checkRefreshToken(token) {
 	});
 }
 
+async function notAuthorized(data, route, token)
+{
+	if (data.message === 'Access unauthorized')
+	{
+		const result = await checkRefreshToken(token);
+		if (result)
+		{
+			navigateTo(route);
+		}
+	}
+	else
+	{
+		app.innerHTML = loadNotAuthorizedHTML();
+		setTimeout(() => 
+		{
+			navigateTo('/login/');
+		}, 5000);
+	}
+}
+
 window.checkRefreshToken = checkRefreshToken;
+window.notAuthorized = notAuthorized;

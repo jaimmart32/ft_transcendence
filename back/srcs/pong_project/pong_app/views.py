@@ -1,4 +1,4 @@
-import json# Maybe not needed
+import json
 import smtplib, ssl
 from django.shortcuts import render, redirect
 from django.db import IntegrityError
@@ -25,7 +25,6 @@ from .jwtUtils import create_jwt_token, get_user_from_jwt, create_jwt_refresh_to
 from django.views.decorators.csrf import csrf_exempt
 from .avatar import handle_avatar_upload
 
-# Create your views here.
 
 @csrf_exempt
 def main_view(request):
@@ -300,7 +299,7 @@ def Home(request):
 def Profile(request):
 	if request.method == 'GET':
 		user = request.user
-		content = {'username': user.username, 'email': user.email, 'tfa': user.tfa, 'avatar': user.avatar.url if user.avatar else None,}
+		content = {'status': 'success', 'username': user.username, 'email': user.email, 'tfa': user.tfa, 'avatar': user.avatar.url if user.avatar else None,}
 #'game_stats': request.user.game_stats,
 #'tournament_stats': request.user.tournament_stats
 		return JsonResponse(content, status=200)
@@ -429,7 +428,7 @@ def FriendsList(request):
 		user = request.user
 		friends = user.friends.all()
 		friends_data = [{'username': friend.username, 'online': friend.is_online} for friend in friends]
-		return JsonResponse(friends_data, status=200, safe=False)
+		return JsonResponse({'status': 'success', 'friends': friends_data}, status=200, safe=False)
 	return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
 
 @csrf_exempt
