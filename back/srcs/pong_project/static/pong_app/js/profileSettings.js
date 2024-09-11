@@ -33,33 +33,12 @@ async function loadProfileSettings()
 	 		}
 			else
 			{
-				console.log(data.status);
-				console.log(data.message);
-				console.log('Inside the else for the data message')
-				if (data.message === 'Access unauthorized')
-				{
-					const result = await checkRefreshToken(token);
-					console.log('Inside the access unauthorized')
-					if (result)
-					{
-						console.log('Inside result');
-						console.log(result);
-						navigateTo('/home/profile/edit/');
-					}
-				}
-				else
-				{
-					console.log('Inside the else for unauthorized')
-					alert('You are not authorized to view this page. Please log in.');
-					navigateTo('/login/');
-				}
+				checkRefresh(data,'/home/profile/edit/', token);
 			}
 		}
 		catch(error)
 		{
-			console.error('Error:', error);
-			alert('You are not authorized to view this page. Please log in.');
-			navigateTo('/login/');
+			notAuthorized(error);
 		}
 	}
 	else
@@ -137,37 +116,19 @@ async function sendUserData(userDict, token)
 		{
     	    if (data.message)
 			{
-				if (data.message === 'Access unauthorized')
-				{
-					const result = await checkRefreshToken(token);
-					console.log('Inside the access unauthorized')
-					if (result)
-					{
-						console.log('Inside result');
-						console.log(result);
-						navigateTo('/home/profile/edit/');
-					}
-				}
-				else
-				{
-					console.log('Inside the else for unauthorized')
-					alert('You are not authorized to view this page. Please log in.');
-					navigateTo('/login/');
-				}
     	        if (data.message.includes('file'))
 				{
     	            showMessage('file-error', data.message);
     	    	}
     	    	console.error(data.message);
+				await checkRefresh(data, '/home/profile/edit/', token);
     	    }
     	}
 	}
     catch(error)
 	{
         console.log('Inside the error');
-        console.error('Error:', error);
-        alert('Access denied');
-		navigateTo('/login/');
+        notAuthorized(error);
     }
 }
 

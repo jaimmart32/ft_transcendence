@@ -30,7 +30,7 @@ function checkRefreshToken(token) {
 	});
 }
 
-async function notAuthorized(data, route, token)
+async function checkRefresh(data, route, token)
 {
 	if (data.message === 'Access unauthorized')
 	{
@@ -40,15 +40,26 @@ async function notAuthorized(data, route, token)
 			navigateTo(route);
 		}
 	}
-	else
-	{
-		app.innerHTML = loadNotAuthorizedHTML();
-		setTimeout(() => 
+}
+function notAuthorized(error)
+{
+	if(!error)
 		{
-			navigateTo('/login/');
-		}, 5000);
-	}
+			console.log('CATCHED ERROR FROM CHECKREFRESHTOKEN!');
+			app.innerHTML = loadNotAuthorizedHTML();
+			setTimeout(() => 
+			{
+				navigateTo('/login/');
+			}, 5000);
+		}
+		else
+		{
+		console.error('Error:', error);
+		alert('You are not authorized to view this page. Please log in.');
+		navigateTo('/login/');
+		}
 }
 
 window.checkRefreshToken = checkRefreshToken;
+window.checkRefresh = checkRefresh
 window.notAuthorized = notAuthorized;

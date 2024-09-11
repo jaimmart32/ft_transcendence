@@ -47,14 +47,13 @@ async function loadFriendsSection()
 			}
 			else
 			{
-				await notAuthorized(data, '/home/friends/', token);
+				await checkRefresh(data, '/home/friends/', token);
 			}
 		}
 		catch(error)
 		{
-			console.error('Error:', error);
-			alert('You are not authorized to view this page. Please log in.');
-			navigateTo('/login/');
+			console.log('INSIDE CATCH OF FRIENDS!');
+			notAuthorized(error);
 		}
 	}
 	else
