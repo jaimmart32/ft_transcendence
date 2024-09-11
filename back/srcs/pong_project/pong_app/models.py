@@ -70,7 +70,7 @@ class Paddle:
 		self.width = board.width / 50
 		self.height = self.width * 5
 		self.velocityY = 0
-		if number is 1:
+		if number == 1:
 			self.x = 10
 			self.y = (board.height / 2) - (self.height / 2)
 		else:
