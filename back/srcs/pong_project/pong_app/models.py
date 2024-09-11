@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser 
+import random
 
 # Create your models here.
 
@@ -62,14 +63,20 @@ class Ball:
 		self.height = self.width
 		self.x = (board.width / 2) - (self.height / 2)
 		self.y = (board.height / 2) - (self.height / 2)
-		self.velocityX = 1
-		self.velocityY = 2
+		#self.velocityX = 1
+		#self.velocityY = 2
+		list1 = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+		self.velocityX = random.choice(list1) 
+		self.velocityY = random.choice(list1)
 
 class Paddle:
 	def __init__(self, number, board) -> None:
 		self.width = board.width / 50
 		self.height = self.width * 5
+		#list1 = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 30]
+		#self.velocityY = random.choice(list1)
 		self.velocityY = 0
+		self.score = 0
 		if number == 1:
 			self.x = 10
 			self.y = (board.height / 2) - (self.height / 2)

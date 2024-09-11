@@ -29,17 +29,18 @@ class PongConsumer(WebsocketConsumer):
         self.game_thread.start()
 
     def ballSaved(self):
-    # Check if the ball is within the vertical range of player 1 and at their x-coordinate
-        if (self.ball.x == self.player1.x + self.player1.width) and \
-        (self.player1.y <= self.ball.y <= self.player1.y + self.player1.height):
+        # Check if the ball is within the vertical range of player 1 and near their paddle (on the left side)
+        if (self.ball.x <= self.player1.x + self.player1.width) and (self.ball.x >= self.player1.x) and \
+            (self.player1.y <= self.ball.y <= self.player1.y + self.player1.height):
             return True
         
-        # Check if the ball is within the vertical range of player 2 and at their x-coordinate
-        elif (self.ball.x == self.player2.x - self.ball.width) and \
+        # Check if the ball is within the vertical range of player 2 and near their paddle (on the right side)
+        elif (self.ball.x >= self.player2.x - self.ball.width) and (self.ball.x <= self.player2.x) and \
             (self.player2.y <= self.ball.y <= self.player2.y + self.player2.height):
             return True
         
         return False
+
 
 
     def move_players(self):
@@ -50,7 +51,13 @@ class PongConsumer(WebsocketConsumer):
                 self.player2.y += self.player2.velocityY
     
     def score(self):
-        return self.ball.x >= self.board.width or self.ball.x <= 0
+        if self.ball.x >= self.board.width:
+            self.player1.score += 1
+            return True
+        elif self.ball.x <= 0 - self.ball.width:
+            self.player2.score += 1
+            return True
+        return False
 
     def move_ball(self):
         with self.lock:  # Acquire the lock before modifying shared resources
@@ -60,7 +67,7 @@ class PongConsumer(WebsocketConsumer):
                 self.ball.velocityX = -self.ball.velocityX
             # check if the ball was saved or if it was scored
             if self.score():
-                exit() # TODO: this must be changed
+                self.ball = Ball(board=self.board)
             self.ball.x += self.ball.velocityX
             self.ball.y += self.ball.velocityY
     
@@ -74,6 +81,8 @@ class PongConsumer(WebsocketConsumer):
                     'Player2': self.player2.y,
                     'ballX': self.ball.x,
                     'ballY': self.ball.y,
+                    'Score1': self.player1.score,
+                    'Score2': self.player2.score
                 }
 
             time.sleep(0.016)  # Approx 60 FPS
@@ -117,6 +126,8 @@ class PongConsumer(WebsocketConsumer):
                     'Player2': self.player2.y,
                     'ballX': self.ball.x,
                     'ballY': self.ball.y,
+                    'Score1': self.player1.score,
+                    'Score2': self.player2.score
                 }
             self.send(text_data=json.dumps(position_updated))
         except json.JSONDecodeError as e:

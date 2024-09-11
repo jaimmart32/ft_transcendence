@@ -73,8 +73,8 @@ function initializeGame(){
         ball.x = data['ballX'];
         ball.y = data['ballY'];
 
-        console.log(player2.y);
-        console.log(ball.x);
+        score1 = data['Score1']
+        score2 = data['Score2']
         update();
     }
 
@@ -119,6 +119,9 @@ function initializeGame(){
         //ball
         context.fillStyle = "White"
         context.fillRect(ball.x, ball.y, ball.width, ball.height);
+        context.fillText(score1.toString(), (board.width / 4), board.height/2);
+        context.fillText(score2.toString(), (board.width / 4) * 3, board.height/2);
+        context.font = '50px Courier New';
 
         // Send ball and player data every frame
         sendPlayerData("update");
