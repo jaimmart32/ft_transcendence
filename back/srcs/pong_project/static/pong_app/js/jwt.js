@@ -21,15 +21,15 @@ function checkRefreshToken(token)
 			if (data.status === 'success') {
 				localStorage.setItem('access', data.newToken); // Save the new access token
 				console.log('inside success for refresh check,saved new token!!!')
-				resolve(true/*data.new_access_token*/); // Return the new token
-			} else {
-				reject(false); // Failed to refresh token
+				resolve("valid"/*data.new_access_token*/); // Return the new token
+			} else if (data.status === 'expired'){
+				reject("expired"); // Failed to refresh token
 			}
 		})
 		.catch(error =>
 		{
 			console.error('Error refreshing token:', error);
-			reject(false);
+			reject("catch");
 		});
 	});
 }
@@ -39,21 +39,23 @@ async function checkRefresh(data, route, token)
 	if (data.message === 'Access unauthorized')
 	{
 		const result = await checkRefreshToken(token);
-		if (result)
+		if (result === "valid")
 		{
+			console.log('Access expired but Refresh not, navigating to route');
 			navigateTo(route);
 		}
 	}
 }
 function notAuthorized(error)
 {
-	if(!error)
+	if(error === "expired")
 		{
 			console.log('CATCHED ERROR FROM CHECKREFRESHTOKEN!');
 			app.innerHTML = loadNotAuthorizedHTML();
 			setTimeout(() => 
 			{
 //				logoutUser();
+				localStorage.removeItem('access');
 				navigateTo('/login/');
 			}, 5000);
 		}
