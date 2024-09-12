@@ -1,5 +1,7 @@
-function checkRefreshToken(token) {
-	return new Promise((resolve, reject) => {
+function checkRefreshToken(token)
+{
+	return new Promise((resolve, reject) =>
+	{
 		fetch('/verify-refresh/', {
 			method: 'POST',
 			headers: {
@@ -14,7 +16,8 @@ function checkRefreshToken(token) {
 			})
 		})
 		.then(response => response.json())
-		.then(data => {
+		.then(data =>
+		{
 			if (data.status === 'success') {
 				localStorage.setItem('access', data.newToken); // Save the new access token
 				console.log('inside success for refresh check,saved new token!!!')
@@ -23,7 +26,8 @@ function checkRefreshToken(token) {
 				reject(false); // Failed to refresh token
 			}
 		})
-		.catch(error => {
+		.catch(error =>
+		{
 			console.error('Error refreshing token:', error);
 			reject(false);
 		});
@@ -49,14 +53,15 @@ function notAuthorized(error)
 			app.innerHTML = loadNotAuthorizedHTML();
 			setTimeout(() => 
 			{
+//				logoutUser();
 				navigateTo('/login/');
 			}, 5000);
 		}
 		else
 		{
-		console.error('Error:', error);
-		alert('You are not authorized to view this page. Please log in.');
-		navigateTo('/login/');
+			console.error('Error:', error);
+			alert('You are not authorized to view this page. Please log in.');
+			navigateTo('/login/');
 		}
 }
 
