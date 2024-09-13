@@ -107,6 +107,8 @@ def	getUserInfo(request):
 	if request.method == 'GET':
 		user = request.user
 		username = user.username
+		status = "ONLINE" if user.is_online else "OFFLINE"
+		print(f"Username: {username}, Status: {status}", flush=True)
 		return JsonResponse({'status': 'success', 'username': username, 'is_online': user.is_online}, status=200)
 	return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
 
@@ -252,6 +254,7 @@ def loginView(request):
 @csrf_exempt
 @jwt_required
 def	logoutView(request):
+	print("INSIDE LOGOUT VIEW!!!", flush=True)
 	if request.method == 'POST':
 		user = request.user
 		if user:

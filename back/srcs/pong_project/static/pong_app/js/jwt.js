@@ -54,7 +54,6 @@ function notAuthorized(error)
 			app.innerHTML = loadNotAuthorizedHTML();
 			setTimeout(() => 
 			{
-//				logoutUser();
 				localStorage.removeItem('access');
 				navigateTo('/login/');
 			}, 5000);

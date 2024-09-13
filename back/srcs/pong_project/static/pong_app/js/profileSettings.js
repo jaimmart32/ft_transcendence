@@ -33,7 +33,7 @@ async function loadProfileSettings()
 	 		}
 			else
 			{
-				checkRefresh(data,'/home/profile/edit/', token);
+				await checkRefresh(data,'/home/profile/edit/', token);
 			}
 		}
 		catch(error)
