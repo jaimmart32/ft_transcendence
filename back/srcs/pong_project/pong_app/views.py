@@ -34,12 +34,18 @@ def main_view(request):
 			return render(request, 'pong_app/index.html')
 	return render(request, "pong_app/index.html")
 
-# This is a protection that will be used for almost all views after logging into the application
-# It will be used as decorator on top of the views
+# This function will be used for almost all views, it will be used as a decorator, which
+# needs to execute right before the each view. Its purpose is to get both the refresh and
+# access token, verify first the access, if it is valid, the view will be executed correctly.
+# Else, if it's expired, it will check the received refresh token. There's two different outcomes:
+# the refresh token is valid or not. If the refresh token is valid, a new access token will be provided
+# in the response, else, means the session of the user is no longer valid, therefore logs out the user.
 @csrf_exempt
 def jwt_required(viewFunction):
 
 	def wrapper(request, *args, **kwargs):
+		# Take both tokens, refresh inside the cookies, access inside the header
+		# or depending on the type of request, it could be inside the body.
 		auth_header = request.headers.get('Authorization')
 		refresh_token = request.COOKIES.get('refresh_token')
 		token = None
@@ -60,15 +66,18 @@ def jwt_required(viewFunction):
 		if token:
 			print('Token founded!', flush=True)
 			user = None
+			# If the token is expired, we look for the refresh token and check it.
 			if check_expiry(token) is True:
 				print('Token expired', flush=True)
 				print('Inside wrapper, checking access', flush=True)
 				if refresh_token is not None and tokenType == 'Refresh':
+				# The refresh token is expired, we return our response.
 					print('Refresh token sent!', flush=True)
 					if check_expiry(refresh_token) is True:
 						print('Refresh has expired!', flush=True)
 						decode_jwt_token(refresh_token, refreshType="yes")
 						return JsonResponse({'status': 'expired', 'message': 'Refresh expired'}, status=402)
+					# The refresh token is valid, we execute the view
 					else:
 						print('Refresh is still active!', flush=True)
 						user = get_user_from_jwt(token)
@@ -76,10 +85,13 @@ def jwt_required(viewFunction):
 						if user is None:
 							print('couldnt get user from token!!!', flush=True)
 						return viewFunction(request, *args, **kwargs)
+				# The access token is expired, we send a especific response so the front knows that it needs to
+				# ask for a new access token to the back-end's view "verifyRefresh".
 				else:
 					print('Access token expired!', flush=True)
 					return JsonResponse({'status': 'error', 'message': 'Access unauthorized'}, status=401)
 					
+			# Everything is correct, we set the request.user and execute the view.
 			else:
 				print('there is a token and it didn`t expire!', flush=True)
 				user = get_user_from_jwt(token)
@@ -90,6 +102,9 @@ def jwt_required(viewFunction):
 		return render(request, "pong_app/index.html")
 	return wrapper
 
+# This view will be called after the front-end receives the response that the access token is expired. It will receive the refresh token
+# inside the cookies of the request. After the decorator checks that the refresh token is valid, this view will create a new access token
+# and return it in the response.
 @csrf_exempt
 @jwt_required
 def	verifyRefresh(request):
