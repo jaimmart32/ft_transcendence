@@ -98,7 +98,7 @@ function loadSignupForm()
 	}
 }
 
-function loadPlayGame()
+function loadPlayGame(id)
 {
 	app.innerHTML = `
 	    <h2>Play Game</h2>
@@ -120,7 +120,7 @@ function loadPlayGame()
 		});
 	}
 
-	initializeGame();
+	initializeGame(id);
 }
 
 function loadCreateTournament()
@@ -188,7 +188,8 @@ async function loadHome()
 					play.addEventListener('click', function(event)
 					{
 						event.preventDefault();
-						navigateTo('/home/game/');
+						game_id = Math.floor(Math.random() * 10000)
+						navigateTo(`/home/game/${game_id}`);
 					});
 				}
 				if (friends)
@@ -204,7 +205,8 @@ async function loadHome()
 					tournament.addEventListener('click', function(event)
 					{
 						event.preventDefault();
-						navigateTo('/home/game/');
+						game_id = Math.floor(Math.random() * 10000)
+						navigateTo(`/home/game/${game_id}`);
 					});
 				}
 			}

@@ -1,20 +1,21 @@
-function loadPage(url, data)
+function loadPage(url_raw, data)
 {
-	if (url === '/home/')
+	url = url_raw.split('?') // we split the game id
+	if (url[0] === '/home/')
 		loadHome();
-	else if (url === '/login/')
+	else if (url[0] === '/login/')
 		loadLoginForm();
-	else if (url === '/signup/')
+	else if (url[0] === '/signup/')
 		loadSignupForm();
-	else if (url === '/signup/email/activate/')
+	else if (url[0] === '/signup/email/activate/')
 		loadLoginForm();
-	else if (url === '/home/profile/')
+	else if (url[0] === '/home/profile/')
 		loadProfile(data);
-	else if (url === '/home/profile/edit/')
+	else if (url[0] === '/home/profile/edit/')
 		loadProfileSettings();
-	else if (url === '/home/game/')
-		loadPlayGame();
-	else if (url === '/home/friends/')
+	else if (url[0] === '/home/game/')
+		loadPlayGame(url[1]);
+	else if (url[0] === '/home/friends/')
 		loadFriendsSection();
 }
 

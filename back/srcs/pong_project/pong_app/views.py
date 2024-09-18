@@ -463,42 +463,6 @@ def RemoveFriend(request):
 			return JsonResponse({'status': 'error', 'message': 'User not found'}, status=404)
 	return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
 
-"""class Move(APIView):
-	permission_classes = [AllowAny]
-	def post(self, request):   
-		player1 = request.data.get("Player1")
-		key = request.data.get('key')
-		player2 = request.data.get("Player2")
-		key = request.data.get("key")
-		speed1 = request.data.get("speed1")
-		speed2 = request.data.get("speed2")
-		# player 1
-		if key == 'KeyW':
-			speed1 = -3
-		elif key == 'KeyS':
-			speed1 = 3
-		# player 2
-		elif key == 'ArrowUp':
-			speed2 = -3
-		elif key == 'ArrowDown':
-			speed2 = 3
-		try:
-			speed1 = int(speed1)
-			if not outOfBounds(player1 + speed1, 10, 500):
-				player1 += int(speed1)
-		except:
-				pass
-		try:
-			speed2 = int(speed2)
-			if not outOfBounds(player2 + speed2, 10, 500):
-				player2 += int(speed2)
-		except:
-			pass
-		position_updated = {
-			'Player1': player1,
-			'Player2': player2,
-			'Speed1': speed1,
-			'Speed2': speed2,
-		}
 
-		return JsonResponse(position_updated)"""
+#def create_game(request, game_id):
+#	xxx

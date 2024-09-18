@@ -44,12 +44,13 @@ let ball = new Ball(board);
 
 
 
-function initializeGame(){
+function initializeGame(id){
     player1.velocityY = 0;
     player2.velocityY = 0;
-    const socket = new WebSocket('ws://' + window.location.host + '/ws/pong-socket/');
+    const socket = new WebSocket('wss://' + window.location.host + '/wss/pong-socket/' + id + '/');
     socket.onopen = function(event) {
         console.log("WebSocket is open now.");
+        console.log(id)
     };
     
     socket.onclose = function(event) {

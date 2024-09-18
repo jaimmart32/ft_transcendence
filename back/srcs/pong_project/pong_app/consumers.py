@@ -1,7 +1,7 @@
 import json
-from channels.generic.websocket import WebsocketConsumer
+#from channels.generic.websocket import WebsocketConsumer
 import random
-#from channels.generic.websocket import AsyncWebsocketConsumer
+from channels.generic.websocket import AsyncWebsocketConsumer
 import logging
 import time
 import threading
@@ -16,9 +16,25 @@ def ballOutOfBounds(yPosition, ball, board):
     return yPosition < 0 or yPosition + ball > board
 
 
-class PongConsumer(WebsocketConsumer):
-    def connect(self):
+class PongConsumer(AsyncWebsocketConsumer):
+    async def connect(self):
         logger.info(self.scope)  # Print the scope to debug the connection
+        self.game_id = self.scope['url_route']['kwargs']['game_id']
+        self.game_id_group = 'pong_app_%s' % self.game_id
+
+        await self.channel_layer.group_add(
+            self.game_id_group,
+            self.channel_name
+        )
+
+        await self.channel_layer.group_send(
+            self.game_id_group,
+            {
+                'type': 'tester_message',
+                'tester': 'tester',
+            }
+        )
+
         self.accept()
         self.running = True
         self.board = Board()
@@ -93,7 +109,8 @@ class PongConsumer(WebsocketConsumer):
             # Check if the ball is out of bounds to score
             if self.score():
                 if self.player1.score == 7 or self.player2.score == 7:
-                    self.disconnect("game over") # TODO: when you restart the game it gets a bit weird so it has to be improved
+                    self.running = False
+                    #self.disconnect("game over") # TODO: when you restart the game it gets a bit weird so it has to be improved
                 # Reset the ball after scoring
                 self.ball = Ball(board=self.board)
     
@@ -116,11 +133,19 @@ class PongConsumer(WebsocketConsumer):
             self.send(text_data=json.dumps(position_updated))
              
     
-    def disconnect(self, close_code):
+    async def disconnect(self, close_code):
         logger.info(f"Disconnected: {close_code}")
         self.running = False
+        await self.channel_layer.group_discard(
+            self.game_id_group,
+            self.channel_name
+        )
 
-    def receive(self, text_data):
+    async def receive(self, text_data):
+        tester = text_data['tester']
+        await self.send(text_data=json.dumps({
+            'tester': tester,
+        }))
         try:
             text_data_json = json.loads(text_data)
             key = text_data_json["key"]

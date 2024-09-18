@@ -29,4 +29,7 @@ urlpatterns = [
 	path('home/friends/', views.FriendsList, name='friends-list'),
 	path('home/friends/add/', views.AddFriend, name='add-friend'),
 	path('home/friends/remove/', views.RemoveFriend, name='remove-friend'),
+
+	# Game
+	#path('<str:game_id>/', views.game, name='create_game')
 ]
