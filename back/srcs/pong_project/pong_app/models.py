@@ -24,6 +24,7 @@ class CustomUser(AbstractUser):
 	tournament_stats = models.JSONField(default=dict)
 	# self so that can be related witj user model,
 	friends = models.ManyToManyField('self', blank=True)
+	#id = models.IntegerField()
 
 	def __str__(self):
 		return f"{self.username}"
@@ -38,8 +39,10 @@ class Tournament(models.Model):
 		return f"Winner of {self.name}: {self.winner}!"
 
 class	Game(models.Model):
-	player1 = models.CharField(max_length=8)
-	player2 = models.CharField(max_length=8)
+	player1 = models.ForeignKey(CustomUser, related_name='player1', on_delete=models.CASCADE)
+	player2 = models.ForeignKey(CustomUser, related_name='player2', on_delete=models.CASCADE)
+	game_id = models.IntegerField()
+	enough_players = models.BooleanField(default=False)
 	winner = models.CharField(max_length=8, blank=True, null=True)
 	# Game format:
 	# game = 3 rounds
@@ -47,6 +50,10 @@ class	Game(models.Model):
 	# If draw, +1 round, first who scores is the winner
 	scores1 = models.JSONField(default=list)
 	scores2 = models.JSONField(default=list)
+
+	def check_jugadores(self):
+        # Verifica si ambos jugadores están conectados
+	    return self.jugador_1 is not None and self.jugador_2 is not None
 
 	def __str__(self):
 		return f"Winner: {self.winner}!"

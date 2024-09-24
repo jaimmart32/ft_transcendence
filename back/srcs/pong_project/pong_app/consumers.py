@@ -18,24 +18,37 @@ def ballOutOfBounds(yPosition, ball, board):
 
 class PongConsumer(AsyncWebsocketConsumer):
     async def connect(self):
-        logger.info(self.scope)  # Print the scope to debug the connection
         self.game_id = self.scope['url_route']['kwargs']['game_id']
+        self.user = self.scope['user']
+
+        # Get or create the game instance
+        self.game = await Game.objects.get_or_create(id=self.game_id)
+        logger.info(self.scope)  # Print the scope to debug the connection
         self.game_id_group = 'pong_app_%s' % self.game_id
 
+       # Add the WebSocket connection to the group
         await self.channel_layer.group_add(
             self.game_id_group,
             self.channel_name
         )
 
-        await self.channel_layer.group_send(
-            self.game_id_group,
-            {
-                'type': 'tester_message',
-                'tester': 'tester',
-            }
-        )
+        # Determine if the user is Player 1 or Player 2 based on whether slots are taken
+        if not self.game.player1:
+            self.game.player1 = self.user
+            self.player_role = 'player1'
+        elif not self.game.player2:
+            self.game.player2 = self.user
+            self.player_role = 'player2'
+        else:
+            # Reject the connection if the room is full (both player slots taken)
+            await self.close()
+            return
+
+        # Save the game state with the player assignments
+        await self.game.save()
 
         self.accept()
+
         self.running = True
         self.board = Board()
         self.ball = Ball(board=self.board)
@@ -46,27 +59,21 @@ class PongConsumer(AsyncWebsocketConsumer):
         self.game_thread.start()
 
     def ballSaved(self):
-        # Check if the ball is within the vertical range of player 1 and near their paddle (on the left side)
         if (self.ball.x + self.ball.velocityX <= self.player1.x + self.player1.width) and (self.ball.x >= self.player1.x) and \
                 (self.player1.y <= self.ball.y <= self.player1.y + self.player1.height):
-            # Calculate the hit position relative to the paddle's center
             paddle_center = self.player1.y + self.player1.height / 2
-            hit_pos = (self.ball.y - paddle_center) / (self.player1.height / 2)  # Get a value between -1 and 1
-            self.ball.velocityY += hit_pos * 5  # Modify the vertical velocity
+            hit_pos = (self.ball.y - paddle_center) / (self.player1.height / 2)
+            self.ball.velocityY += hit_pos * 3  # Modify the vertical velocity
             
-            # Ensure the ball is moved outside of the paddle to prevent getting stuck
             self.ball.x = self.player1.x + self.player1.width + 1
             return True
 
-        # Check if the ball is within the vertical range of player 2 and near their paddle (on the right side)
         elif (self.ball.x + self.ball.velocityX >= self.player2.x - self.ball.width) and (self.ball.x <= self.player2.x) and \
                 (self.player2.y <= self.ball.y <= self.player2.y + self.player2.height):
-            # Calculate the hit position relative to the paddle's center
             paddle_center = self.player2.y + self.player2.height / 2
             hit_pos = (self.ball.y - paddle_center) / (self.player2.height / 2)
-            self.ball.velocityY += hit_pos * 5  # Modify the vertical velocity
+            self.ball.velocityY += hit_pos * 3
             
-            # Ensure the ball is moved outside of the paddle to prevent getting stuck
             self.ball.x = self.player2.x - self.ball.width - 1
             return True
 
@@ -114,6 +121,7 @@ class PongConsumer(AsyncWebsocketConsumer):
                 # Reset the ball after scoring
                 self.ball = Ball(board=self.board)
     
+    
     def game_loop(self):
         self.running = True
         while self.running:
@@ -130,7 +138,13 @@ class PongConsumer(AsyncWebsocketConsumer):
 
             time.sleep(0.016)  # Approx 60 FPS
 
-            self.send(text_data=json.dumps(position_updated))
+            await self.channel_layer.group_send(
+            self.game_id_group,
+            {
+                'type': 'tester_message',
+                'tester': 'tester', # TODO: aqui deberia ir la nueva posicion
+            }
+        )
              
     
     async def disconnect(self, close_code):
@@ -140,6 +154,14 @@ class PongConsumer(AsyncWebsocketConsumer):
             self.game_id_group,
             self.channel_name
         )
+
+        # Remove players from the game
+        if self.player_role == 'player1':
+            self.game.player1 = None
+        elif self.player_role == 'player2':
+            self.game.player2 = None
+
+        await self.game.save()
 
     async def receive(self, text_data):
         tester = text_data['tester']
@@ -180,7 +202,13 @@ class PongConsumer(AsyncWebsocketConsumer):
                     'Score1': self.player1.score,
                     'Score2': self.player2.score
                 }
-            self.send(text_data=json.dumps(position_updated))
+            await self.channel_layer.group_send(
+            self.game_id_group,
+            {
+                'type': 'tester_message',
+                'tester': 'tester', # TODO: aqui deberia ir la nueva posicion
+            }
+            )
         except json.JSONDecodeError as e:
             logger.error("Failed to parse JSON: %s", e)
         except Exception as e:
