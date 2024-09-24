@@ -2,12 +2,9 @@ function homeHTML(data)
 {
 	return(`
 		<h2>Welcome, ${data.username}!</h2>
-		<div class="btn-group-vertical">
-		    <button class="btn btn-primary" id="profile">Profile</button>
-		    <button class="btn btn-primary" id="play-game">Play Game</button>
-		    <button class="btn btn-primary" id="friends-section">Friends</button>
-		    <button class="btn btn-primary" id="create-tournament">Create Tournament</button>
-		</div>
+		<p style="color: white;">
+			Hello world! Here we should add a brief description of our project.
+		</p>
 	    `);
 }
 
@@ -119,50 +116,54 @@ function loadGenericHTML(type)
 	if (type === 'login')
 	{
 		return (`
-		    <h2>Login</h2>
-		    <form id="login-form">
-			<div class="form-group">
-			    <label for="username">Username</label>
-			    <input type="username" class="form-control" id="username" aria-describedby="usernameHelp" placeholder="Enter username">
-			    <span id="username-error" class="error-message"></span>
-			</div>
-			<div class="form-group">
-			    <label for="password">Password</label>
-			    <input type="password" class="form-control" id="password" placeholder="Password">
-			    <span id="password-error" class="error-message"></span>
-			</div>
-			<span id="email-error" class="error-message"></span>
-			<button type="submit" class="btn btn-primary">Login</button>
-		    </form>
+
+		<div class="form-container">
+			<h2 class="form-title">Log in</h2>
+			<form id="login-form">
+				<div class="form-group">
+					<label for="username">Username</label>
+					<input type="username" class="form-control" id="username" placeholder="Enter username">
+			    		<span id="username-error" class="error-message"></span>
+				</div>
+				<div class="form-group">
+					<label for="password">Password</label>
+					<input type="password" class="form-control" id="password" placeholder="Enter password">
+			    		<span id="password-error" class="error-message"></span>
+				</div>
+				<button class="custom-button" id="submit">Submit</button>
+			</form>
+		</div>
 		`);
 	}
 	else if (type === 'signup')
 	{
 		return(`
-		    <h2>Sign Up</h2>
-		    <form id="signup-form">
-			<div class="form-group">
-			    <label for="username">Username</label>
-			    <input type="text" class="form-control" id="username" placeholder="Enter username">
-			    <span id="username-error" class="error-message"></span>
+			<div class="form-container">
+				<h2 class="form-title">Sign Up</h2>
+				<form id="signup-form">
+					<div class="form-group">
+						<label for="username">Username</label>
+						<input type="username" class="form-control" id="username" placeholder="Enter username">
+						<span id="username-error" class="error-message"></span>
+					</div>
+					<div class="form-group">
+						<label for="email">Email</label>
+						<input type="email" class="form-control" id="email" placeholder="Enter email">
+						<span id="email-error" class="error-message"></span>
+					</div>
+					<div class="form-group">
+						<label for="password">Password</label>
+						<input type="password" class="form-control" id="password" placeholder="Enter password">
+						<span id="password-error" class="error-message"></span>
+					</div>
+					<div class="form-group">
+						<label for="confirm password">Password</label>
+						<input type="password" class="form-control" id="confirm-password" placeholder="Confirm password">
+						<span id="conf-password-error" class="error-message"></span>
+					</div>
+					<button class="custom-button" id="submit">Submit</button>
+				</form>
 			</div>
-			<div class="form-group">
-			    <label for="email">Email address</label>
-			    <input type="email" class="form-control" id="email" aria-describedby="emailHelp" placeholder="Enter email">
-			    <span id="email-error" class="error-message"></span>
-			</div>
-			<div class="form-group">
-			    <label for="password">Password</label>
-			    <input type="password" class="form-control" id="password" placeholder="Password">
-			    <span id="password-error" class="error-message"></span>
-			</div>
-			<div class="form-group">
-			    <label for="confirm password">Confirm password</label>
-			    <input type="password" class="form-control" id="confirm-password" placeholder="Confirm password">
-			    <span id="conf-password-error" class="error-message"></span>
-			</div>
-			<button type="submit" class="btn btn-primary">Sign Up</button>
-		    </form>
 		`);
 	}
 }
