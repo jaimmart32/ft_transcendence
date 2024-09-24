@@ -4,6 +4,17 @@ document.addEventListener('DOMContentLoaded', function() {
     const signupLink = document.getElementById('signup-link');
     const login42Link = document.getElementById('login42-link');
 	const logoutLink = document.getElementById('logout-link');
+	const navbarLinks = document.querySelectorAll('.explore-navbar-nav .nav-link');// the selector will only select those elements that are descendants of an element that has the class explore-navbar-nav
+	// Event listenner in charge of navigating as a SPA
+    navbarLinks.forEach(link =>
+	{
+        link.addEventListener('click', function(event)
+		{
+            event.preventDefault();// Avoid recharging page
+            const targetPath = event.target.getAttribute('data-path');  // Obtain path
+            navigateTo(targetPath);
+        });
+    });
 
 //	This event listener is in charge of receiving any event regarding the 
 //	browser buttons (forward/backward/refresh)
