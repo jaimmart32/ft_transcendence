@@ -29,7 +29,7 @@ body
 	justify-content: center;
 	align-items: center;
 	height: 10%;
-	width: 100%
+	width: 100%;
 	margin: 0;
 	padding: 0;
 }
@@ -37,7 +37,7 @@ body
 .explore-navbar-nav
 {
 	background-color: white;
-	display: none;
+	display: flex;
 	justify-content: center;
 	list-style-type: none;
 	margin: 0;

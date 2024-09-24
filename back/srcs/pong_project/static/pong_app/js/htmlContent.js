@@ -1,10 +1,22 @@
+
+//Font Awesome is a very popular icon library that allows you to include thousands of scalable icons on a web page simply by applying CSS classes.
 function homeHTML(data)
 {
 	return(`
-		<h2>Welcome, ${data.username}!</h2>
-		<p style="color: white;">
-			Hello world! Here we should add a brief description of our project.
-		</p>
+	<div class="jumbotron text-center bg-dark text-white mt-4">
+    	<h1 class="display-4">Welcome to WebPong ${data.username}!</h1>
+	    <p class="lead">The best way to connect with your friends, personalize your profile and enjoy Pong games.</p>
+	    <hr class="my-4">
+	    <p>
+	        With WebPong, you can:
+	        <ul class="list-unstyled">
+	            <li><i class="fas fa-user-friends"></i> Add and manage friends</li>
+	            <li><i class="fas fa-user-cog"></i> Customize your profile to your liking</li>
+	            <li><i class="fas fa-gamepad"></i> Challenge your friends in online Pong games</li>
+	        </ul>
+	    </p>
+	</div>
+
 	    `);
 }
 
