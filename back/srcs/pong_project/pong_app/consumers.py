@@ -1,7 +1,7 @@
 import json
-#from channels.generic.websocket import WebsocketConsumer
+from channels.generic.websocket import WebsocketConsumer
 import random
-from channels.generic.websocket import AsyncWebsocketConsumer
+#from channels.generic.websocket import WebsocketConsumer
 import logging
 import time
 import threading
@@ -16,18 +16,19 @@ def ballOutOfBounds(yPosition, ball, board):
     return yPosition < 0 or yPosition + ball > board
 
 
-class PongConsumer(AsyncWebsocketConsumer):
-    async def connect(self):
+class PongConsumer(WebsocketConsumer):
+    def connect(self):
+        exit()
         self.game_id = self.scope['url_route']['kwargs']['game_id']
         self.user = self.scope['user']
 
         # Get or create the game instance
-        self.game = await Game.objects.get_or_create(id=self.game_id)
+        self.game, created = Game.objects.get_or_create(id=self.game_id)
         logger.info(self.scope)  # Print the scope to debug the connection
         self.game_id_group = 'pong_app_%s' % self.game_id
 
        # Add the WebSocket connection to the group
-        await self.channel_layer.group_add(
+        self.channel_layer.group_add(
             self.game_id_group,
             self.channel_name
         )
@@ -41,11 +42,11 @@ class PongConsumer(AsyncWebsocketConsumer):
             self.player_role = 'player2'
         else:
             # Reject the connection if the room is full (both player slots taken)
-            await self.close()
+            self.close()
             return
 
         # Save the game state with the player assignments
-        await self.game.save()
+        self.game.save()
 
         self.accept()
 
@@ -57,6 +58,7 @@ class PongConsumer(AsyncWebsocketConsumer):
         self.lock = threading.Lock()  # Initialize the lock
         self.game_thread = threading.Thread(target=self.game_loop)
         self.game_thread.start()
+
 
     def ballSaved(self):
         if (self.ball.x + self.ball.velocityX <= self.player1.x + self.player1.width) and (self.ball.x >= self.player1.x) and \
@@ -122,7 +124,7 @@ class PongConsumer(AsyncWebsocketConsumer):
                 self.ball = Ball(board=self.board)
     
     
-    async def game_loop(self):
+    def game_loop(self):
         self.running = True
         while self.running:
             self.move_ball()
@@ -138,7 +140,7 @@ class PongConsumer(AsyncWebsocketConsumer):
 
             time.sleep(0.016)  # Approx 60 FPS
 
-            await self.channel_layer.group_send(
+            self.channel_layer.group_send(
             self.game_id_group,
             {
                 'position': position_updated
@@ -146,10 +148,10 @@ class PongConsumer(AsyncWebsocketConsumer):
         )
              
     
-    async def disconnect(self, close_code):
+    def disconnect(self, close_code):
         logger.info(f"Disconnected: {close_code}")
         self.running = False
-        await self.channel_layer.group_discard(
+        self.channel_layer.group_discard(
             self.game_id_group,
             self.channel_name
         )
@@ -160,9 +162,9 @@ class PongConsumer(AsyncWebsocketConsumer):
         elif self.player_role == 'player2':
             self.game.player2 = None
 
-        await self.game.save()
+        self.game.save()
 
-    async def receive(self, text_data):
+    def receive(self, text_data):
         try:
             text_data_json = json.loads(text_data)
             key = text_data_json['position']["key"]
@@ -197,7 +199,7 @@ class PongConsumer(AsyncWebsocketConsumer):
                     'Score1': self.player1.score,
                     'Score2': self.player2.score
                 }
-            await self.channel_layer.group_send(
+            self.channel_layer.group_send(
             self.game_id_group,
             {
                 'position': position_updated

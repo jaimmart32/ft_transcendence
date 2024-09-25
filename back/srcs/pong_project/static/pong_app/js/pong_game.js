@@ -45,13 +45,16 @@ let ball = new Ball(board);
 
 
 function initializeGame(id){
+    let score1 = 0;
+    let score2 = 0;
     player1.velocityY = 0;
     player2.velocityY = 0;
-    alert("BAHHAJVAGHAHGA")
     const socket = new WebSocket('wss://' + window.location.host + '/wss/pong-socket/' + id + '/');
+    isSocketOpen = false;
     socket.onopen = function(event) {
         console.log("WebSocket is open now.");
-        console.log(id)
+        console.log(id);
+        isSocketOpen = true;
     };
     
     socket.onclose = function(event) {
@@ -67,16 +70,16 @@ function initializeGame(id){
         const data = JSON.parse(event.data);
 
         // Update player1's position with the received data
-        player1.y = data['Player1'];
+        player1.y = data['position']['Player1'];
 
         // Update player2's position with the received data
-        player2.y = data['Player2'];
+        player2.y = data['position']['Player2'];
 
-        ball.x = data['ballX'];
-        ball.y = data['ballY'];
+        ball.x = data['position']['ballX'];
+        ball.y = data['position']['ballY'];
 
-        score1 = data['Score1']
-        score2 = data['Score2']
+        score1 = data['position']['Score1']
+        score2 = data['position']['Score2']
         update();
     }
 
@@ -102,12 +105,14 @@ function initializeGame(id){
     }
 
     function sendPlayerData(keycode, action){
-        socket.send(JSON.stringify({
-            'position': {
-                'key': keycode,
-                'action': action
-            }
-        }));
+        if (isSocketOpen) {
+            socket.send(JSON.stringify({
+                'position': {
+                    'key': keycode,
+                    'action': action
+                }
+            }));
+        }
     }
             
     function update() {
