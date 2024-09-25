@@ -5,7 +5,7 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 import logging
 import time
 import threading
-from .models import Paddle, Board, Ball
+from .models import Paddle, Board, Ball, Game
 
 logger = logging.getLogger(__name__)
 
@@ -122,7 +122,7 @@ class PongConsumer(AsyncWebsocketConsumer):
                 self.ball = Ball(board=self.board)
     
     
-    def game_loop(self):
+    async def game_loop(self):
         self.running = True
         while self.running:
             self.move_ball()
@@ -141,8 +141,7 @@ class PongConsumer(AsyncWebsocketConsumer):
             await self.channel_layer.group_send(
             self.game_id_group,
             {
-                'type': 'tester_message',
-                'tester': 'tester', # TODO: aqui deberia ir la nueva posicion
+                'position': position_updated
             }
         )
              
@@ -164,14 +163,10 @@ class PongConsumer(AsyncWebsocketConsumer):
         await self.game.save()
 
     async def receive(self, text_data):
-        tester = text_data['tester']
-        await self.send(text_data=json.dumps({
-            'tester': tester,
-        }))
         try:
             text_data_json = json.loads(text_data)
-            key = text_data_json["key"]
-            action = text_data_json["action"]
+            key = text_data_json['position']["key"]
+            action = text_data_json['position']["action"]
             if key in ["KeyW", "KeyS", "ArrowUp", "ArrowDown"]:
                 with self.lock:  # Acquire the lock before modifying shared resources
                     if action == "move":
@@ -205,10 +200,9 @@ class PongConsumer(AsyncWebsocketConsumer):
             await self.channel_layer.group_send(
             self.game_id_group,
             {
-                'type': 'tester_message',
-                'tester': 'tester', # TODO: aqui deberia ir la nueva posicion
+                'position': position_updated
             }
-            )
+        )
         except json.JSONDecodeError as e:
             logger.error("Failed to parse JSON: %s", e)
         except Exception as e:

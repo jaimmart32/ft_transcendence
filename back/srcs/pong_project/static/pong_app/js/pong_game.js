@@ -47,6 +47,7 @@ let ball = new Ball(board);
 function initializeGame(id){
     player1.velocityY = 0;
     player2.velocityY = 0;
+    alert("BAHHAJVAGHAHGA")
     const socket = new WebSocket('wss://' + window.location.host + '/wss/pong-socket/' + id + '/');
     socket.onopen = function(event) {
         console.log("WebSocket is open now.");
@@ -101,11 +102,12 @@ function initializeGame(id){
     }
 
     function sendPlayerData(keycode, action){
-        socket.send(JSON.stringify(
-        {
-            'key': keycode,
-            'action': action
-        }))
+        socket.send(JSON.stringify({
+            'position': {
+                'key': keycode,
+                'action': action
+            }
+        }));
     }
             
     function update() {
