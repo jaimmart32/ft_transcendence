@@ -4,7 +4,7 @@ from channels.generic.websocket import WebsocketConsumer
 import logging
 import time
 import threading
-from .models import Paddle, Board, Ball
+from .models import Paddle, Board, Ball, Game, CustomUser
 
 logger = logging.getLogger(__name__)
 
@@ -124,3 +124,24 @@ class PongConsumer(WebsocketConsumer):
         except Exception as e:
             logger.error("Unexpected error: %s", e)
 
+    def update_game_stats(self, winner):
+        player1_user = CustomUser.objects.get(id=self.player1.user_id)
+        player2_user = CustomUser.objects.get(id=self.player2.user_id)
+
+        player1_stats = player1_user.game_stats
+        player1_stats['total'] = player1_stats.get('total', 0) + 1
+        if winner == 1:
+            player1_stats['wins'] = player1_stats.get('wins', 0) + 1
+        else:
+            player1_stats['losses'] = player1_stats.get('losses', 0) + 1
+        player1_user.game_stats = player1_stats
+        player1_user.save()
+
+        player2_stats = player2_user.game_stats
+        player2_stats['total'] = player2_stats.get('total', 0) + 1
+        if winner == 2:
+            player2_stats['wins'] = player2_stats.get('wins', 0) + 1
+        else:
+            player2_stats['losses'] = player2_stats.get('losses', 0) + 1
+        player2_user.game_stats = player2_stats
+        player2_user.save()

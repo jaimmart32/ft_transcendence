@@ -13,6 +13,7 @@ function homeHTML(data)
 	            <li><i class="fas fa-user-friends"></i> Add and manage friends</li>
 	            <li><i class="fas fa-user-cog"></i> Customize your profile to your liking</li>
 	            <li><i class="fas fa-gamepad"></i> Challenge your friends in online Pong games</li>
+	            <li><i class="fas fa-trophy"></i> Create Pong Tournaments to test your skills</li>
 	        </ul>
 	    </p>
 	</div>
