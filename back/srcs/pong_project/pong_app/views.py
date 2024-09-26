@@ -309,8 +309,11 @@ def verify2FA(request):
 @jwt_required
 def Home(request):
 	if request.method == 'GET':
-		content = {'status': 'success', 'message': 'Welcome to the home page!', 'username': request.user.username}
-		return JsonResponse(content, status=200)
+		# Also check if user is online to avoid rendering HomeHTML when refresh token is ok but user in not online
+		if request.user.is_online:
+			content = {'status': 'success', 'message': 'Welcome to the home page!', 'username': request.user.username}
+			return JsonResponse(content, status=200)
+		return JsonResponse({'status': 'error', 'message': 'Not online dispite valid token'}, status=400)
 	return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
 
 

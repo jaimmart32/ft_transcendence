@@ -20,15 +20,26 @@ async function loadFriendsSection()
 
 			if (data.status === 'success')
 			{
-				let friendsHTML = '<h2>Friends</h2><ul>';
+				let friendsHTML = `
+    				<div class="friends-header-container">
+    				    <div class="friends-header">Friends</div>
+    				</div>
+    				<div class="friends-list">
+`;
 				data.friends.forEach(friend => {
 					friendsHTML += `
-						<li>${friend.username} - ${friend.online ? 'Online' : 'Offline'}
-						<button data-username="${friend.username}" class="remove-friend btn btn-danger">Remove</button>
-						</li>
+						<div class="friend-card d-flex">
+							<div class="friend-username">${friend.username}</div>
+							<div class="friend-status ${friend.online ? 'online' : 'offline'}">
+								${friend.online ? 'Online' : 'Offline'}
+							</div>
+							<div class="friend-actions">
+								<button data-username="${friend.username}" class="remove-friend btn btn-danger">Remove</button>
+							</div>
+						</div>
 					`;
 				});
-				friendsHTML += '</ul><button id="add-friend" class="btn btn-primary">Add Friend</button>';
+				friendsHTML += '</div><div class="add-friend-container"><button id="add-friend" class="btn btn-primary">Add Friend</button></div>';
 				app.innerHTML = friendsHTML;
 
 				document.querySelectorAll('.remove-friend').forEach(button => {

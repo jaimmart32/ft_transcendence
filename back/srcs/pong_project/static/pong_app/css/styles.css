@@ -128,3 +128,81 @@ body
 	padding: 20px 20px;
 	border-radius: 20px;
 }
+
+/*FRIENDS SECTION*/
+
+.friends-header-container
+{
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.friends-header
+{
+    font-size: 36px;
+    font-weight: bold;
+    background-color: #7011b0;
+    color: rgb(175, 155, 179);
+    padding: 10px 20px;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.friends-list
+{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+
+.friend-card
+{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 10px;
+}
+
+.friend-username
+{
+    flex: 2;
+    padding: 5px;
+    background-color: #f0f0f0;
+}
+
+.friend-status
+{
+    flex: 1;
+    padding: 5px;
+    text-align: center;
+}
+
+.friend-actions
+{
+    flex: 1;
+    text-align: right;
+}
+
+.online
+{
+    background-color: #d4edda;
+}
+
+.offline
+{
+    background-color: #f8d7da;
+}
+
+.add-friend-container
+{
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
