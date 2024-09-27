@@ -21,25 +21,32 @@ async function loadFriendsSection()
 			if (data.status === 'success')
 			{
 				let friendsHTML = `
-    				<div class="friends-header-container">
-    				    <div class="friends-header">Friends</div>
-    				</div>
-    				<div class="friends-list">
-`;
+				<div class="options-container">
+					<div class="option">
+						<h3><b>Friends</b></h3>
+						<button class="custom-button" id="add-friend" style="background-color: green; width: 10%;">
+							<i class="fas fa-user-plus"></i>
+						</button>
+						<div class="friends-list" style="width: 100%;">
+				`;
+
 				data.friends.forEach(friend => {
 					friendsHTML += `
-						<div class="friend-card d-flex">
-							<div class="friend-username">${friend.username}</div>
-							<div class="friend-status ${friend.online ? 'online' : 'offline'}">
-								${friend.online ? 'Online' : 'Offline'}
-							</div>
-							<div class="friend-actions">
-								<button data-username="${friend.username}" class="remove-friend btn btn-danger">Remove</button>
-							</div>
-						</div>
-					`;
-				});
-				friendsHTML += '</div><div class="add-friend-container"><button id="add-friend" class="btn btn-primary">Add Friend</button></div>';
+							<div class="friend-card">
+								<span class="friend-username">${friend.username}</span>
+								<span class="friend-status ${friend.online ? 'online' : 'offline'}">
+									${friend.online ? 'Online' : 'Offline'}
+								</span>
+								<div class="friend-actions">
+									<button data-username="${friend.username}" class="custom-button" style="background-color: red; align-items: left;">
+										<i class="fas fa-user-minus"></i>
+									</button>
+								</div>
+							</div>`});
+				friendsHTML +=	`</div>
+					</div>
+				</div>`;
+
 				app.innerHTML = friendsHTML;
 
 				document.querySelectorAll('.remove-friend').forEach(button => {

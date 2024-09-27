@@ -23,105 +23,92 @@ function homeHTML(data)
 
 function profileHTML(data, avatarUrl)
 {
+//	The username is not being picked up. Both bottom buttons are not being centered
 	return(`
-		<div id="profile-settings" class="container mt-4">
-	<div class="card mx-auto" style="max-width: 500px;">
-	    <div class="card-body text-center">
-		<img src="${avatarUrl}" alt="Profile Picture" class="img-thumbnail mb-3">
-		<h3 id="username">${data.username}</h3>
-		<ul class="list-group list-group-flush mb-3">
-		    <li class="list-group-item">Games Played: <span id="games-played">0</span></li>
-		    <li class="list-group-item">Games Won: <span id="games-won">0</span></li>
-		    <li class="list-group-item">Games Lost: <span id="games-lost">0</span></li>
-		</ul>
-		<button id='edit-profile' type="button" class="btn btn-primary">Edit Profile</button>
-		<button class="btn btn-secondary" id="back-to-home">Back to Home</button>
-	    </div>
-	</div>
-    </div>
-
-    <!-- Custom JS -->
-    <script>
-	// Example function to load user data dynamically
-	function loadUserData() {
-	    const username = 'JohnDoe';
-	    const gamesPlayed = 25;
-	    const gamesWon = 15;
-	    const gamesLost = 10;
-
-	    document.getElementById('username').innerText = username;
-	    document.getElementById('games-played').innerText = gamesPlayed;
-	    document.getElementById('games-won').innerText = gamesWon;
-	    document.getElementById('games-lost').innerText = gamesLost;
-	}
-
-	// Call loadUserData on page load
-	document.addEventListener('DOMContentLoaded', loadUserData);
-    </script>
-`);
+		<div id="profile-settings" class="container mt-4" style="font-family: 'Courier New', Courier, Monospace;">
+			<div class="card mx-auto" style="max-width: 500px; background-color: red; border-radius: 20px;">
+				<div class="card-body text-center">
+					<img src="${avatarUrl}" alt="Profile Picture" class="img-thumbnail mb-3" style="background-color: black; border-radius: 20px;">
+					<h3 id="username" style="padding: 10px 10px;">${data.usernname}</h3>
+					<div class="container" style="box-sizing: border-box; width: 100%; padding: 0; margin: 0;">
+						<div class="container" style="width: 40%; background-color: white; border-radius: 20px; margin-top: 20px;">
+							<ul class="list-group list-group-flush mb-3">
+								<b>Games</b>
+								<li class="list-group item">
+									Played: 
+									<span id="games-played">0</span>
+								</li>
+								<li class="list-group item">
+									Won: 
+									<span id="games-won">0</span>
+								</li>
+								<li class="list-group item">
+									Lost: 
+									<span id="games-lost">0</span>
+								</li>
+							</ul>
+						</div>
+					</div>
+					<div class="button-group">
+						<button id="edit-profile" class="custom-button">
+							<i class="fas fa-user-edit"></i>
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
+		`);
 }
 
 function profileSettingsHTML(data)
 {
+//	When changing the img source, an error message appears that the user does not have access to the page
 	return(`
-		<div class="container mt-2">
-				<h2>Profile Settings</h2>
-				<img src="/static/pong_app/media/user-pic.jpg" alt="Default user profile picture" width="128" height="128">
-				<form id="profile-settings">
-				<!-- Username Field -->
-				<div class="form-group row">
-					<label for="username" class="col-sm-2 col-form-label">Username</label>
-					<div class="col-sm-10">
-					<input type="text" class="form-control" id="username" value=${data.username}>
-						<span id="username-error" class="error-message"></span>
+		<div id="profile-settings" class="container mt-4" style="font-family: 'Courier New', Courier, Monospace;">
+			<div class="card mx-auto" style="max-width: 500px; background-color: red;">
+				<div class="card-body text-center">
+					<img src="avatarUrl.jpg" alt="Profile Picture" class="img-thumbnail" style="background-color: black; width: 70%; height: 50%;">
+					<form id="profile-settings" style="padding: 30px 20px;">
+						<div class="form-group row" style="justify-content: center;">
+							<label for="username" class="col-form-label">Username</label>
+							<div class="col-sm-10">
+								<input type="text" class="form-control" id="username" value=${data.username}>
+								<span id="username-error" class="error-message"></span>
+							</div>
+						</div>
+						<div class="form-group row" style="justify-content: center;">
+							<label for="password" class="col-form-label">Password</label>
+							<div class="col-sm-10">
+								<input type="password" class="form-control" id="password" placeholder="********">
+								<span id="password-error" class="error-message"></span>
+							</div>
+						</div>
+						<div class="form-group row" style="justify-content: center;"> 
+							<div class="col-sm-10" >
+								<label for="twofa" class="col-form-label row" style="justify-content: center;">Activate 2FA</label>
+								<input type="checkbox" id="twofa">
+							</div>
+						</div>
+						<div class="form-group row" style="justify-content: center;">
+							<label for="avatar" class="col-form-label">Change Avatar</label>
+							<div class="col-sm-10">
+								<input type="file" class="form-control-file" id="avatar">
+							</div>
+							<span id="file-error" class="error-message"></span>
+							
+						<!-- We need to reduce the amount of margin or space that is between the choose file button
+						and the save changes button. -->
+						</div>
+						<span id="file-error" class="error-message"></span>
+					</div>
+					</form>
+					<div class="button-group" style="padding: 0; margin-top: 0;">
+						<button id="save-changes" class="custom-button" style="margin-top: 0;">Save Changes</button>
 					</div>
 				</div>
-				<!-- Password Field -->
-				<div class="form-group row">
-					<label for="password" class="col-sm-2 col-form-label">Password</label>
-					<div class="col-sm-10">
-					<input type="password" class="form-control" id="password" placeholder="*******">
-						<span id="password-error" class="error-message"></span>
-					</div>
-				</div>
-				<!-- Preferred Language Field -->
-				<div class="form-group row">
-					<label for="language" class="col-sm-2 col-form-label">Preferred Language</label>
-					<div class="col-sm-10">
-					<select class="form-control" id="language">
-						<option>English</option>
-						<option>Spanish</option>
-						<option>French</option>
-					</select>
-					</div>
-				</div>
-				<!-- 2FA Activation Field -->
-				<div class="form-group row">
-					<label for="twofa" class="col-sm-2 col-form-label">Activate 2FA</label>
-					<div class="col-sm-10">
-					<input type="checkbox" id="twofa">
-					</div>
-				</div>
-				<!-- Avatar Change Field -->
-				<div class="form-group row">
-					<label for="avatar" class="col-sm-2 col-form-label">Change Avatar</label>
-					<div class="col-sm-10">
-					<input type="file" class="form-control-file" id="avatar">
-					</div>
-					<span id="file-error" class="error-message"></span>
-				</div>
-				<!-- Submit Button -->
-				<div class="form-group row">
-					<div class="col-sm-10 offset-sm-2">
-					<button id="save-changes" type="submit" class="btn btn-success">Save Changes</button>
-					</div>
-				</div>
-				</form>
 			</div>
-			<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-			<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
-			<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-			`);
+		</div>
+		`);
 }
 
 function loadGenericHTML(type)
