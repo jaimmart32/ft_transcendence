@@ -286,23 +286,27 @@ def verify2FA(request):
 	if request.method == 'POST':
 		username = request.POST.get('username')
 		otp = request.POST.get('otp')
-		user = CustomUser.objects.get(username=username)
+		try:
+			user = CustomUser.objects.get(username=username)
 
-		if user is not None:
-			if (user.otp == otp and user.otp_expDate is not None and user.otp_expDate > timezone.now()):
-				token = create_jwt_token(user)
-				user.is_online = True
-				user.save()
-				return JsonResponse({
-						'status': 'success',
-						'message': 'Logged in successfully!',
-						'access': token},
-						status=200
-					)
+			if user is not None:
+				if (user.otp == otp and user.otp_expDate is not None and user.otp_expDate > timezone.now()):
+					token = create_jwt_token(user)
+					user.is_online = True
+					user.save()
+					return JsonResponse({
+							'status': 'success',
+							'message': 'Logged in successfully!',
+							'access': token},
+							status=200
+						)
+				else:
+					return JsonResponse({'status': 'error', 'message': 'Expired code'}, status=400)
 			else:
-				return JsonResponse({'status': 'error', 'message': 'Expired code'}, status=400)
-		else:
-			return JsonResponse({'status': 'error', 'message': 'Invalid code'}, status=400)
+				return JsonResponse({'status': 'error', 'message': 'Invalid code'}, status=400)
+		except(CustomUser.DoesNotExist):
+			print("USER DOES NOT EXIST?!", flush=True)
+			return JsonResponse({'status': 'error', 'message': 'User does not exist'}, status=400)
 	return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
 
 
