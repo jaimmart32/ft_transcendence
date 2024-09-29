@@ -18,20 +18,24 @@ def ballOutOfBounds(yPosition, ball, board):
 
 class PongConsumer(WebsocketConsumer):
     def connect(self):
-        exit()
-        self.game_id = self.scope['url_route']['kwargs']['game_id']
+        self.game_id = int(self.scope['url_route']['kwargs']['game_id'])
         self.user = self.scope['user']
+        self.game_id_group = f'pong_app_{self.game_id}'
 
         # Get or create the game instance
-        self.game, created = Game.objects.get_or_create(id=self.game_id)
-        logger.info(self.scope)  # Print the scope to debug the connection
-        self.game_id_group = 'pong_app_%s' % self.game_id
+        #self.game, created = Game.objects.get_or_create(game_id=self.game_id) # Esto peta porwue hay que pasar argumentos de player1, player2, etc, solo con el game_id peta
 
-       # Add the WebSocket connection to the group
-        self.channel_layer.group_add(
-            self.game_id_group,
-            self.channel_name
-        )
+        self.game, created = Game.objects.get_or_create(
+        game_id=self.game_id,
+        defaults={
+            'player1': None,
+            'player2': None,
+            'enough_players': False,
+            'winner': None,
+            'scores1': [],
+            'scores2': []
+        }
+    )
 
         # Determine if the user is Player 1 or Player 2 based on whether slots are taken
         if not self.game.player1:
@@ -44,6 +48,13 @@ class PongConsumer(WebsocketConsumer):
             # Reject the connection if the room is full (both player slots taken)
             self.close()
             return
+
+       
+       # Add the WebSocket connection to the group
+        self.channel_layer.group_add(
+            self.game_id_group,
+            self.channel_name
+        )
 
         # Save the game state with the player assignments
         self.game.save()

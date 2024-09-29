@@ -49,9 +49,12 @@ function initializeGame(id){
     let score2 = 0;
     player1.velocityY = 0;
     player2.velocityY = 0;
-    const socket = new WebSocket('wss://' + window.location.host + '/wss/pong-socket/' + id + '/');
+    const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+    const socket = new WebSocket(protocol + '://' + window.location.host + '/ws/pong-socket/' + parseInt(id) + '/');
+    //const socket = new WebSocket('ws://' + window.location.host + '/ws/pong-socket/' + id + '/');
     isSocketOpen = false;
     socket.onopen = function(event) {
+        alert("hola")
         console.log("WebSocket is open now.");
         console.log(id);
         isSocketOpen = true;
@@ -132,7 +135,7 @@ function initializeGame(id){
         context.font = '50px Courier New';
 
         // Send ball and player data every frame
-        sendPlayerData("update");
+        //sendPlayerData("update");
     }
     update();
 }
