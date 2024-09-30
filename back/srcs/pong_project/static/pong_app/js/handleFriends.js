@@ -38,7 +38,7 @@ async function loadFriendsSection()
 									${friend.online ? 'Online' : 'Offline'}
 								</span>
 								<div class="friend-actions">
-									<button data-username="${friend.username}" class="custom-button" style="background-color: red; align-items: left;">
+									<button data-username="${friend.username}" class="custom-button remove-friend" style="background-color: red; align-items: left;">
 										<i class="fas fa-user-minus"></i>
 									</button>
 								</div>

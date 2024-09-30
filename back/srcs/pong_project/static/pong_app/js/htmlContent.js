@@ -29,7 +29,7 @@ function profileHTML(data, avatarUrl)
 			<div class="card mx-auto" style="max-width: 500px; background-color: red; border-radius: 20px;">
 				<div class="card-body text-center">
 					<img src="${avatarUrl}" alt="Profile Picture" class="img-thumbnail mb-3" style="background-color: black; border-radius: 20px;">
-					<h3 id="username" style="padding: 10px 10px;">${data.usernname}</h3>
+					<h3 id="username" style="padding: 10px 10px;">${data.username}</h3>
 					<div class="container" style="box-sizing: border-box; width: 100%; padding: 0; margin: 0;">
 						<div class="container" style="width: 40%; background-color: white; border-radius: 20px; margin-top: 20px;">
 							<ul class="list-group list-group-flush mb-3">
@@ -67,7 +67,7 @@ function profileSettingsHTML(data)
 		<div id="profile-settings" class="container mt-4" style="font-family: 'Courier New', Courier, Monospace;">
 			<div class="card mx-auto" style="max-width: 500px; background-color: red;">
 				<div class="card-body text-center">
-					<img src="avatarUrl.jpg" alt="Profile Picture" class="img-thumbnail" style="background-color: black; width: 70%; height: 50%;">
+					<img src="/static/pong_app/media/user-pic.jpg" alt="Profile Picture" class="img-thumbnail" style="background-color: black; width: 70%; height: 50%;">
 					<form id="profile-settings" style="padding: 30px 20px;">
 						<div class="form-group row" style="justify-content: center;">
 							<label for="username" class="col-form-label">Username</label>
