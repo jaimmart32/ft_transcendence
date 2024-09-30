@@ -60,14 +60,13 @@ function profileHTML(data, avatarUrl)
 		`);
 }
 
-function profileSettingsHTML(data)
+function profileSettingsHTML(data, avatarUrl)
 {
-//	When changing the img source, an error message appears that the user does not have access to the page
 	return(`
 		<div id="profile-settings" class="container mt-4" style="font-family: 'Courier New', Courier, Monospace;">
 			<div class="card mx-auto" style="max-width: 500px; background-color: red;">
 				<div class="card-body text-center">
-					<img src="/static/pong_app/media/user-pic.jpg" alt="Profile Picture" class="img-thumbnail" style="background-color: black; width: 70%; height: 50%;">
+					<img src="${avatarUrl}" alt="Profile Picture" class="img-thumbnail" style="background-color: black; width: 70%; height: 50%;">
 					<form id="profile-settings" style="padding: 30px 20px;">
 						<div class="form-group row" style="justify-content: center;">
 							<label for="username" class="col-form-label">Username</label>
@@ -170,16 +169,16 @@ function loadGenericHTML(type)
 
 function loadTournamentSectionHTML()
 {
-	return (`<div class="tournament-section">
-            	<div class="tournament-container">
+	return (`<div class="options-container">
+            	<div class="option">
             	    <h2>Create a Tournament</h2>
             	    <p>Create your own tournament and invite your friends to compete!</p>
-            	    <button class="custom-button">Create Tournament</button>
+            	    <button class="custom-button">Create</button>
             	</div>
-            	<div class="tournament-container">
+            	<div class="option">
             	    <h2>Join a Tournament</h2>
             	    <p>Join an existing tournament and compete against other players!</p>
-            	    <button class="custom-button">Join Tournament</button>
+            	    <button class="custom-button">Join</button>
             	</div>
         	</div>`);
 }

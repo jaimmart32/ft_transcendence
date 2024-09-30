@@ -5,7 +5,6 @@ async function loadProfileSettings()
 	{
 		try
 		{
-			console.log('INSIDE PROFILESETTINGS!!!!')
 			const response = await fetch('/get_user_info/',
 			{
 				method: 'GET',
@@ -18,8 +17,18 @@ async function loadProfileSettings()
 			const data = await response.json();
 			if (data.status === 'success')
 			{
-				app.innerHTML = profileSettingsHTML(data);
+				const avatarUrl = data.avatar ? data.avatar : '/static/pong_app/media/user-pic.jpg';
+				app.innerHTML = profileSettingsHTML(data, avatarUrl);
+				const twofa = document.getElementById('twofa');
+				twofa.checked = data.twofa;
 
+				const username_field = document.getElementById('username');
+				const password_field = document.getElementById('password');
+				if (data.intra)
+				{
+					username_field.classList.add('d-none');	
+					password_field.classList.add('d-none');	
+				}
 //		    	I could add one more button to go back without making any changes
 				const save = document.getElementById('save-changes');
 				if (save)

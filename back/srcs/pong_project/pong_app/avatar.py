@@ -27,7 +27,8 @@ def handle_avatar_upload(user, avatar_data, min_width=100, min_height=100, max_w
 			raise ValidationError(f"The image is too large (maximum size: {max_width}x{max_height}px).")
 
 		# Save file 
-		avatar_file = ContentFile(img_data, name=f'{user.username}_avatar.{ext}')
+		avatar_file = ContentFile(img_data, name=f'{user.id}_avatar.{ext}')
+		print(avatar_file.name, flush=True)
 		user.avatar = avatar_file
 	except Exception as e:
 		raise ValidationError(str(e))

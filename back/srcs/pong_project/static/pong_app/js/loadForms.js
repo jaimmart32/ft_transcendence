@@ -151,27 +151,6 @@ function loadPlayGame()
 //	initializeGame();
 }
 
-function loadCreateTournament()
-{
-	app.innerHTML = `
-	    <h2>Create Tournament</h2>
-	    <p>Create a new tournament.</p>
-	    <!-- Add tournament creation form or content here -->
-	    <button class="btn btn-secondary" id="back-to-home">Back to Home</button>
-	`;
-
-	const back = document.getElementById('back-to-home');
-
-	if (back)
-	{
-		back.addEventListener('click', function(event)
-		{
-			event.preventDefault();
-			navigateTo('/home/');
-		});
-	}
-}
-
 async function loadHome()
 {
 	console.log('Inside loadHome');
@@ -244,8 +223,51 @@ async function loadHome()
 	}
 }
 
+async function loadTournamentSection()
+{
+	const app = document.getElementById('app');
+	const token = localStorage.getItem('access');
+
+	if (token)
+	{
+		try
+		{
+			const response = await fetch('/get_user_info/',
+			{
+				method: 'GET',
+				headers:
+				{
+					'Authorization': `Bearer ${token}`,
+					'Content-Type': 'application/json'
+				}
+			})
+			
+			const data = await response.json();
+
+			if (data.status === 'success')
+			{
+				app.innerHTML = loadTournamentSectionHTML();
+//				Add two event listeners for both buttons, join or create buttons.
+			}
+			else
+			{
+				await checkRefresh(data, '/home/', token);
+			}
+		}
+		 catch(error)
+		 {
+			notAuthorized(error);
+		}
+	}
+	else
+	{
+		alert('You are not authorized to view this page. Please log in.');
+		navigateTo('/login/');
+	}
+}
+
 window.loadPlayGame = loadPlayGame;
-window.loadCreateTournament = loadCreateTournament;
+window.loadTournamentSection = loadTournamentSection;
 window.loadLoginForm = loadLoginForm;
 window.loadSignupForm = loadSignupForm;
 window.loadHome = loadHome;

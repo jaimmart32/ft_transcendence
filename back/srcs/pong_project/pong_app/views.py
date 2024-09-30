@@ -124,7 +124,8 @@ def	getUserInfo(request):
 		username = user.username
 		status = "ONLINE" if user.is_online else "OFFLINE"
 		print(f"Username: {username}, Status: {status}", flush=True)
-		return JsonResponse({'status': 'success', 'username': username, 'is_online': user.is_online}, status=200)
+		return JsonResponse({'status': 'success', 'username': username, 'is_online': user.is_online, 'avatar': user.avatar.url if user.avatar else None, 'intra': user.intra, 'tfa': user.tfa}, status=200)
+
 	return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
 
 @csrf_exempt

@@ -19,7 +19,7 @@ function loadPage(url, data)
 	else if (url === '/home/game/online/')
 		loadPlayGame();
 	else if (url === '/home/game/tournament/')
-		loadCreateTournament();
+		loadTournamentSection();
 	else if (url === '/home/friends/')
 		loadFriendsSection();
 }
