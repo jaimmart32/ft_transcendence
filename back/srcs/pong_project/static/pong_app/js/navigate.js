@@ -14,6 +14,12 @@ function loadPage(url, data)
 		loadProfileSettings();
 	else if (url === '/home/game/')
 		loadPlayGame();
+	else if (url === '/home/game/local/')
+		loadPlayGame();
+	else if (url === '/home/game/online/')
+		loadPlayGame();
+	else if (url === '/home/game/tournament/')
+		loadCreateTournament();
 	else if (url === '/home/friends/')
 		loadFriendsSection();
 }
