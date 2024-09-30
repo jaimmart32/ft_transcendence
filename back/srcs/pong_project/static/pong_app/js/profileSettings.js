@@ -20,7 +20,7 @@ async function loadProfileSettings()
 				const avatarUrl = data.avatar ? data.avatar : '/static/pong_app/media/user-pic.jpg';
 				app.innerHTML = profileSettingsHTML(data, avatarUrl);
 				const twofa = document.getElementById('twofa');
-				twofa.checked = data.twofa;
+				twofa.checked = data.tfa;
 
 				const username_field = document.getElementById('username');
 				const password_field = document.getElementById('password');

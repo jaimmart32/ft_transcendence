@@ -358,7 +358,7 @@ def EditProfile(request):
 			user.tfa = True if twofa == 'on' else False
 
 			if password:
-				user.set_password(password)
+				user.set_password(password + settings.PEPPER)
 
 			
 			if avatar_data:

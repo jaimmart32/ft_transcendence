@@ -186,6 +186,7 @@ REST_FRAMEWORK = {
 }
 
 AUTH_USER_MODEL = 'pong_app.CustomUser'
+CSRF_TRUSTED_ORIGINS = ['https://localhost:8000']
 
 
 
