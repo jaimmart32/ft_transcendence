@@ -1,11 +1,12 @@
 import json
-from channels.generic.websocket import WebsocketConsumer
+#from channels.generic.websocket import AsyncWebsocketConsumer
+import contextlib
 import random
-#from channels.generic.websocket import WebsocketConsumer
+from channels.generic.websocket import WebsocketConsumer
 import logging
 import time
 import threading
-from .models import Paddle, Board, Ball, Game
+from .models import Paddle, Board, Ball, Game, CustomUser
 
 logger = logging.getLogger(__name__)
 
@@ -17,32 +18,48 @@ def ballOutOfBounds(yPosition, ball, board):
 
 
 class PongConsumer(WebsocketConsumer):
-    def connect(self):
+    def connect(self):  # TODO: cambiar esto para que sea async
         self.game_id = int(self.scope['url_route']['kwargs']['game_id'])
         self.user = self.scope['user']
         self.game_id_group = f'pong_app_{self.game_id}'
 
-        # Get or create the game instance
-        #self.game, created = Game.objects.get_or_create(game_id=self.game_id) # Esto peta porwue hay que pasar argumentos de player1, player2, etc, solo con el game_id peta
+        with contextlib.suppress(KeyError):
+            if len(self.channel_layer.groups[self.group_name]) > 2:
+                print("JAVI42")
+                print(self.channel_layer.groups[self.group_name])
+                #self.accept()
 
-        self.game, created = Game.objects.get_or_create(
-        game_id=self.game_id,
-        defaults={
-            'player1': None,
-            'player2': None,
-            'enough_players': False,
-            'winner': None,
-            'scores1': [],
-            'scores2': []
-        }
-    )
+        # Resolve the lazy user object to a CustomUser instance
+        if hasattr(self.user, '_wrapped') and self.user._wrapped is not None:
+            resolved_user = self.user._wrapped
+        else:
+            resolved_user = self.user
+
+        # Ensure that the resolved user is an instance of CustomUser
+        if not isinstance(resolved_user, CustomUser):
+            logger.error(f"Resolved user is not a CustomUser instance: {resolved_user}")
+            self.close()
+            return
+
+        # Try to retrieve the game first without assigning player1/player2 initially
+        try:
+            self.game = Game.objects.get(game_id=self.game_id)
+        except Game.DoesNotExist:
+            # If game doesn't exist, create it without player1 and player2
+            self.game = Game.objects.create(
+                game_id=self.game_id,
+                enough_players=False,
+                winner=None,
+                scores1=[],
+                scores2=[]
+            )
 
         # Determine if the user is Player 1 or Player 2 based on whether slots are taken
         if not self.game.player1:
-            self.game.player1 = self.user
+            self.game.player1 = self.resolved_user
             self.player_role = 'player1'
         elif not self.game.player2:
-            self.game.player2 = self.user
+            self.game.player2 = self.resolved_user
             self.player_role = 'player2'
         else:
             # Reject the connection if the room is full (both player slots taken)
@@ -162,6 +179,7 @@ class PongConsumer(WebsocketConsumer):
     def disconnect(self, close_code):
         logger.info(f"Disconnected: {close_code}")
         self.running = False
+        #self.game_thread.join()  # Wait for the thread to finish before exiting
         self.channel_layer.group_discard(
             self.game_id_group,
             self.channel_name

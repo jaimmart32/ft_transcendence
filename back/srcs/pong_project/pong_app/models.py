@@ -40,8 +40,8 @@ class Tournament(models.Model):
 
 class	Game(models.Model):
 	game_id = models.IntegerField()
-	player1 = models.ForeignKey(CustomUser, related_name='player1', on_delete=models.CASCADE)
-	player2 = models.ForeignKey(CustomUser, related_name='player2', on_delete=models.CASCADE)
+	player1 = models.ForeignKey(CustomUser, null=True, blank=True, on_delete=models.SET_NULL, related_name='player1')
+	player2 = models.ForeignKey(CustomUser, null=True, blank=True, on_delete=models.SET_NULL, related_name='player2')
 	enough_players = models.BooleanField(default=False)
 	winner = models.CharField(max_length=8, blank=True, null=True)
 	# Game format:
@@ -52,8 +52,8 @@ class	Game(models.Model):
 	scores2 = models.JSONField(default=list)
 
 	def check_players_connection(self):
-        # Verifica si ambos jugadores están conectados
-	    return self.player1 is not None and self.player2 is not None
+		# Verifica si ambos jugadores están conectados
+		return self.player1 is not None and self.player2 is not None
 
 	def __str__(self):
 		return f"Winner: {self.winner}!"
