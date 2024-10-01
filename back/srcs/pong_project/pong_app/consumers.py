@@ -18,17 +18,23 @@ def ballOutOfBounds(yPosition, ball, board):
 
 
 class PongConsumer(WebsocketConsumer):
-    def connect(self):  # TODO: cambiar esto para que sea async
+    def connect(self):
         self.game_id = int(self.scope['url_route']['kwargs']['game_id'])
         self.user = self.scope['user']
-        self.game_id_group = f'pong_app_{self.game_id}'
+        self.group_name = f'pong_app_{self.game_id}'
+
+        # Add the WebSocket connection to the group
+        self.channel_layer.group_add(
+            self.group_name,
+            self.channel_name
+        )
 
         with contextlib.suppress(KeyError):
             if len(self.channel_layer.groups[self.group_name]) > 2:
                 print("JAVI42")
                 print(self.channel_layer.groups[self.group_name])
                 #self.accept()
-
+        h = """
         # Resolve the lazy user object to a CustomUser instance
         if hasattr(self.user, '_wrapped') and self.user._wrapped is not None:
             resolved_user = self.user._wrapped
@@ -40,6 +46,7 @@ class PongConsumer(WebsocketConsumer):
             logger.error(f"Resolved user is not a CustomUser instance: {resolved_user}")
             self.close()
             return
+        """
 
         # Try to retrieve the game first without assigning player1/player2 initially
         try:
@@ -56,22 +63,16 @@ class PongConsumer(WebsocketConsumer):
 
         # Determine if the user is Player 1 or Player 2 based on whether slots are taken
         if not self.game.player1:
-            self.game.player1 = self.resolved_user
+            self.game.player1 = self.user
             self.player_role = 'player1'
         elif not self.game.player2:
-            self.game.player2 = self.resolved_user
+            self.game.player2 = self.user
             self.player_role = 'player2'
         else:
             # Reject the connection if the room is full (both player slots taken)
+            self.player_role = 'none'
             self.close()
             return
-
-       
-       # Add the WebSocket connection to the group
-        self.channel_layer.group_add(
-            self.game_id_group,
-            self.channel_name
-        )
 
         # Save the game state with the player assignments
         self.game.save()
@@ -169,7 +170,7 @@ class PongConsumer(WebsocketConsumer):
             time.sleep(0.016)  # Approx 60 FPS
 
             self.channel_layer.group_send(
-            self.game_id_group,
+            self.group_name,
             {
                 'position': position_updated
             }
@@ -181,7 +182,7 @@ class PongConsumer(WebsocketConsumer):
         self.running = False
         #self.game_thread.join()  # Wait for the thread to finish before exiting
         self.channel_layer.group_discard(
-            self.game_id_group,
+            self.group_name,
             self.channel_name
         )
 
@@ -229,7 +230,7 @@ class PongConsumer(WebsocketConsumer):
                     'Score2': self.player2.score
                 }
             self.channel_layer.group_send(
-            self.game_id_group,
+            self.group_name,
             {
                 'position': position_updated
             }

@@ -18,10 +18,6 @@ function loadPage(url_raw, data)
 	else if (url_raw  == '/home/profile/edit/')
 		loadProfileSettings();
 	else if (url  == '/home/game/'){
-		alert(url_split[0])
-		alert(url_split[1])
-		alert(url_split[2])
-		alert(url_split[3])
 		loadPlayGame(url_split[3]);
 	}
 	else if (url_raw  == '/home/friends/')
