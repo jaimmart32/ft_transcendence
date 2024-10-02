@@ -26,7 +26,7 @@ function profileHTML(data, avatarUrl)
 //	The username is not being picked up. Both bottom buttons are not being centered
 	return(`
 		<div id="profile-settings" class="container mt-4" style="font-family: 'Courier New', Courier, Monospace;">
-			<div class="card mx-auto" style="max-width: 500px; background-color: red; border-radius: 20px;">
+			<div class="card mx-auto" style="max-width: 500px; background-color: purple; border-radius: 20px;">
 				<div class="card-body text-center">
 					<img src="${avatarUrl}" alt="Profile Picture" class="img-thumbnail mb-3" style="background-color: black; border-radius: 20px;">
 					<h3 id="username" style="padding: 10px 10px;">${data.username}</h3>
@@ -64,7 +64,7 @@ function profileSettingsHTML(data, avatarUrl)
 {
 	return(`
 		<div id="profile-settings" class="container mt-4" style="font-family: 'Courier New', Courier, Monospace;">
-			<div class="card mx-auto" style="max-width: 500px; background-color: red;">
+			<div class="card mx-auto" style="max-width: 500px; background-color: purple;">
 				<div class="card-body text-center">
 					<img src="${avatarUrl}" alt="Profile Picture" class="img-thumbnail" style="background-color: black; width: 70%; height: 50%;">
 					<form id="profile-settings" style="padding: 30px 20px;">
