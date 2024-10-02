@@ -1,5 +1,7 @@
-function checkRefreshToken(token) {
-	return new Promise((resolve, reject) => {
+function checkRefreshToken(token)
+{
+	return new Promise((resolve, reject) =>
+	{
 		fetch('/verify-refresh/', {
 			method: 'POST',
 			headers: {
@@ -14,41 +16,56 @@ function checkRefreshToken(token) {
 			})
 		})
 		.then(response => response.json())
-		.then(data => {
+		.then(data =>
+		{
 			if (data.status === 'success') {
 				localStorage.setItem('access', data.newToken); // Save the new access token
 				console.log('inside success for refresh check,saved new token!!!')
-				resolve(true/*data.new_access_token*/); // Return the new token
-			} else {
-				reject(false); // Failed to refresh token
+				resolve("valid"/*data.new_access_token*/); // Return the new token
+			} else if (data.status === 'expired'){
+				reject("expired"); // Failed to refresh token
 			}
 		})
-		.catch(error => {
+		.catch(error =>
+		{
 			console.error('Error refreshing token:', error);
-			reject(false);
+			reject("catch");
 		});
 	});
 }
 
-async function notAuthorized(data, route, token)
+async function checkRefresh(data, route, token)
 {
 	if (data.message === 'Access unauthorized')
 	{
 		const result = await checkRefreshToken(token);
-		if (result)
+		if (result === "valid")
 		{
+			console.log('Access expired but Refresh not, navigating to route');
 			navigateTo(route);
 		}
 	}
-	else
-	{
-		app.innerHTML = loadNotAuthorizedHTML();
-		setTimeout(() => 
+}
+function notAuthorized(error)
+{
+	if(error === "expired")
 		{
+			console.log('CATCHED ERROR FROM CHECKREFRESHTOKEN!');
+			app.innerHTML = loadNotAuthorizedHTML();
+			setTimeout(() => 
+			{
+				localStorage.removeItem('access');
+				navigateTo('/login/');
+			}, 5000);
+		}
+		else
+		{
+			console.error('Error:', error);
+			alert('You are not authorized to view this page. Please log in.');
 			navigateTo('/login/');
-		}, 5000);
-	}
+		}
 }
 
 window.checkRefreshToken = checkRefreshToken;
+window.checkRefresh = checkRefresh
 window.notAuthorized = notAuthorized;

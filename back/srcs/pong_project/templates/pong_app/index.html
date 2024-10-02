@@ -7,56 +7,57 @@
     <title>Pong Webapp</title>
     <!-- Bootstrap CSS -->
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
     <!-- Custom CSS -->
     <link href="{% static 'pong_app/css/styles.css' %}" rel="stylesheet">
 </head>
 <body>
-    <!-- <nav class="navbar navbar-expand-lg navbar-light">
-        <div id="navbarNav">
-            <ul class="navbar-nav ml-auto">
-                <li class="nav-item">
-                    <a class="nav-link" href="#" id="login-link">Login</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#" id="signup-link">Sign Up</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="login42" id="ft-link">Login with 42</a>
-                </li>
-            </ul>
-        </div>
-    </nav> -->
-    <nav class="navbar navbar-expand-lg navbar-light">
-        <div id="navbarNav">
-            <li class="nav-item d-none" id="logout-item"> <!-- Initially hidden -->
-                <a class="nav-link" href="#" id="logout-link">Logout</a>
-            </li>
-        </div>
-    </nav>
-    <div id="app" class="container mt-4">
-        <nav class="menu">
-            <ul class="menuNav">
-                <li class="links" id="login-link"><a href="login/">Login</a></li>
-                <li class="links" id="signup-link"><a href="signup/">Sign Up</a></li>
-                <li class="links" id="login42-link"><a href="#">Login with 42</a></li>
-            </ul>
-        </nav>
-        <!-- Content will be dynamically injected here -->
-        </div>        
+    <!--NAVBAR-->
+    <nav class="brand-navbar">
+		<a class="navbar-nav d-flex flex-row justify-content-center w-100" href="#">
+			<!--<img src="icon.jpg" alt="" width="30" height="24" class="d-inline-block align-text-top">-->
+		WebPong
+		</a>
+	</nav>
+	<nav class="explore-navbar-nav" id="display-item">
+		<ul class="navbar-nav d-flex flex-row justify-content-center w-100">
+			<li class="nav-item active">
+				<a class="nav-link" aria-current="page" href="#" data-path="/home/">Home </a>
+			</li>
+			<li class="nav-item active">
+				<a class="nav-link" href="#" data-path="/home/profile/">Profile </a>
+			</li>
+			<li class="nav-item active">
+				<a class="nav-link" href="#" data-path="/home/game/">Play </a>
+			</li>
+			<li class="nav-item active">
+				<a class="nav-link" href="#" data-path="/home/friends/">Friends </a>
+			</li>
+			<li class="nav-item active" id="logout-link">
+				<a class="nav-link" href="#">Log out </a>
+			</li>
+		</ul>
+	</nav>
+	<div id="app" class="container" style="height: 100%; display: flex; justify-content: center; align-items: center; flex-direction: column;">
+		<button class="custom-button" id="signup-link">Sign up</button>
+		<button class="custom-button" id="login-link">Log in</button>
+		<button class="custom-button" id="login42-link">42 Log in</button>
+	</div>
+	<footer class="footer">
+		<section class="text-center mb-3">
+			<a href="https://github.com/BriBelt/ft_transcendence" target="_blank" aria-label="GitHub">
+			  <i class="fab fa-github fa-2x"></i>
+			</a>
+		</section>
+		<div class="text-center p-3" style="background-color: gray; color: #333;">
+			2024 ft_transcendence
+		</div>
+	</footer>
+
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <!-- Custom JS -->
-    <!--<script src="../../static/pong_app/js/main.js"></script>
-    <script src="../../static/pong_app/js/navigate.js"></script>
-    <script src="../../static/pong_app/js/loadForms.js"></script>
-    <script src="../../static/pong_app/js/handleCredentials.js"></script>
-    <script src="../../static/pong_app/js/profileSettings.js"></script>
-    <script src="../../static/pong_app/js/handleProfile.js"></script>
-    <script src="../../static/pong_app/js/oauth.js"></script>
-    <script src="../../static/pong_app/js/pong_game.js"></script>
-    <script src="../../static/pong_app/js/signUp.js"></script>
-    <script src="../../static/pong_app/js/handleFriends.js"></script>-->
     <script src="{% static 'pong_app/js/main.js' %}"></script>
     <script src="{% static 'pong_app/js/navigate.js' %}"></script>
     <script src="{% static 'pong_app/js/loadForms.js' %}"></script>

@@ -5,7 +5,6 @@ async function loadProfileSettings()
 	{
 		try
 		{
-			console.log('INSIDE PROFILESETTINGS!!!!')
 			const response = await fetch('/get_user_info/',
 			{
 				method: 'GET',
@@ -18,8 +17,18 @@ async function loadProfileSettings()
 			const data = await response.json();
 			if (data.status === 'success')
 			{
-				app.innerHTML = profileSettingsHTML(data);
+				const avatarUrl = data.avatar ? data.avatar : '/static/pong_app/media/user-pic.jpg';
+				app.innerHTML = profileSettingsHTML(data, avatarUrl);
+				const twofa = document.getElementById('twofa');
+				twofa.checked = data.tfa;
 
+				const username_field = document.getElementById('username');
+				const password_field = document.getElementById('password');
+				if (data.intra)
+				{
+					username_field.classList.add('d-none');	
+					password_field.classList.add('d-none');	
+				}
 //		    	I could add one more button to go back without making any changes
 				const save = document.getElementById('save-changes');
 				if (save)
@@ -33,33 +42,12 @@ async function loadProfileSettings()
 	 		}
 			else
 			{
-				console.log(data.status);
-				console.log(data.message);
-				console.log('Inside the else for the data message')
-				if (data.message === 'Access unauthorized')
-				{
-					const result = await checkRefreshToken(token);
-					console.log('Inside the access unauthorized')
-					if (result)
-					{
-						console.log('Inside result');
-						console.log(result);
-						navigateTo('/home/profile/edit/');
-					}
-				}
-				else
-				{
-					console.log('Inside the else for unauthorized')
-					alert('You are not authorized to view this page. Please log in.');
-					navigateTo('/login/');
-				}
+				await checkRefresh(data,'/home/profile/edit/', token);
 			}
 		}
 		catch(error)
 		{
-			console.error('Error:', error);
-			alert('You are not authorized to view this page. Please log in.');
-			navigateTo('/login/');
+			notAuthorized(error);
 		}
 	}
 	else
@@ -137,37 +125,19 @@ async function sendUserData(userDict, token)
 		{
     	    if (data.message)
 			{
-				if (data.message === 'Access unauthorized')
-				{
-					const result = await checkRefreshToken(token);
-					console.log('Inside the access unauthorized')
-					if (result)
-					{
-						console.log('Inside result');
-						console.log(result);
-						navigateTo('/home/profile/edit/');
-					}
-				}
-				else
-				{
-					console.log('Inside the else for unauthorized')
-					alert('You are not authorized to view this page. Please log in.');
-					navigateTo('/login/');
-				}
     	        if (data.message.includes('file'))
 				{
     	            showMessage('file-error', data.message);
     	    	}
     	    	console.error(data.message);
+				await checkRefresh(data, '/home/profile/edit/', token);
     	    }
     	}
 	}
     catch(error)
 	{
         console.log('Inside the error');
-        console.error('Error:', error);
-        alert('Access denied');
-		navigateTo('/login/');
+        notAuthorized(error);
     }
 }
 

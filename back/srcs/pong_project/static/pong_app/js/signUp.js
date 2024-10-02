@@ -52,7 +52,7 @@ function signUpHandler()
     }
     else
     {
-        console.error('login-form not found');
+        console.error('signup-form not found');
     }
 }
 

@@ -25,8 +25,8 @@ services:
         volumes:
             - transcendence:/backup
         container_name: back 
-        ports:
-            - '8000:8000'
+#        ports:
+#           - '8000:8000'
         environment:
              POSTGRES_DB: "PGdatabase"
              POSTGRES_USER: "PGuser"
@@ -37,6 +37,17 @@ services:
             - app-network
     
 
+    nginx:
+        build:
+            context: ./nginx/
+        container_name: nginx
+        ports:
+            - '8000:8000'
+            - '8080:8080'
+        depends_on:
+            - back
+        networks:
+            - app-network
 
 
 volumes:

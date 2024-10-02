@@ -20,15 +20,33 @@ async function loadFriendsSection()
 
 			if (data.status === 'success')
 			{
-				let friendsHTML = '<h2>Friends</h2><ul>';
+				let friendsHTML = `
+				<div class="options-container">
+					<div class="option">
+						<h3><b>Friends</b></h3>
+						<button class="custom-button" id="add-friend" style="background-color: green; width: 10%;">
+							<i class="fas fa-user-plus"></i>
+						</button>
+						<div class="friends-list" style="width: 100%;">
+				`;
+
 				data.friends.forEach(friend => {
 					friendsHTML += `
-						<li>${friend.username} - ${friend.online ? 'Online' : 'Offline'}
-						<button data-username="${friend.username}" class="remove-friend btn btn-danger">Remove</button>
-						</li>
-					`;
-				});
-				friendsHTML += '</ul><button id="add-friend" class="btn btn-primary">Add Friend</button>';
+							<div class="friend-card">
+								<span class="friend-username">${friend.username}</span>
+								<span class="friend-status ${friend.online ? 'online' : 'offline'}">
+									${friend.online ? 'Online' : 'Offline'}
+								</span>
+								<div class="friend-actions">
+									<button data-username="${friend.username}" class="custom-button remove-friend" style="background-color: red; align-items: left;">
+										<i class="fas fa-user-minus"></i>
+									</button>
+								</div>
+							</div>`});
+				friendsHTML +=	`</div>
+					</div>
+				</div>`;
+
 				app.innerHTML = friendsHTML;
 
 				document.querySelectorAll('.remove-friend').forEach(button => {
@@ -47,14 +65,13 @@ async function loadFriendsSection()
 			}
 			else
 			{
-				await notAuthorized(data, '/home/friends/', token);
+				await checkRefresh(data, '/home/friends/', token);
 			}
 		}
 		catch(error)
 		{
-			console.error('Error:', error);
-			alert('You are not authorized to view this page. Please log in.');
-			navigateTo('/login/');
+			console.log('INSIDE CATCH OF FRIENDS!');
+			notAuthorized(error);
 		}
 	}
 	else

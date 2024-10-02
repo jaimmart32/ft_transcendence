@@ -17,10 +17,15 @@ function loadPage(url_raw, data)
 		loadProfile(data);
 	else if (url_raw  == '/home/profile/edit/')
 		loadProfileSettings();
-	else if (url  == '/home/game/'){
+	else if (url === '/home/game/')
 		loadPlayGame(url_split[3]);
-	}
-	else if (url_raw  == '/home/friends/')
+	else if (url === '/home/game/local/')
+		loadPlayGame();
+	else if (url === '/home/game/online/')
+		loadPlayGame();
+	else if (url === '/home/game/tournament/')
+		loadTournamentSection();
+	else if (url === '/home/friends/')
 		loadFriendsSection();
 }
 
@@ -28,7 +33,7 @@ function navigateTo(url, data)
 {
 	window.history.pushState({}, '', url);
 	loadPage(url, data);
-//	updateLogoutButtonVisibility();
+	updateLogoutButtonVisibility();
 }
 
 window.loadPage = loadPage;

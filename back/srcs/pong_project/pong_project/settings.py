@@ -192,6 +192,7 @@ REST_FRAMEWORK = {
 }
 
 AUTH_USER_MODEL = 'pong_app.CustomUser'
+CSRF_TRUSTED_ORIGINS = ['https://localhost:8000']
 
 
 
@@ -217,5 +218,5 @@ EMAIL_PORT = os.getenv('EMAIL_PORT')
 
 JWT_SECRET_KEY = os.getenv('JWT_SECRET_KEY')
 JWT_ALGORITHM = os.getenv('JWT_ALGORITHM')
-JWT_EXPIRATION_DELTA = timedelta(minutes=1) 
-JWT_REFRESH_EXPIRATION_DELTA = timedelta(minutes=2) 
+JWT_EXPIRATION_DELTA = timedelta(minutes=5)
+JWT_REFRESH_EXPIRATION_DELTA = timedelta(minutes=60)
