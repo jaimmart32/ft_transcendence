@@ -44,14 +44,16 @@ let ball = new Ball(board);
 
 
 
-function initializeGame(id){
+function initializeGame(){
     let score1 = 0;
     let score2 = 0;
     player1.velocityY = 0;
     player2.velocityY = 0;
     userid = localStorage.getItem('userid');
-    const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
-    const socket = new WebSocket(protocol + '://' + window.location.host + '/ws/pong-socket/' + parseInt(id) + '/' + userid + '/');
+    //const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+    
+    // TODO: generate id only when a new game is created, if not, select the id
+    const socket = new WebSocket('wss://' + window.location.host + '/wss/pong-socket/' + parseInt(id) + '/' + userid + '/');
     //const socket = new WebSocket('ws://' + window.location.host + '/ws/pong-socket/' + id + '/');
     isSocketOpen = false;
     socket.onopen = function(event) {

@@ -22,7 +22,7 @@ function loadPage(url_raw, data)
 	else if (url === '/home/game/local/')
 		loadPlayGame();
 	else if (url === '/home/game/online/')
-		loadPlayGame();
+		initializeGame();
 	else if (url === '/home/game/tournament/')
 		loadTournamentSection();
 	else if (url === '/home/friends/')
