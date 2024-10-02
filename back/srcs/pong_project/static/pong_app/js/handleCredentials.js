@@ -30,6 +30,7 @@ function logInHandler()
 		{
                     if (data.status === 'success')
 		    {
+				localStorage.setItem('userid', data.userid);
 			if (data.message === 'Verification code sent')
 			{
 				code = prompt('Enter the verification code: ');

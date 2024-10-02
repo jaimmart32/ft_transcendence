@@ -49,12 +49,12 @@ function initializeGame(id){
     let score2 = 0;
     player1.velocityY = 0;
     player2.velocityY = 0;
+    userid = localStorage.getItem('userid');
     const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
-    const socket = new WebSocket(protocol + '://' + window.location.host + '/ws/pong-socket/' + parseInt(id) + '/');
+    const socket = new WebSocket(protocol + '://' + window.location.host + '/ws/pong-socket/' + parseInt(id) + '/' + userid + '/');
     //const socket = new WebSocket('ws://' + window.location.host + '/ws/pong-socket/' + id + '/');
     isSocketOpen = false;
     socket.onopen = function(event) {
-        alert("hola")
         console.log("WebSocket is open now.");
         console.log(id);
         isSocketOpen = true;

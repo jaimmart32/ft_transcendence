@@ -233,7 +233,8 @@ def loginView(request):
 			response = JsonResponse({
 					'status': 'success',
 					'message': 'Logged in successfully!',
-					'access': token}, status=200)
+					'access': token,
+					'userid': user.id}, status=200)
 			response.set_cookie(
 				key = 'refresh_token',
 				value = refresh_token,

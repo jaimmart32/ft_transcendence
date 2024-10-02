@@ -1,8 +1,9 @@
 import json
-#from channels.generic.websocket import AsyncWebsocketConsumer
+from channels.generic.websocket import AsyncWebsocketConsumer
 import contextlib
 import random
-from channels.generic.websocket import WebsocketConsumer
+#from channels.generic.websocket import WebsocketConsumer
+import asyncio
 import logging
 import time
 import threading
@@ -17,73 +18,40 @@ def ballOutOfBounds(yPosition, ball, board):
     return yPosition < 0 or yPosition + ball > board
 
 
-class PongConsumer(WebsocketConsumer):
-    def connect(self):
+class PongConsumer(AsyncWebsocketConsumer):
+    async def connect(self):
         self.game_id = int(self.scope['url_route']['kwargs']['game_id'])
-        self.user = self.scope['user']
+        self.user_id = int(self.scope['url_route']['kwargs']['userid'])
+        print("args:", self.user_id, flush=True)
+        self.user = await asyncio.to_thread(CustomUser.objects.get, id=self.user_id)
+        #self.user = CustomUser.objects.get(id=self.user_id)
+        print("user:", self.user.username, flush=True)
         self.group_name = f'pong_app_{self.game_id}'
 
         # Add the WebSocket connection to the group
-        self.channel_layer.group_add(
+        await self.channel_layer.group_add(
             self.group_name,
             self.channel_name
         )
 
+        #self.game = await asyncio.to_thread(Game.objects.get, id=self.game_id)
+
         with contextlib.suppress(KeyError):
             if len(self.channel_layer.groups[self.group_name]) > 2:
-                print("JAVI42")
-                print(self.channel_layer.groups[self.group_name])
-                #self.accept()
-        h = """
-        # Resolve the lazy user object to a CustomUser instance
-        if hasattr(self.user, '_wrapped') and self.user._wrapped is not None:
-            resolved_user = self.user._wrapped
-        else:
-            resolved_user = self.user
-
-        # Ensure that the resolved user is an instance of CustomUser
-        if not isinstance(resolved_user, CustomUser):
-            logger.error(f"Resolved user is not a CustomUser instance: {resolved_user}")
-            self.close()
-            return
-        """
-
-        # Try to retrieve the game first without assigning player1/player2 initially
-        try:
-            self.game = Game.objects.get(game_id=self.game_id)
-        except Game.DoesNotExist:
-            # If game doesn't exist, create it without player1 and player2
-            self.game = Game.objects.create(
-                game_id=self.game_id,
-                enough_players=False,
-                winner=None,
-                scores1=[],
-                scores2=[]
-            )
-
-        # Determine if the user is Player 1 or Player 2 based on whether slots are taken
-        if not self.game.player1:
-            self.game.player1 = self.user
-            self.player_role = 'player1'
-        elif not self.game.player2:
-            self.game.player2 = self.user
-            self.player_role = 'player2'
-        else:
-            # Reject the connection if the room is full (both player slots taken)
-            self.player_role = 'none'
-            self.close()
-            return
+                await self.close()
 
         # Save the game state with the player assignments
-        self.game.save()
+        #await self.game.save()
+        #await asyncio.to_thread(self.game.save)
 
-        self.accept()
+        await self.accept()
 
         self.running = True
         self.board = Board()
         self.ball = Ball(board=self.board)
         self.player1 = Paddle(number=1, board=self.board)
         self.player2 = Paddle(number=2, board=self.board)
+        #asyncio.create_task(self.game_loop())
         self.lock = threading.Lock()  # Initialize the lock
         self.game_thread = threading.Thread(target=self.game_loop)
         self.game_thread.start()
@@ -153,7 +121,7 @@ class PongConsumer(WebsocketConsumer):
                 self.ball = Ball(board=self.board)
     
     
-    def game_loop(self):
+    async def game_loop(self):
         self.running = True
         while self.running:
             self.move_ball()
@@ -169,19 +137,20 @@ class PongConsumer(WebsocketConsumer):
 
             time.sleep(0.016)  # Approx 60 FPS
 
-            self.channel_layer.group_send(
+            await self.channel_layer.group_send(
             self.group_name,
             {
+                'type': 'send_position',
                 'position': position_updated
             }
         )
              
     
-    def disconnect(self, close_code):
+    async def disconnect(self, close_code):
         logger.info(f"Disconnected: {close_code}")
         self.running = False
         #self.game_thread.join()  # Wait for the thread to finish before exiting
-        self.channel_layer.group_discard(
+        await self.channel_layer.group_discard(
             self.group_name,
             self.channel_name
         )
@@ -194,7 +163,11 @@ class PongConsumer(WebsocketConsumer):
 
         self.game.save()
 
-    def receive(self, text_data):
+    async def send_position(self, event):
+        position = event['position']
+        await self.send(text_data=json.dumps(position))
+
+    async def receive(self, text_data):
         try:
             text_data_json = json.loads(text_data)
             key = text_data_json['position']["key"]
@@ -229,9 +202,10 @@ class PongConsumer(WebsocketConsumer):
                     'Score1': self.player1.score,
                     'Score2': self.player2.score
                 }
-            self.channel_layer.group_send(
+            await self.channel_layer.group_send(
             self.group_name,
             {
+                'type': 'send_position',
                 'position': position_updated
             }
         )
