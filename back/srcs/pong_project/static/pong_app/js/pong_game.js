@@ -45,6 +45,8 @@ let ball = new Ball(board);
 
 
 function initializeGame(){
+    console.log('initializeGame called');
+    loadGameCanvas();
     let score1 = 0;
     let score2 = 0;
     player1.velocityY = 0;
@@ -53,12 +55,12 @@ function initializeGame(){
     //const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
     
     // TODO: generate id only when a new game is created, if not, select the id
-    const socket = new WebSocket('wss://' + window.location.host + '/wss/pong-socket/' + parseInt(id) + '/' + userid + '/');
+    const socket = new WebSocket('wss://' + window.location.host + '/ws/pong-socket/'  + userid + '/');
     //const socket = new WebSocket('ws://' + window.location.host + '/ws/pong-socket/' + id + '/');
     isSocketOpen = false;
     socket.onopen = function(event) {
         console.log("WebSocket is open now.");
-        console.log(id);
+//        console.log(id);
         isSocketOpen = true;
     };
     
@@ -71,6 +73,7 @@ function initializeGame(){
     };
 
     socket.onmessage = function(event) {
+        console.log("RECIEVING MESSAGE FROM WS!!")
         // Parse the JSON data received from the server
         const data = JSON.parse(event.data);
 
@@ -113,8 +116,8 @@ function initializeGame(){
         if (isSocketOpen) {
             socket.send(JSON.stringify({
                 'position': {
-                    'key': keycode,
-                    'action': action
+                    'key': keycode,// ArrowUp or ArrowDown
+                    'action': action//"move" or "stop"
                 }
             }));
         }

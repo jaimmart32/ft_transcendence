@@ -136,6 +136,7 @@ function loadPlayGame(id)
 	{
 		online.addEventListener('click', function(event)
 		{
+			console.log('INSIDE ONLINE BUTTON EVENT LISTENER!');
 			event.preventDefault();
 			navigateTo('/home/game/online/');
 		});
@@ -151,6 +152,17 @@ function loadPlayGame(id)
 //	initializeGame();
 }
 
+function loadGameCanvas()
+{
+	app.innerHTML = `
+	    <h2>Play Game</h2>
+	    <p>Get ready to play a game of Pong!</p>
+	    <!-- Add game play content here -->
+	    <canvas id="board" width="900" height="500"></canvas>
+		<br>
+		<button class="btn btn-secondary" id="back-to-home">Back to Home</button>
+	`;
+}
 async function loadHome()
 {
 	console.log('Inside loadHome');
@@ -268,6 +280,7 @@ async function loadTournamentSection()
 }
 
 window.loadPlayGame = loadPlayGame;
+window.loadGameCanvas = loadGameCanvas
 window.loadTournamentSection = loadTournamentSection;
 window.loadLoginForm = loadLoginForm;
 window.loadSignupForm = loadSignupForm;
