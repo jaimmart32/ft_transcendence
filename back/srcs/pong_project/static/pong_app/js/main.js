@@ -2,107 +2,90 @@ document.addEventListener('DOMContentLoaded', function() {
     const app = document.getElementById('app');
     const loginLink = document.getElementById('login-link');
     const signupLink = document.getElementById('signup-link');
-
-    // Load login form on clicking "Login" link
-    loginLink.addEventListener('click', function(event) {
-        event.preventDefault();
-        loadLoginForm();
+    const login42Link = document.getElementById('login42-link');
+	const logoutLink = document.getElementById('logout-link');
+	const navbarLinks = document.querySelectorAll('.explore-navbar-nav .nav-link');// the selector will only select those elements that are descendants of an element that has the class explore-navbar-nav
+	// Event listenner in charge of navigating as a SPA
+    navbarLinks.forEach(link =>
+	{
+        link.addEventListener('click', function(event)
+		{
+            event.preventDefault();// Avoid recharging page
+            const targetPath = event.target.getAttribute('data-path');  // Obtain path
+            navigateTo(targetPath);
+        });
     });
 
-    // Load signup form on clicking "Sign Up" link
-    signupLink.addEventListener('click', function(event) {
-        event.preventDefault();
-        loadSignupForm();
-    });
+//	This event listener is in charge of receiving any event regarding the 
+//	browser buttons (forward/backward/refresh)
+	window.addEventListener('popstate', function(event)
+	{
+		navigateTo(window.location.pathname);
+	});
 
-//	HTML for the Login page
-    function loadLoginForm() {
-        app.innerHTML = `
-            <h2>Login</h2>
-            <form id="login-form">
-                <div class="form-group">
-                    <label for="username">Username</label>
-                    <input type="username" class="form-control" id="username" aria-describedby="usernameHelp" placeholder="Enter username">
-                </div>
-                <div class="form-group">
-                    <label for="password">Password</label>
-                    <input type="password" class="form-control" id="password" placeholder="Password">
-                </div>
-                <button type="submit" class="btn btn-primary">Login</button>
-            </form>
-        `;
-	logInHandler();
+	if (loginLink)
+	{
+		loginLink.addEventListener('click', function(event)
+		{
+			event.preventDefault();
+			navigateTo('/login/');
+		});
+	}
+
+	if (signupLink)
+	{
+		signupLink.addEventListener('click', function(event)
+		{
+			event.preventDefault();
+			navigateTo('/signup/');
+		});
+	}
+
+	if (login42Link)
+	{
+		login42Link.addEventListener('click', async function(event)
+		{
+			alert('clicked 42 auth');
+			event.preventDefault();
+			await handleAuth();
+		});
+	}
+	if (logoutLink)
+	{
+        logoutLink.addEventListener('click', function(event)
+		{
+            event.preventDefault();
+            logoutUser();
+        });
     }
-
-//	HTML for the SignUp page
-    function loadSignupForm() {
-        app.innerHTML = `
-            <h2>Sign Up</h2>
-            <form id="signup-form">
-                <div class="form-group">
-                    <label for="username">Username</label>
-                    <input type="text" class="form-control" id="username" placeholder="Enter username">
-                </div>
-                <div class="form-group">
-                    <label for="email">Email address</label>
-                    <input type="email" class="form-control" id="email" aria-describedby="emailHelp" placeholder="Enter email">
-                </div>
-                <div class="form-group">
-                    <label for="password">Password</label>
-                    <input type="password" class="form-control" id="password" placeholder="Password">
-                </div>
-                <button type="submit" class="btn btn-primary">Sign Up</button>
-            </form>
-        `;
-	signUpHandler();
-//	loadSettingsForm();
-    }
-
-    function loadProfileSettings() {
-        app.innerHTML = `
-            <h2>Profile Settings</h2>
-            <p>Here you can update your profile settings.</p>
-            <!-- Add profile settings content here -->
-            <button class="btn btn-secondary" id="back-to-home">Back to Home</button>
-        `;
-        document.getElementById('back-to-home').addEventListener('click', loadHome);
-    }
-
-    function loadPlayGame() {
-        app.innerHTML = `
-            <h2>Play Game</h2>
-            <p>Get ready to play a game of Pong!</p>
-            <!-- Add game play content here -->
-            <button class="btn btn-secondary" id="back-to-home">Back to Home</button>
-        `;
-        document.getElementById('back-to-home').addEventListener('click', loadHome);
-    }
-
-    function loadFriendsSection() {
-        app.innerHTML = `
-            <h2>Friends</h2>
-            <p>Manage your friends here.</p>
-            <!-- Add friends management content here -->
-            <button class="btn btn-secondary" id="back-to-home">Back to Home</button>
-        `;
-        document.getElementById('back-to-home').addEventListener('click', loadHome);
-    }
-
-    function loadCreateTournament() {
-        app.innerHTML = `
-            <h2>Create Tournament</h2>
-            <p>Create a new tournament.</p>
-            <!-- Add tournament creation form or content here -->
-            <button class="btn btn-secondary" id="back-to-home">Back to Home</button>
-        `;
-        document.getElementById('back-to-home').addEventListener('click', loadHome);
-    }
-
-    window.loadProfileSettings = loadProfileSettings;
-    window.loadPlayGame = loadPlayGame;
-    window.loadFriendsSection = loadFriendsSection;
-    window.loadCreateTournament = loadCreateTournament;
-    window.loadLoginForm = loadLoginForm;
-    window.loadSignupForm = loadSignupForm;
+//	window.addEventListener('beforeunload', function(event) {
+//		const token = this.localStorage.getItem('access');
+//			this.navigator.sendBeacon('/logout/', JSON.stringify({ easter_egg: 'Como estan los maquinas', token: token}));
+//	});
+	navigateTo(window.location.pathname + window.location.search);
 });
 
+/*function monitorUrlChanges() {
+    let currentPath = window.location.pathname;
+
+    console.log('INSIDE MONITOR URL');
+    setInterval(() => {
+        if (window.location.pathname !== currentPath) {
+            currentPath = window.location.pathname;
+            loadPage(currentPath);  // Trigger page load when URL changes
+        }
+    }, 100);  // Check every 100ms if the URL has changed
+}
+
+	
+//	This event listener is in charge of receiving any event regarding the 
+//	browser buttons (forward/backward/refresh)
+	window.addEventListener('popstate', function(event)
+	{
+		navigateTo(window.location.pathname);
+//		loadPage(window.location.pathname);
+	});
+
+	navigateTo(window.location.pathname);
+	//loadPage(window.location.pathname);
+});*/

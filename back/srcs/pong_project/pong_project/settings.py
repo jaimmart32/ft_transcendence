@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 from pathlib import Path
 import os
 from datetime import timedelta
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -27,12 +28,16 @@ SECRET_KEY = 'django-insecure-e57z&%tw+1o4k6lnlgku*gk)j0)eli0zsn&wl#mj_a8d$2mr#z
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+HOST = os.getenv('HOST')
+
+# ALLOWED_HOSTS = [HOST]
+ALLOWED_HOSTS = [ '*' ]
 
 
 # Application definition
 
 INSTALLED_APPS = [
+    'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -40,6 +45,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    'channels',
     'pong_app',
 
     'rest_framework',
@@ -76,15 +82,31 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'pong_project.wsgi.application'
+# Define the ASGI application
+ASGI_APPLICATION = 'pong_project.asgi.application'
 
-
+env = load_dotenv(".env")
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
-DATABASES = {
+"""DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
+    }
+}"""
+# POSTGRESQL DATABASE SETTINGS
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        #'NAME': 'PGdatabase',
+        #'USER': 'PGuser',
+        #'PASSWORD': 'PGpassword',
+        'NAME': os.getenv('POSTGRES_DB'),
+        'USER': os.getenv('POSTGRES_USER'),
+        'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
+        'HOST': 'db',
+        'PORT': '5432',
     }
 }
 
@@ -107,6 +129,26 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'DEBUG',
+    },
+}
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer",
+	},
+}
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
@@ -128,6 +170,10 @@ STATIC_URL = 'static/'
 # The absolute path to the directory where collectstatic will collect static files for deployment.
 #STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
+MEDIA_URL = 'media/'
+
+MEDIA_ROOT = BASE_DIR / "media"
+
 # Additional locations the staticfiles app will traverse if the FileSystemFinder finder is enabled.
 
 STATICFILES_DIRS = [
@@ -145,4 +191,32 @@ REST_FRAMEWORK = {
     ],
 }
 
+AUTH_USER_MODEL = 'pong_app.CustomUser'
+CSRF_TRUSTED_ORIGINS = ['https://localhost:8000', 'wss://localhost:8000']
 
+
+
+PEPPER = os.getenv('PEPPER')
+
+CLIENT_ID = os.getenv('CLIENT_ID')
+CLIENT_SECRET = os.getenv('CLIENT_SECRET')
+REDIRECT_URI = os.getenv('REDIRECT_URI')
+AUTH_ENDPOINT = os.getenv('AUTH_ENDPOINT')
+SCOPE = os.getenv('SCOPE')
+#FRONT_REDIRECT = os.getenv('FRONT_REDIRECT')
+HOST = os.getenv('HOST')
+
+TOKEN_URL = os.getenv('TOKEN_URL')
+USER_INFO_URL = os.getenv('USER_INFO_URL')
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST_TLS = os.getenv('EMAIL_HOST_TLS')
+EMAIL_HOST = os.getenv('EMAIL_HOST')
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
+EMAIL_PORT = os.getenv('EMAIL_PORT')
+
+JWT_SECRET_KEY = os.getenv('JWT_SECRET_KEY')
+JWT_ALGORITHM = os.getenv('JWT_ALGORITHM')
+JWT_EXPIRATION_DELTA = timedelta(minutes=5)
+JWT_REFRESH_EXPIRATION_DELTA = timedelta(minutes=60)

@@ -1,3 +1,9 @@
 django==4.2.13
 djangorestframework==3.14.0
 djangorestframework-simplejwt==5.2.0
+python-dotenv
+requests
+Pillow
+psycopg2==2.9.6
+channels==4.0.0  # Versión estable para Django Channels
+daphne==4.0.0  # Versión de Daphne compatible con Channels 3.x
