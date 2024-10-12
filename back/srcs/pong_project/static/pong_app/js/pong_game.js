@@ -113,6 +113,7 @@ function initializeGame(){
     }
 
     function sendPlayerData(keycode, action){
+        console.log('!!SENDING DATA!!!');
         if (isSocketOpen) {
             socket.send(JSON.stringify({
                 'position': {
