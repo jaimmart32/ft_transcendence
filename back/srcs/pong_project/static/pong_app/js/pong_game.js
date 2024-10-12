@@ -74,20 +74,21 @@ function initializeGame(){
 
     socket.onmessage = function(event) {
         console.log("RECIEVING MESSAGE FROM WS!!")
+        console.log(event.data)
         // Parse the JSON data received from the server
         const data = JSON.parse(event.data);
 
         // Update player1's position with the received data
-        player1.y = data['position']['Player1'];
+        player1.y = data['Player1'];
 
         // Update player2's position with the received data
-        player2.y = data['position']['Player2'];
+        player2.y = data['Player2'];
 
-        ball.x = data['position']['ballX'];
-        ball.y = data['position']['ballY'];
+        ball.x = data['ballX'];
+        ball.y = data['ballY'];
 
-        score1 = data['position']['Score1']
-        score2 = data['position']['Score2']
+        score1 = data['Score1']
+        score2 = data['Score2']
         update();
     }
 

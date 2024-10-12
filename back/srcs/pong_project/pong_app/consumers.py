@@ -1,8 +1,8 @@
 import json
 from channels.generic.websocket import AsyncWebsocketConsumer
+from channels.generic.websocket import WebsocketConsumer
 import contextlib
 import random
-#from channels.generic.websocket import WebsocketConsumer
 import asyncio
 import logging
 import time
@@ -27,7 +27,7 @@ class PongConsumer(AsyncWebsocketConsumer):
         self.player_number = None
         waiting_queue.append(self)
         print(f'!!!!!! queue length = {len(waiting_queue)}', flush=True)
-        self.user = await asyncio.to_thread(CustomUser.objects.get, id=self.user_id)
+        self.user = await CustomUser.objects.aget(id=self.user_id)
         #self.user = CustomUser.objects.get(id=self.user_id)
 
         await self.accept()
@@ -63,7 +63,6 @@ class PongConsumer(AsyncWebsocketConsumer):
             self.player1 = Paddle(number=1, board=self.board)
             self.player2 = Paddle(number=2, board=self.board)
             #asyncio.create_task(self.game_loop())
-            self.lock = asyncio.Lock()  # Initialize the lock
             asyncio.create_task(self.game_loop())
 
 
@@ -90,11 +89,10 @@ class PongConsumer(AsyncWebsocketConsumer):
 
 
     async def move_players(self):
-        async with self.lock:  # Acquire the lock before modifying shared resources
-            if not outOfBounds(self.player1.y + self.player1.velocityY, self.player1.height, self.board.height):
-                self.player1.y += self.player1.velocityY
-            if not outOfBounds(self.player2.y + self.player2.velocityY, self.player1.height, self.board.height):
-                self.player2.y += self.player2.velocityY
+        if not outOfBounds(self.player1.y + self.player1.velocityY, self.player1.height, self.board.height):
+            self.player1.y += self.player1.velocityY
+        if not outOfBounds(self.player2.y + self.player2.velocityY, self.player1.height, self.board.height):
+            self.player2.y += self.player2.velocityY
     
     async def score(self):
         if self.ball.x >= self.board.width:
@@ -109,25 +107,25 @@ class PongConsumer(AsyncWebsocketConsumer):
 #        print("MOVE BALL CALLED", flush=True)
         #print("Before: ", self.ball.x, flush=True)
         #async with self.lock:  # Acquire the lock before modifying shared resources CHECK IF NEEDED
-            if ballOutOfBounds(self.ball.y, self.ball.height, self.board.height):
-                self.ball.velocityY = -self.ball.velocityY
+        if ballOutOfBounds(self.ball.y, self.ball.height, self.board.height):
+            self.ball.velocityY = -self.ball.velocityY
 
-            # Ensure that the ball has a minimum speed to avoid getting stuck
-            if abs(self.ball.velocityX) < 5:
-                self.ball.velocityX = 5 if self.ball.velocityX > 0 else -5
+        # Ensure that the ball has a minimum speed to avoid getting stuck
+        if abs(self.ball.velocityX) < 5:
+            self.ball.velocityX = 5 if self.ball.velocityX > 0 else -5
 
-            # Move the ball as usual
-            self.ball.x += self.ball.velocityX
-            self.ball.y += self.ball.velocityY
-            #print("after: ", self.ball.x, flush=True)
+        # Move the ball as usual
+        self.ball.x += self.ball.velocityX
+        self.ball.y += self.ball.velocityY
+        #print("after: ", self.ball.x, flush=True)
 
-            # Check if the ball is out of bounds to score
-            if self.score():
-                if self.player1.score == 7 or self.player2.score == 7:
-                    self.running = False
-                    #self.disconnect("game over") # TODO: when you restart the game it gets a bit weird so it has to be improved
-                # Reset the ball after scoring
-                self.ball = Ball(board=self.board)
+        # Check if the ball is out of bounds to score
+        if self.score():
+            if self.player1.score == 7 or self.player2.score == 7:
+                self.running = False
+                #self.disconnect("game over") # TODO: when you restart the game it gets a bit weird so it has to be improved
+            # Reset the ball after scoring
+            self.ball = Ball(board=self.board)
         
     
     
@@ -150,7 +148,7 @@ class PongConsumer(AsyncWebsocketConsumer):
             #print(f'Player: {self.user_id}, ballx: {self.ball.x}', flush=True)
             #print(self.player1.y, flush=True)
             print(f'c: {self.ball.x}', flush=True)
-            await self.channel_layer.send(
+            await self.channel_layer.group_send(
                 self.group_name,
                 {
                     'type': 'send_position',
@@ -194,20 +192,17 @@ class PongConsumer(AsyncWebsocketConsumer):
             text_data_json = json.loads(text_data)
             key = text_data_json['position']["key"]
             action = text_data_json['position']["action"]
-            
-            # Check wich playes is sending updates
-            if self.player_number == 1:
-                player = self.player1
+
+            # Determinar qué jugador envió la actualización
+            player = self.player1 if self.player_number == 1 else self.player2
+        
+            if action == "move":
+                if key == "ArrowUp":
+                    player.velocityY = -10
+                elif key == "ArrowDown":
+                    player.velocityY = 10
             else:
-                player = self.player2
-            async with self.lock: # Ensure only one player modifies velocity at a time
-                if action == "move":
-                    if key == "ArrowUp":
-                        player.velocityY = -10
-                    elif key == "ArrowDown":
-                        player.velocityY = 10
-                else:
-                    player.velocityY = 0
+                player.velocityY = 0
 
             position_updated = {
                     'Player1': self.player1.y,
@@ -217,7 +212,7 @@ class PongConsumer(AsyncWebsocketConsumer):
                     'Score1': self.player1.score,
                     'Score2': self.player2.score
                 }
-            await self.channel_layer.send(
+            await self.channel_layer.group_send(
             self.group_name,
             {
                 'type': 'send_position',
