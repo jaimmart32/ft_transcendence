@@ -26,6 +26,8 @@ class PongConsumer(AsyncWebsocketConsumer):
         self.group_name = None
         self.player_number = None
         waiting_queue.append(self)
+        self.player_1 = None
+        self.player_2 = None
         print(f'!!!!!! queue length = {len(waiting_queue)}', flush=True)
         self.user = await CustomUser.objects.aget(id=self.user_id)
         #self.user = CustomUser.objects.get(id=self.user_id)
@@ -33,15 +35,17 @@ class PongConsumer(AsyncWebsocketConsumer):
         await self.accept()
         # if there are sufficient players start if not wait
         if len(waiting_queue) >= 2:
-            player_1 = waiting_queue.pop(0)
-            player_2 = waiting_queue.pop(0)
+            self.player_1 = waiting_queue.pop(0)
+            self.player_2 = waiting_queue.pop(0)
+            self.player_1.player_1 = self.player_1
+            self.player_1.player_2 = self.player_2
 
             # Create unique identifier for game
-            self.group_name = f'pong_game_{player_1.user_id}_{player_2.user_id}'
+            self.group_name = f'pong_game_{self.player_1.user_id}_{self.player_2.user_id}'
 
             # Asign same room for players
-            await player_1.start_game(self.group_name, 1)
-            await player_2.start_game(self.group_name, 2)
+            await self.player_1.start_game(self.group_name, 1)
+            await self.player_2.start_game(self.group_name, 2)
 
 #            await self.send(text_data=json.dumps({'message': 'Ws connextion established'}))
 
@@ -58,7 +62,7 @@ class PongConsumer(AsyncWebsocketConsumer):
         if player_number == 1:
             print("INIZIALICING GAME OBJECTS", flush=True)
             self.running = True
-            self.board = Board()
+            self.board = Board(width=900, height=500)
             self.ball = Ball(board=self.board)
             self.player1 = Paddle(number=1, board=self.board)
             self.player2 = Paddle(number=2, board=self.board)
@@ -66,7 +70,7 @@ class PongConsumer(AsyncWebsocketConsumer):
             asyncio.create_task(self.game_loop())
 
 
-    async def ballSaved(self):
+    def ballSaved(self):
         if (self.ball.x + self.ball.velocityX <= self.player1.x + self.player1.width) and (self.ball.x >= self.player1.x) and \
                 (self.player1.y <= self.ball.y <= self.player1.y + self.player1.height):
             paddle_center = self.player1.y + self.player1.height / 2
@@ -88,13 +92,13 @@ class PongConsumer(AsyncWebsocketConsumer):
         return False
 
 
-    async def move_players(self):
+    def move_players(self):
         if not outOfBounds(self.player1.y + self.player1.velocityY, self.player1.height, self.board.height):
             self.player1.y += self.player1.velocityY
         if not outOfBounds(self.player2.y + self.player2.velocityY, self.player1.height, self.board.height):
             self.player2.y += self.player2.velocityY
     
-    async def score(self):
+    def score(self):
         if self.ball.x >= self.board.width:
             self.player1.score += 1
             return True
@@ -103,7 +107,7 @@ class PongConsumer(AsyncWebsocketConsumer):
             return True
         return False
 
-    async def move_ball(self):
+    def move_ball(self):
 #        print("MOVE BALL CALLED", flush=True)
         #print("Before: ", self.ball.x, flush=True)
         #async with self.lock:  # Acquire the lock before modifying shared resources CHECK IF NEEDED
@@ -113,6 +117,9 @@ class PongConsumer(AsyncWebsocketConsumer):
         # Ensure that the ball has a minimum speed to avoid getting stuck
         if abs(self.ball.velocityX) < 5:
             self.ball.velocityX = 5 if self.ball.velocityX > 0 else -5
+
+        if self.ballSaved():
+            self.ball.velocityX = -self.ball.velocityX
 
         # Move the ball as usual
         self.ball.x += self.ball.velocityX
@@ -133,10 +140,8 @@ class PongConsumer(AsyncWebsocketConsumer):
         print("GAME LOOP CALLED", flush=True)
         self.running = True
         while self.running:
-            print(f'a: {self.ball.x}', flush=True)
-            await self.move_ball()
-            print(f'b: {self.ball.x}', flush=True)
-            await self.move_players()
+            self.move_ball()
+            self.move_players()
             position_updated = {
                     'Player1': self.player1.y,
                     'Player2': self.player2.y,
@@ -147,7 +152,6 @@ class PongConsumer(AsyncWebsocketConsumer):
                 }
             #print(f'Player: {self.user_id}, ballx: {self.ball.x}', flush=True)
             #print(self.player1.y, flush=True)
-            print(f'c: {self.ball.x}', flush=True)
             await self.channel_layer.group_send(
                 self.group_name,
                 {
@@ -193,8 +197,12 @@ class PongConsumer(AsyncWebsocketConsumer):
             key = text_data_json['position']["key"]
             action = text_data_json['position']["action"]
 
+            number = 1 if self == self.player_1 else 2
+            print(f"!!!!!!!!!!{number}", flush=True)
             # Determinar qué jugador envió la actualización
-            player = self.player1 if self.player_number == 1 else self.player2
+            player = self.player1 if self == self.player_1 else self.player2
+
+            print("i am player ", player)
         
             if action == "move":
                 if key == "ArrowUp":

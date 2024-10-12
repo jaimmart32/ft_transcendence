@@ -128,6 +128,8 @@ function initializeGame(){
     function update() {
         //requestAnimationFrame(update);
         context.clearRect(0, 0, board.width, board.height);
+        context.fillStyle = "Black";
+        context.fillRect(0, 0, board.width, board.height);
 
         // draw players
         context.fillStyle = "skyblue";
