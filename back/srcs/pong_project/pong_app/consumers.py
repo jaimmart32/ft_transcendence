@@ -18,6 +18,24 @@ def ballOutOfBounds(yPosition, ball, board):
     return yPosition < 0 or yPosition + ball > board
 
 waiting_queue = []
+game_states = {}
+
+# En un archivo nuevo, por ejemplo, game_state.py
+class GameState:
+    def __init__(self):
+        self.board = Board(width=900, height=500)
+        self.ball = Ball(board=self.board)
+        self.player1 = Paddle(number=1, board=self.board)
+        self.player2 = Paddle(number=2, board=self.board)
+        self.game_loop_started = False
+        self.running = True
+
+    def reset(self):
+        self.ball = Ball(board=self.board)
+        self.player1.score = 0
+        self.player2.score = 0
+        self.running = True
+
 
 class PongConsumer(AsyncWebsocketConsumer):
     async def connect(self):
@@ -25,9 +43,8 @@ class PongConsumer(AsyncWebsocketConsumer):
         self.user_id = int(self.scope['url_route']['kwargs']['userid'])
         self.group_name = None
         self.player_number = None
+        self.game_state = None
         waiting_queue.append(self)
-        self.player_1 = None
-        self.player_2 = None
         print(f'!!!!!! queue length = {len(waiting_queue)}', flush=True)
         self.user = await CustomUser.objects.aget(id=self.user_id)
         #self.user = CustomUser.objects.get(id=self.user_id)
@@ -37,12 +54,13 @@ class PongConsumer(AsyncWebsocketConsumer):
         if len(waiting_queue) >= 2:
             self.player_1 = waiting_queue.pop(0)
             self.player_2 = waiting_queue.pop(0)
-            self.player_1.player_1 = self.player_1
-            self.player_1.player_2 = self.player_2
 
             # Create unique identifier for game
             self.group_name = f'pong_game_{self.player_1.user_id}_{self.player_2.user_id}'
 
+            self.player_1.game_state = GameState()
+            self.player_2.game_state = self.player_1.game_state
+            game_states[self.group_name] = self.player_1.game_state
             # Asign same room for players
             await self.player_1.start_game(self.group_name, 1)
             await self.player_2.start_game(self.group_name, 2)
@@ -53,86 +71,93 @@ class PongConsumer(AsyncWebsocketConsumer):
         print(self.channel_name, flush=True)
         self.group_name = group_name
         self.player_number = player_number
+        #self.game_state = GameState()
+
+        #game_states[group_name] = self.game_state
 
         # Add this player to room
         await self.channel_layer.group_add(self.group_name, self.channel_name)
 
         print(f"!!!!!!Jugador {self.player_number} se unió a la sala: {self.group_name}!!!!!!", flush=True)
 
-        if player_number == 1:
+        if player_number == 1:# and not hasattr(self.game_state, 'game_loop_started'):
             print("INIZIALICING GAME OBJECTS", flush=True)
-            self.running = True
-            self.board = Board(width=900, height=500)
-            self.ball = Ball(board=self.board)
-            self.player1 = Paddle(number=1, board=self.board)
-            self.player2 = Paddle(number=2, board=self.board)
-            #asyncio.create_task(self.game_loop())
+            self.game_state.board = Board(width=900, height=500)
+            self.game_state.ball = Ball(board=self.game_state.board)
+            self.game_state.player1 = Paddle(number=1, board=self.game_state.board)
+            self.game_state.player2 = Paddle(number=2, board=self.game_state.board)
+            
+            self.game_state.game_loop_started = True
             asyncio.create_task(self.game_loop())
+        self.running = True
+
 
 
     def ballSaved(self):
-        if (self.ball.x + self.ball.velocityX <= self.player1.x + self.player1.width) and (self.ball.x >= self.player1.x) and \
-                (self.player1.y <= self.ball.y <= self.player1.y + self.player1.height):
-            paddle_center = self.player1.y + self.player1.height / 2
-            hit_pos = (self.ball.y - paddle_center) / (self.player1.height / 2)
-            self.ball.velocityY += hit_pos * 3  # Modify the vertical velocity
+        if (self.game_state.ball.x + self.game_state.ball.velocityX <= self.game_state.player1.x + self.game_state.player1.width) and (self.game_state.ball.x >= self.game_state.player1.x) and \
+                (self.game_state.player1.y <= self.game_state.ball.y <= self.game_state.player1.y + self.game_state.player1.height):
+            paddle_center = self.game_state.player1.y + self.game_state.player1.height / 2
+            hit_pos = (self.game_state.ball.y - paddle_center) / (self.game_state.player1.height / 2)
+            self.game_state.ball.velocityY += hit_pos * 3  # Modify the vertical velocity
             
-            self.ball.x = self.player1.x + self.player1.width + 1
+            self.game_state.ball.x = self.game_state.player1.x + self.game_state.player1.width + 1
             return True
 
-        elif (self.ball.x + self.ball.velocityX >= self.player2.x - self.ball.width) and (self.ball.x <= self.player2.x) and \
-                (self.player2.y <= self.ball.y <= self.player2.y + self.player2.height):
-            paddle_center = self.player2.y + self.player2.height / 2
-            hit_pos = (self.ball.y - paddle_center) / (self.player2.height / 2)
-            self.ball.velocityY += hit_pos * 3
+        elif (self.game_state.ball.x + self.game_state.ball.velocityX >= self.game_state.player2.x - self.game_state.ball.width) and (self.game_state.ball.x <= self.game_state.player2.x) and \
+                (self.game_state.player2.y <= self.game_state.ball.y <= self.game_state.player2.y + self.game_state.player2.height):
+            paddle_center = self.game_state.player2.y + self.game_state.player2.height / 2
+            hit_pos = (self.game_state.ball.y - paddle_center) / (self.game_state.player2.height / 2)
+            self.game_state.ball.velocityY += hit_pos * 3
             
-            self.ball.x = self.player2.x - self.ball.width - 1
+            self.game_state.ball.x = self.game_state.player2.x - self.game_state.ball.width - 1
             return True
 
         return False
 
 
     def move_players(self):
-        if not outOfBounds(self.player1.y + self.player1.velocityY, self.player1.height, self.board.height):
-            self.player1.y += self.player1.velocityY
-        if not outOfBounds(self.player2.y + self.player2.velocityY, self.player1.height, self.board.height):
-            self.player2.y += self.player2.velocityY
+        if not outOfBounds(self.game_state.player1.y + self.game_state.player1.velocityY, self.game_state.player1.height, self.game_state.board.height):
+            self.game_state.player1.y += self.game_state.player1.velocityY
+        if not outOfBounds(self.game_state.player2.y + self.game_state.player2.velocityY, self.game_state.player1.height, self.game_state.board.height):
+            self.game_state.player2.y += self.game_state.player2.velocityY
     
     def score(self):
-        if self.ball.x >= self.board.width:
-            self.player1.score += 1
+        if self.game_state.ball.x >= self.game_state.board.width:
+            self.game_state.player1.score += 1
             return True
-        elif self.ball.x <= 0 - self.ball.width:
-            self.player2.score += 1
+        elif self.game_state.ball.x <= 0 - self.game_state.ball.width:
+            self.game_state.player2.score += 1
             return True
         return False
 
     def move_ball(self):
 #        print("MOVE BALL CALLED", flush=True)
-        #print("Before: ", self.ball.x, flush=True)
+        #print("Before: ", self.game_state.ball.x, flush=True)
         #async with self.lock:  # Acquire the lock before modifying shared resources CHECK IF NEEDED
-        if ballOutOfBounds(self.ball.y, self.ball.height, self.board.height):
-            self.ball.velocityY = -self.ball.velocityY
+        if ballOutOfBounds(self.game_state.ball.y, self.game_state.ball.height, self.game_state.board.height):
+            self.game_state.ball.velocityY = -self.game_state.ball.velocityY
 
         # Ensure that the ball has a minimum speed to avoid getting stuck
-        if abs(self.ball.velocityX) < 5:
-            self.ball.velocityX = 5 if self.ball.velocityX > 0 else -5
+        if abs(self.game_state.ball.velocityX) < 5:
+            self.game_state.ball.velocityX = 5 if self.game_state.ball.velocityX > 0 else -5
 
         if self.ballSaved():
-            self.ball.velocityX = -self.ball.velocityX
+            self.game_state.ball.velocityX = -self.game_state.ball.velocityX
 
         # Move the ball as usual
-        self.ball.x += self.ball.velocityX
-        self.ball.y += self.ball.velocityY
-        #print("after: ", self.ball.x, flush=True)
+        self.game_state.ball.x += self.game_state.ball.velocityX
+        self.game_state.ball.y += self.game_state.ball.velocityY
+
+        
+        #
 
         # Check if the ball is out of bounds to score
         if self.score():
-            if self.player1.score == 7 or self.player2.score == 7:
+            if self.game_state.player1.score == 7 or self.game_state.player2.score == 7:
                 self.running = False
                 #self.disconnect("game over") # TODO: when you restart the game it gets a bit weird so it has to be improved
             # Reset the ball after scoring
-            self.ball = Ball(board=self.board)
+            self.game_state.ball = Ball(board=self.game_state.board)
         
     
     
@@ -143,15 +168,15 @@ class PongConsumer(AsyncWebsocketConsumer):
             self.move_ball()
             self.move_players()
             position_updated = {
-                    'Player1': self.player1.y,
-                    'Player2': self.player2.y,
-                    'ballX': self.ball.x,
-                    'ballY': self.ball.y,
-                    'Score1': self.player1.score,
-                    'Score2': self.player2.score
+                    'Player1': self.game_state.player1.y,
+                    'Player2': self.game_state.player2.y,
+                    'ballX': self.game_state.ball.x,
+                    'ballY': self.game_state.ball.y,
+                    'Score1': self.game_state.player1.score,
+                    'Score2': self.game_state.player2.score
                 }
-            #print(f'Player: {self.user_id}, ballx: {self.ball.x}', flush=True)
-            #print(self.player1.y, flush=True)
+            #print(f'Player: {self.user_id}, ballx: {self.game_state.ball.x}', flush=True)
+            #print(self.game_state.player1.y, flush=True)
             await self.channel_layer.group_send(
                 self.group_name,
                 {
@@ -177,16 +202,12 @@ class PongConsumer(AsyncWebsocketConsumer):
                 self.channel_name
             )
 
-        # Remove players from the game
-        #if self.player_role == 'player1':
-        #    self.game.player1 = None
-        #elif self.player_role == 'player2':
-        #    self.game.player2 = None
-
-        #self.game.save()
+        # Remove game state if both players disconnect
+        #if self.group_name in game_states and not any(player.running for player in [self.player_1, self.player_2]):
+        #    del game_states[self.group_name]
 
     async def send_position(self, event):
-        print("SENDING POSITION", flush=True)
+        #print("SENDING POSITION", flush=True)
         position = event['position']
         await self.send(text_data=json.dumps(position))
 
@@ -197,12 +218,11 @@ class PongConsumer(AsyncWebsocketConsumer):
             key = text_data_json['position']["key"]
             action = text_data_json['position']["action"]
 
-            number = 1 if self == self.player_1 else 2
-            print(f"!!!!!!!!!!{number}", flush=True)
             # Determinar qué jugador envió la actualización
-            player = self.player1 if self == self.player_1 else self.player2
-
-            print("i am player ", player)
+            print(f"\033[91mPlayer number : {self.player_number}\033[0m", flush=True)
+            print(f"\033[91mKey : {key}\033[0m", flush=True)
+            print(f"\033[91mAction : {action}\033[0m", flush=True)
+            player = self.game_state.player1 if self.player_number == 1 else self.game_state.player2
         
             if action == "move":
                 if key == "ArrowUp":
@@ -213,12 +233,12 @@ class PongConsumer(AsyncWebsocketConsumer):
                 player.velocityY = 0
 
             position_updated = {
-                    'Player1': self.player1.y,
-                    'Player2': self.player2.y,
-                    'ballX': self.ball.x,
-                    'ballY': self.ball.y,
-                    'Score1': self.player1.score,
-                    'Score2': self.player2.score
+                    'Player1': self.game_state.player1.y,
+                    'Player2': self.game_state.player2.y,
+                    'ballX': self.game_state.ball.x,
+                    'ballY': self.game_state.ball.y,
+                    'Score1': self.game_state.player1.score,
+                    'Score2': self.game_state.player2.score
                 }
             await self.channel_layer.group_send(
             self.group_name,
@@ -233,8 +253,8 @@ class PongConsumer(AsyncWebsocketConsumer):
             logger.error("Unexpected error: %s", e)
 
     def update_game_stats(self, winner):
-        player1_user = CustomUser.objects.get(id=self.player1.user_id)
-        player2_user = CustomUser.objects.get(id=self.player2.user_id)
+        player1_user = CustomUser.objects.get(id=self.game_state.player1.user_id)
+        player2_user = CustomUser.objects.get(id=self.game_state.player2.user_id)
 
         player1_stats = player1_user.game_stats
         player1_stats['total'] = player1_stats.get('total', 0) + 1
