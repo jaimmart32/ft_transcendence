@@ -35,16 +35,22 @@ class Ball{
         this.velocityY = 2;
     }
 }
-           
+
 let context;
-let board = new Board(900, 500);
-let player1 = new Player(1, board);
-let player2 = new Player(2, board);
-let ball = new Ball(board);
-
-
+let socket;
+let isSocketOpen = false;
 
 function initializeGame(){
+    
+    // Close existing WebSocket connection if open
+    if (socket) {
+        socket.close();
+        isSocketOpen = false;
+    }
+    let board = new Board(900, 500);
+    let player1 = new Player(1, board);
+    let player2 = new Player(2, board);
+    let ball = new Ball(board);
     console.log('initializeGame called');
     loadGameCanvas();
     let score1 = 0;
@@ -55,7 +61,7 @@ function initializeGame(){
     //const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
     
     // TODO: generate id only when a new game is created, if not, select the id
-    const socket = new WebSocket('wss://' + window.location.host + '/ws/pong-socket/'  + userid + '/');
+    socket = new WebSocket('wss://' + window.location.host + '/ws/pong-socket/'  + userid + '/');
     //const socket = new WebSocket('ws://' + window.location.host + '/ws/pong-socket/' + id + '/');
     isSocketOpen = false;
     socket.onopen = function(event) {
@@ -102,6 +108,9 @@ function initializeGame(){
     context.fillRect(player1.x, player1.y, player1.width, player1.height);
     context.fillRect(player2.x, player2.y, player2.width, player2.height);
 
+    document.removeEventListener("keyup", stopDjango);  // Remove previous event listeners
+    document.removeEventListener("keydown", moveDjango);
+
     document.addEventListener("keyup", stopDjango);
     document.addEventListener("keydown", moveDjango);
         
@@ -124,6 +133,18 @@ function initializeGame(){
             }));
         }
     }
+
+    function displayWinnerBanner(winner) {
+        contextL.fillStyle = "white";
+        context.font = "50px Arial";
+        const text = `${winner} Wins!`;
+        // Measure the text width to center it
+        const textWidth = context.measureText(text).width;
+        // Clear the canvas for the banner
+        contextL.clearRect(0, 0, canvas.width, canvas.height);
+        // Draw the banner in the center of the canvas
+        contextL.fillText(text, (canvas.width / 2) - (textWidth / 2), canvas.height / 2);
+    }
             
     function update() {
         //requestAnimationFrame(update);
@@ -139,9 +160,18 @@ function initializeGame(){
         //ball
         context.fillStyle = "White"
         context.fillRect(ball.x, ball.y, ball.width, ball.height);
-        context.fillText(score1.toString(), (board.width / 4), board.height/2);
-        context.fillText(score2.toString(), (board.width / 4) * 3, board.height/2);
-        context.font = '50px Courier New';
+        if (score1 == 7 || score2 == 7)
+        {
+            if (score1 == 7)
+                displayWinnerBanner("Player 1");
+            else
+                displayWinnerBanner("Player 2");
+        }
+        else{
+            context.fillText(score1.toString(), (board.width / 4), board.height/2);
+            context.fillText(score2.toString(), (board.width / 4) * 3, board.height/2);
+            context.font = '50px Arial';
+        }
 
         // Send ball and player data every frame
         //sendPlayerData("update");

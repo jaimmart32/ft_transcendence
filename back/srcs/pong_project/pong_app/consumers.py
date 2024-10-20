@@ -162,6 +162,21 @@ class PongConsumer(AsyncWebsocketConsumer):
         # Check if the ball is out of bounds to score
         if self.score():
             if self.game_state.player1.score == 7 or self.game_state.player2.score == 7:
+                position_updated = {
+                    'Player1': self.game_state.player1.y,
+                    'Player2': self.game_state.player2.y,
+                    'ballX': self.game_state.ball.x,
+                    'ballY': self.game_state.ball.y,
+                    'Score1': self.game_state.player1.score,
+                    'Score2': self.game_state.player2.score
+                }
+                self.channel_layer.group_send(
+                self.group_name,
+                {
+                    'type': 'send_position',
+                    'position': position_updated
+                }
+            )
                 self.running = False
                 #self.disconnect("game over") # TODO: when you restart the game it gets a bit weird so it has to be improved
             # Reset the ball after scoring
@@ -203,13 +218,16 @@ class PongConsumer(AsyncWebsocketConsumer):
     async def disconnect(self, close_code):
         logger.info(f"Disconnected: {close_code}")
         self.running = False
-        active_players.delete(self.user_id)
+        active_players.discard(self.user_id)
         #self.game_thread.join()  # Wait for the thread to finish before exiting
         if self.group_name:
             await self.channel_layer.group_discard(
                 self.group_name,
                 self.channel_name
             )
+        
+        # Close the WebSocket connection
+        await super().disconnect(close_code)
 
         # Remove game state if both players disconnect
         #if self.group_name in game_states and not any(player.running for player in [self.player_1, self.player_2]):
