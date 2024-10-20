@@ -108,22 +108,6 @@ let player1L = new PlayerL(1, boardL);
 let player2L = new PlayerL(2, boardL);
 let ballL = new BallL(boardL);
 
-// Function to display the winner banner
-function displayWinnerBanner(winner) {
-    ctx.fillStyle = "white";
-    ctx.font = "50px Arial";
-    const text = `${winner} Wins!`;
-
-    // Measure the text width to center it
-    const textWidth = ctx.measureText(text).width;
-
-    // Clear the canvas for the banner
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    // Draw the banner in the center of the canvas
-    ctx.fillText(text, (canvas.width / 2) - (textWidth / 2), canvas.height / 2);
-}
-
 function initializeLocalGame() {
     loadGameCanvas();
     let canvas = document.getElementById("board");
