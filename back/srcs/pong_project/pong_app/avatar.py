@@ -4,6 +4,21 @@ from django.core.exceptions import ValidationError
 from PIL import Image
 from io import BytesIO
 
+def check_magic_number(img_data, ext):
+	# Get the first few bytes of the file
+	magic_bytes = img_data[:4].hex().upper()
+	magic_numbers = {
+	'jpeg': 'FFD8',  # JPEG magic number
+	'jpg': 'FFD8',   # JPG maps to JPEG
+	'png': '89504E47',  # PNG magic number
+	'gif': '47494638',  # GIF magic number
+	}
+	if ext in magic_numbers:
+		expected_magic = magic_numbers[ext].upper()
+		return magic_bytes.startswith(expected_magic)
+	return False
+
+
 def handle_avatar_upload(user, avatar_data, min_width=100, min_height=100, max_width=2000, max_height=2000, max_size=1*1024*1024):
 	try:
 		# Check extensions
@@ -17,6 +32,11 @@ def handle_avatar_upload(user, avatar_data, min_width=100, min_height=100, max_w
 			raise ValidationError("The uploaded file is empty.")
 		if len(img_data) > max_size:
 			raise ValidationError("The uploaded file exceeds the maximum allowed size of 1MB.")
+
+		# Check magic numbers to check file extension
+		if not check_magic_number(img_data, ext):
+			raise ValidationError("File signature does not match the provided file extension.")
+
 
 		# Check image dimensions
 		image = Image.open(BytesIO(img_data))
