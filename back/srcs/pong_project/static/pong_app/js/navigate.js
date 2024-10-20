@@ -21,7 +21,7 @@ function loadPage(url, data)
 	else if (url === '/home/game/')
 		loadPlayGame();
 	else if (url === '/home/game/local/')
-		loadPlayGame();
+		initializeLocalGame();
 	else if (url === '/home/game/online/')
 		initializeGame();
 	else if (url === '/home/game/tournament/')
