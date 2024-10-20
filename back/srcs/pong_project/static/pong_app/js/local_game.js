@@ -69,12 +69,12 @@ class BallL {
             this.velocityX = -this.velocityX;
         }
 
-        // Reset ballL position if it goes off screen (left or right)
-        if (this.x <= 0 || this.x >= boardL.width) {
-            this.x = (boardL.width / 2) - (this.width / 2);
-            this.y = (boardL.height / 2) - (this.height / 2);
-            this.velocityX = -this.velocityX; // Reverse direction on reset
-        }
+        //// Reset ballL position if it goes off screen (left or right)
+        //if (this.x <= 0 || this.x >= boardL.width) {
+        //    this.x = (boardL.width / 2) - (this.width / 2);
+        //    this.y = (boardL.height / 2) - (this.height / 2);
+        //    this.velocityX = -this.velocityX; // Reverse direction on reset
+        //}
 
         // Check if scored
         this.score(player1L, player2L, boardL);
@@ -83,10 +83,12 @@ class BallL {
     score(player1L, player2L, boardL) {
         if (this.x <= 0) {
             // Gol del jugador 2
+            console.log("player 2 scored");
             player2L.score += 1;
             this.resetPosition(boardL);
-        } else if (this.x >= boardL.width) {
-            // Gol del jugador 1
+            } else if (this.x >= boardL.width) {
+                // Gol del jugador 1
+            console.log("player 1 scored");
             player1L.score += 1;
             this.resetPosition(boardL);
         }
@@ -106,29 +108,13 @@ let player1L = new PlayerL(1, boardL);
 let player2L = new PlayerL(2, boardL);
 let ballL = new BallL(boardL);
 
-// Function to display the winner banner
-function displayWinnerBanner(winner) {
-    ctx.fillStyle = "white";
-    ctx.font = "50px Arial";
-    const text = `${winner} Wins!`;
-
-    // Measure the text width to center it
-    const textWidth = ctx.measureText(text).width;
-
-    // Clear the canvas for the banner
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    // Draw the banner in the center of the canvas
-    ctx.fillText(text, (canvas.width / 2) - (textWidth / 2), canvas.height / 2);
-}
-
 function initializeLocalGame() {
     loadGameCanvas();
-    console.log('initializeGame called');
-    let canvas = document.getElementById("boardL");
+    let canvas = document.getElementById("board");
     contextL = canvas.getContext("2d");
     canvas.width = boardL.width;
     canvas.height = boardL.height;
+    let running = true;
 
     // Control players using keyboardL
     document.addEventListener("keydown", movePlayer);
@@ -136,79 +122,106 @@ function initializeLocalGame() {
 
     // Start the game loop
     gameLoop();
-}
 
-// Move players based on keyboardL input
-function movePlayer(e) {
-    switch (e.code) {
-        // Player 1 controls (W and S)
-        case "KeyW":
-            player1L.velocityY = -5;
-            break;
-        case "KeyS":
-            player1L.velocityY = 5;
-            break;
 
-        // Player 2 controls (Arrow Up and Arrow Down)
-        case "ArrowUp":
-            player2L.velocityY = -5;
-            break;
-        case "ArrowDown":
-            player2L.velocityY = 5;
-            break;
+    // Move players based on keyboardL input
+    function movePlayer(e) {
+        switch (e.code) {
+            // Player 1 controls (W and S)
+            case "KeyW":
+                player1L.velocityY = -5;
+                break;
+            case "KeyS":
+                player1L.velocityY = 5;
+                break;
+
+            // Player 2 controls (Arrow Up and Arrow Down)
+            case "ArrowUp":
+                player2L.velocityY = -5;
+                break;
+            case "ArrowDown":
+                player2L.velocityY = 5;
+                break;
+        }
     }
-}
 
-// Stop players when keys are released
-function stopPlayer(e) {
-    switch (e.code) {
-        case "KeyW":
-        case "KeyS":
-            player1L.velocityY = 0;
-            break;
+    // Stop players when keys are released
+    function stopPlayer(e) {
+        switch (e.code) {
+            case "KeyW":
+            case "KeyS":
+                player1L.velocityY = 0;
+                break;
 
-        case "ArrowUp":
-        case "ArrowDown":
-            player2L.velocityY = 0;
-            break;
+            case "ArrowUp":
+            case "ArrowDown":
+                player2L.velocityY = 0;
+                break;
+        }
     }
-}
 
-// Game loop to update positions and render the game
-function gameLoop() {
-    contextL.clearRect(0, 0, boardL.width, boardL.height);
-    contextL.fillStyle = "Black";
-    contextL.fillRect(0, 0, boardL.width, boardL.height);
+    function displayWinnerBanner(winner) {
+        contextL.fillStyle = "white";
+        contextL.font = "50px Arial";
+        const text = `${winner} Wins!`;
+        // Measure the text width to center it
+        const textWidth = contextL.measureText(text).width;
+        // Clear the canvas for the banner
+        contextL.clearRect(0, 0, canvas.width, canvas.height);
+        // Draw the banner in the center of the canvas
+        contextL.fillText(text, (canvas.width / 2) - (textWidth / 2), canvas.height / 2);
+    }
 
-    // Move and constrain players
-    player1L.move();
-    player1L.constrain(boardL);
-    player2L.move();
-    player2L.constrain(boardL);
+    function checkEndGame(player1L, player2L) {
+        if (player1L.score === 7)
+        {
+            displayWinnerBanner("Player 1");
+            running = false;
+        }
+        else if (player2L.score === 7)
+        {
+            displayWinnerBanner("Player 2");
+            running = false;
+        }
+    }
 
-    // Move and bounce the ballL
-    ballL.move();
-    ballL.bounce(boardL, player1L, player2L);
+    // Game loop to update positions and render the game
+    function gameLoop() {
+        contextL.clearRect(0, 0, boardL.width, boardL.height);
+        contextL.fillStyle = "Black";
+        contextL.fillRect(0, 0, boardL.width, boardL.height);
 
-    // Draw players
-    contextL.fillStyle = "skyblue";
-    contextL.fillRect(player1L.x, player1L.y, player1L.width, player1L.height);
-    contextL.fillRect(player2L.x, player2L.y, player2L.width, player2L.height);
+        // Move and constrain players
+        player1L.move();
+        player1L.constrain(boardL);
+        player2L.move();
+        player2L.constrain(boardL);
 
-    // Draw ballL
-    contextL.fillStyle = "White";
-    contextL.fillRect(ballL.x, ballL.y, ballL.width, ballL.height);
+        // Move and bounce the ballL
+        ballL.move();
+        ballL.bounce(boardL, player1L, player2L);
 
-    // Display scores
-    contextL.font = "30px Arial";
-    contextL.fillStyle = "white";
-    contextL.fillText("Player 1: " + player1L.score, 50, 50);
-    contextL.fillText("Player 2: " + player2L.score, boardL.width - 200, 50);
+        // Draw players
+        contextL.fillStyle = "skyblue";
+        contextL.fillRect(player1L.x, player1L.y, player1L.width, player1L.height);
+        contextL.fillRect(player2L.x, player2L.y, player2L.width, player2L.height);
 
-    console.log(`P1: ${player1L.score}`);
+        // Draw ballL
+        contextL.fillStyle = "White";
+        contextL.fillRect(ballL.x, ballL.y, ballL.width, ballL.height);
 
-    // Continuously call gameLoop
-    requestAnimationFrame(gameLoop);
+        // Display scores
+        contextL.font = "30px Arial";
+        contextL.fillStyle = "white";
+        contextL.fillText("Player 1: " + player1L.score, 50, 50);
+        contextL.fillText("Player 2: " + player2L.score, boardL.width - 200, 50);
+
+        checkEndGame(player1L, player2L);
+
+        // Continuously call gameLoop
+        if (running)
+            requestAnimationFrame(gameLoop);
+    }
 }
 
 window.initializeLocalGame = initializeLocalGame;
