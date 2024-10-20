@@ -29,7 +29,6 @@ async function loadProfileSettings()
 					username_field.classList.add('d-none');	
 					password_field.classList.add('d-none');	
 				}
-//		    	I could add one more button to go back without making any changes
 				const save = document.getElementById('save-changes');
 				if (save)
 				{
@@ -62,38 +61,41 @@ function updateUserInfo()
 {
     const token = localStorage.getItem('access');
 
-    if (token)
+	if (token)
 	{
-        const username = document.getElementById('username').value;
-        const password = document.getElementById('password').value;
-        const twofa = document.getElementById('twofa').checked ? 'on' : 'off';
-        const userPic = document.getElementById('avatar').files[0];
+		const username = document.getElementById('username').value;
+		const password = document.getElementById('password').value;
+		const twofa = document.getElementById('twofa').checked ? 'on' : 'off';
+		const userPic = document.getElementById('avatar').files[0];
 
 
-        const userDict =
+		const userDict =
 		{
-            username: username,
-            password: password,
-            twofa: twofa,
-        };
+		    username: username,
+		    twofa: twofa,
+		};
+		if (password)
+			userDict.password = password;
 
-        if (userPic)
+		if (userPic)
 		{
-            // Crear un lector para convertir la imagen a base64
-            const reader = new FileReader();
-            reader.readAsDataURL(userPic);
+		    const reader = new FileReader();
+		    reader.readAsDataURL(userPic);
 
-            reader.onloadend = function () {
-                userDict.avatar = reader.result;// Convertido a base64
+		    reader.onloadend = function ()
+		    {
+			userDict.avatar = reader.result;// Convertido a base64
 
-                sendUserData(userDict, token);
-            };
-        }
+			if (validateInput(userDict, 'edit'))
+				sendUserData(userDict, token);
+		    };
+        	}
 		else
 		{
-            sendUserData(userDict, token);
-        }
-    }
+			if (validateInput(userDict, 'edit'))
+		    		sendUserData(userDict, token);
+		}
+	}
 	else
 	{
         alert('You are not authorized to view this page. Please log in.');
@@ -105,34 +107,34 @@ async function sendUserData(userDict, token)
 {
 	try
 	{
-    	const response = await fetch('/home/profile/edit/',
+		const response = await fetch('/home/profile/edit/',
 		{
-    	    method: 'PUT',
-    	    headers:
+		    method: 'PUT',
+		    headers:
 			{
-    	        'Authorization': `Bearer ${token}`,
-    	        'Content-Type': 'application/json',
-    	    },
-    	    body: JSON.stringify(userDict)
-    	})
-    	const data = await response.json();
+				'Authorization': `Bearer ${token}`,
+				'Content-Type': 'application/json',
+			},
+		    body: JSON.stringify(userDict)
+		})
+		const data = await response.json();
 		if (data.status === 'success')
 		{
-    	    alert('Info updated correctly!');
-    	    navigateTo('/home/profile/', userDict);
-    	}
+		    alert('Info updated correctly!');
+		    navigateTo('/home/profile/', userDict);
+		}
 		else
 		{
-    	    if (data.message)
+		    if (data.message)
+		    {
+			if (data.message.includes('file'))
 			{
-    	        if (data.message.includes('file'))
-				{
-    	            showMessage('file-error', data.message);
-    	    	}
-    	    	console.error(data.message);
-				await checkRefresh(data, '/home/profile/edit/', token);
-    	    }
-    	}
+			    showMessage('file-error', data.message);
+			}
+			console.error(data.message);
+					await checkRefresh(data, '/home/profile/edit/', token);
+		    }
+		}
 	}
     catch(error)
 	{

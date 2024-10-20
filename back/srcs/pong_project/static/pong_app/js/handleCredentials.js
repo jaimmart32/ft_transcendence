@@ -30,7 +30,7 @@ function logInHandler()
 		{
                     if (data.status === 'success')
 		    {
-				localStorage.setItem('userid', data.userid);
+			localStorage.setItem('userid', data.userid);
 			if (data.message === 'Verification code sent')
 			{
 				code = prompt('Enter the verification code: ');
@@ -139,14 +139,27 @@ function validateInput(formData, form)
 	{
 		hideMessage('email-error');
 	}
-	if (!validatePass(formData.password) && form !== 'edit')
+	if (form === 'edit' && formData.password)
 	{
-		valid = false;
-		showMessage('password-error', 'Invalid password');
+		if (!validatePass(formData.password))
+		{
+			valid = false;
+			showMessage('password-error', 'Invalid password');
+		}
+		else
+			hideMessage('password-error');
 	}
-	else
+	else if (form !== 'edit')
 	{
-		hideMessage('password-error');
+		if (!validatePass(formData.password))
+		{
+			valid = false;
+			showMessage('password-error', 'Invalid password');
+		}
+		else
+		{
+			hideMessage('password-error');
+		}
 	}
 	if (form === 'signup' && formData.password !== formData.confPass)
 	{

@@ -17,6 +17,7 @@ async function getAuthUrl()
 		if (data.status === 'success')
 		{
 			const authUrl =  `${data.auth_endpoint}?client_id=${data.client_id}&redirect_uri=${data.redirect_uri}&response_type=${data.scope}`
+			console.log('AUTH URL = ' + authUrl);
 			return (authUrl);
 		}
 		else

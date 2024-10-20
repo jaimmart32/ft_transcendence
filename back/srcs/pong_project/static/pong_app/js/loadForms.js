@@ -184,6 +184,7 @@ async function loadHome()
 			})
 			
 			const data = await response.json();
+			console.log(data.status + ": " + data.message);
 
 			if (data.status === 'success')
 			{

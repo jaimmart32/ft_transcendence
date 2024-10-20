@@ -164,7 +164,8 @@ def signupView(request):
 		domain = settings.HOST
 		uid = urlsafe_base64_encode(force_bytes(user.id))
 		token = token_generator.make_token(user)
-		activation_link = f'http://{domain}:8000/activate/{uid}/{token}/'
+		activation_link = f'https://{domain}:8000/activate/{uid}/{token}/'
+		#activation_link = f'https://localhost:8000/activate/{uid}/{token}/'
 		message = MIMEText(f'Please click the following link to activate your account\n {activation_link}')
 		message['Subject'] = 'Account confirmation'
 		message['From'] = settings.EMAIL_HOST_USER 
@@ -198,10 +199,10 @@ def ActivateAccountView(request, uidb64, token):
 			user.is_active = True
 			user.save()
 					# Redirect to the login page or another page after successful activation
-			return redirect(f'http://{settings.HOST}:8000')
+			return redirect(f'https://{settings.HOST}:8000')
 		else:
 					# Render a template with an error message if the token is invalid
-			return redirect(f'http://{settings.HOST}:8000')
+			return redirect(f'https://{settings.HOST}:8000')
 	return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
 
 
@@ -442,7 +443,7 @@ def authCreateUser(request):
 		# Could use the CustomUser.objects.get_or_create() and later check if the user exists 
 		token = create_jwt_token(user)
 
-		redirect_url = f"http://{settings.HOST}:8000?access={token}"
+		redirect_url = f"https://{settings.HOST}:8000?access={token}"
 		return JsonResponse({'status': 'success', 'redirect_url': redirect_url}, status=200)
 	return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
 
