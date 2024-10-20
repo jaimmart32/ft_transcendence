@@ -129,7 +129,8 @@ function loadPlayGame(id)
 		local.addEventListener('click', function(event)
 		{
 			event.preventDefault();
-			navigateTo('/home/game/local/');
+			//navigateTo('/home/game/local/');
+			initializeLocalGame();
 		});
 	}
 	if (online)
@@ -138,7 +139,8 @@ function loadPlayGame(id)
 		{
 			console.log('INSIDE ONLINE BUTTON EVENT LISTENER!');
 			event.preventDefault();
-			navigateTo('/home/game/online/');
+			//navigateTo('/home/game/online/');
+			initializeGame();
 		});
 	}
 	if (tournament)
@@ -159,8 +161,6 @@ function loadGameCanvas()
 	    <p>Get ready to play a game of Pong!</p>
 	    <!-- Add game play content here -->
 	    <canvas id="board" width="900" height="500"></canvas>
-		<br>
-		<button class="btn btn-secondary" id="back-to-home">Back to Home</button>
 	`;
 }
 async function loadHome()

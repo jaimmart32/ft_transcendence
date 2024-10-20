@@ -18,6 +18,7 @@ def ballOutOfBounds(yPosition, ball, board):
     return yPosition < 0 or yPosition + ball > board
 
 waiting_queue = []
+active_players = set()
 game_states = {}
 
 # En un archivo nuevo, por ejemplo, game_state.py
@@ -44,6 +45,12 @@ class PongConsumer(AsyncWebsocketConsumer):
         self.group_name = None
         self.player_number = None
         self.game_state = None
+
+        if self.user_id in active_players:
+            await self.close()  # Close the WebSocket connection
+            logger.info(f"Player {self.user_id} is already connected. Closing duplicate connection.")
+            return
+        active_players.add(self.user_id)
         waiting_queue.append(self)
         print(f'!!!!!! queue length = {len(waiting_queue)}', flush=True)
         self.user = await CustomUser.objects.aget(id=self.user_id)
@@ -52,6 +59,7 @@ class PongConsumer(AsyncWebsocketConsumer):
         await self.accept()
         # if there are sufficient players start if not wait
         if len(waiting_queue) >= 2:
+                
             self.player_1 = waiting_queue.pop(0)
             self.player_2 = waiting_queue.pop(0)
 
@@ -195,6 +203,7 @@ class PongConsumer(AsyncWebsocketConsumer):
     async def disconnect(self, close_code):
         logger.info(f"Disconnected: {close_code}")
         self.running = False
+        active_players.delete(self.user_id)
         #self.game_thread.join()  # Wait for the thread to finish before exiting
         if self.group_name:
             await self.channel_layer.group_discard(
