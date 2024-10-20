@@ -135,15 +135,15 @@ function initializeGame(){
     }
 
     function displayWinnerBanner(winner) {
-        contextL.fillStyle = "white";
+        context.fillStyle = "white";
         context.font = "50px Arial";
         const text = `${winner} Wins!`;
         // Measure the text width to center it
         const textWidth = context.measureText(text).width;
         // Clear the canvas for the banner
-        contextL.clearRect(0, 0, canvas.width, canvas.height);
+        context.clearRect(0, 0, canvas.width, canvas.height);
         // Draw the banner in the center of the canvas
-        contextL.fillText(text, (canvas.width / 2) - (textWidth / 2), canvas.height / 2);
+        context.fillText(text, (canvas.width / 2) - (textWidth / 2), canvas.height / 2);
     }
             
     function update() {
