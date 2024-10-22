@@ -48,6 +48,7 @@ class PongConsumer(AsyncWebsocketConsumer):
         self.player_2 = None
         self.player_number = None
         self.game_state = None
+        self.ended = False
 
         if self.user_id in active_players:
             await self.close()  # Close the WebSocket connection
@@ -184,7 +185,10 @@ class PongConsumer(AsyncWebsocketConsumer):
                     'position': position_updated
                 }
                 )
+
+                #Ends Game
                 self.running = False
+                self.ended = True
                 #self.disconnect("game over") # TODO: when you restart the game it gets a bit weird so it has to be improved
             # Reset the ball after scoring
             self.game_state.ball = Ball(board=self.game_state.board)
@@ -215,7 +219,11 @@ class PongConsumer(AsyncWebsocketConsumer):
                 }
             )
 
-            await asyncio.sleep(0.03)  # 0.016 -> Approx 60 FPS
+            await asyncio.sleep(0.016)  # 0.016 -> Approx 60 FPS
+            if self.ended:
+                await asyncio.sleep(1)
+                await self.close()
+                await self.player_2.close()
              
     
     async def disconnect(self, close_code):
@@ -238,8 +246,14 @@ class PongConsumer(AsyncWebsocketConsumer):
 
     async def send_position(self, event):
         #print("SENDING POSITION", flush=True)
-        position = event['position']
-        await self.send(text_data=json.dumps(position))
+        try:
+            position = event['position']
+            if self.scope["type"] == "websocket" and self.channel_layer is not None:
+                await self.send(text_data=json.dumps(position))
+            else:
+                print("Attempted to send message, but WebSocket is closed.")
+        except Exception as e:
+            logger.error(f"Error sending position: {e}")
 
     async def receive(self, text_data):
         print("!!!!!RECIBIDO!!!", flush=True)
