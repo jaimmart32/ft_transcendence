@@ -7,6 +7,7 @@ import asyncio
 import logging
 import time
 import threading
+from asgiref.sync import sync_to_async
 from .models import Paddle, Board, Ball, Game, CustomUser
 
 logger = logging.getLogger(__name__)
@@ -23,11 +24,11 @@ game_states = {}
 
 # En un archivo nuevo, por ejemplo, game_state.py
 class GameState:
-    def __init__(self):
+    def __init__(self, user_id1, user_id2):
         self.board = Board(width=900, height=500)
         self.ball = Ball(board=self.board)
-        self.player1 = Paddle(number=1, board=self.board)
-        self.player2 = Paddle(number=2, board=self.board)
+        self.player1 = Paddle(number=1, board=self.board, user_id=user_id1)
+        self.player2 = Paddle(number=2, board=self.board, user_id=user_id2)
         self.game_loop_started = False
         self.running = True
 
@@ -43,6 +44,8 @@ class PongConsumer(AsyncWebsocketConsumer):
 
         self.user_id = int(self.scope['url_route']['kwargs']['userid'])
         self.group_name = None
+        self.player_1 = None
+        self.player_2 = None
         self.player_number = None
         self.game_state = None
 
@@ -62,11 +65,13 @@ class PongConsumer(AsyncWebsocketConsumer):
                 
             self.player_1 = waiting_queue.pop(0)
             self.player_2 = waiting_queue.pop(0)
+            self.player_1.player_1 = self.player_1
+            self.player_1.player_2 = self.player_2
 
             # Create unique identifier for game
             self.group_name = f'pong_game_{self.player_1.user_id}_{self.player_2.user_id}'
 
-            self.player_1.game_state = GameState()
+            self.player_1.game_state = GameState(user_id1=self.player_1.user_id, user_id2=self.player_2.user_id)
             self.player_2.game_state = self.player_1.game_state
             game_states[self.group_name] = self.player_1.game_state
             # Asign same room for players
@@ -92,8 +97,8 @@ class PongConsumer(AsyncWebsocketConsumer):
             print("INIZIALICING GAME OBJECTS", flush=True)
             self.game_state.board = Board(width=900, height=500)
             self.game_state.ball = Ball(board=self.game_state.board)
-            self.game_state.player1 = Paddle(number=1, board=self.game_state.board)
-            self.game_state.player2 = Paddle(number=2, board=self.game_state.board)
+            self.game_state.player1 = Paddle(number=1, board=self.game_state.board, user_id=self.user_id)
+            self.game_state.player2 = Paddle(number=2, board=self.game_state.board, user_id=self.player_2.user_id)
             
             self.game_state.game_loop_started = True
             asyncio.create_task(self.game_loop())
@@ -138,7 +143,7 @@ class PongConsumer(AsyncWebsocketConsumer):
             return True
         return False
 
-    def move_ball(self):
+    async def move_ball(self):
 #        print("MOVE BALL CALLED", flush=True)
         #print("Before: ", self.game_state.ball.x, flush=True)
         #async with self.lock:  # Acquire the lock before modifying shared resources CHECK IF NEEDED
@@ -162,6 +167,8 @@ class PongConsumer(AsyncWebsocketConsumer):
         # Check if the ball is out of bounds to score
         if self.score():
             if self.game_state.player1.score == 7 or self.game_state.player2.score == 7:
+                winner = 1 if self.game_state.player1.score == 7 else 2
+                await self.update_game_stats(winner)
                 position_updated = {
                     'Player1': self.game_state.player1.y,
                     'Player2': self.game_state.player2.y,
@@ -176,7 +183,7 @@ class PongConsumer(AsyncWebsocketConsumer):
                     'type': 'send_position',
                     'position': position_updated
                 }
-            )
+                )
                 self.running = False
                 #self.disconnect("game over") # TODO: when you restart the game it gets a bit weird so it has to be improved
             # Reset the ball after scoring
@@ -188,7 +195,7 @@ class PongConsumer(AsyncWebsocketConsumer):
         print("GAME LOOP CALLED", flush=True)
         self.running = True
         while self.running:
-            self.move_ball()
+            await self.move_ball()
             self.move_players()
             position_updated = {
                     'Player1': self.game_state.player1.y,
@@ -209,10 +216,6 @@ class PongConsumer(AsyncWebsocketConsumer):
             )
 
             await asyncio.sleep(0.03)  # 0.016 -> Approx 60 FPS
-#            await self.send(text_data=json.dumps({
-#                'type': 'send_position',
-#                'position': position_updated
-#            }))
              
     
     async def disconnect(self, close_code):
@@ -279,9 +282,12 @@ class PongConsumer(AsyncWebsocketConsumer):
         except Exception as e:
             logger.error("Unexpected error: %s", e)
 
-    def update_game_stats(self, winner):
-        player1_user = CustomUser.objects.get(id=self.game_state.player1.user_id)
-        player2_user = CustomUser.objects.get(id=self.game_state.player2.user_id)
+    #need sync_to_async() decorator to convert the synchronous database operation into an asynchronous operation that can be executed within a WebSockets context.
+    async def update_game_stats(self, winner):
+
+        print(f"\033[96mUPDATE_GAME_STATS CALLED, winner : {winner}\033[0m", flush=True)
+        player1_user = await sync_to_async(CustomUser.objects.get)(id=self.game_state.player1.user_id)
+        player2_user = await sync_to_async(CustomUser.objects.get)(id=self.game_state.player2.user_id)
 
         player1_stats = player1_user.game_stats
         player1_stats['total'] = player1_stats.get('total', 0) + 1
@@ -290,7 +296,7 @@ class PongConsumer(AsyncWebsocketConsumer):
         else:
             player1_stats['losses'] = player1_stats.get('losses', 0) + 1
         player1_user.game_stats = player1_stats
-        player1_user.save()
+        await sync_to_async(player1_user.save)()
 
         player2_stats = player2_user.game_stats
         player2_stats['total'] = player2_stats.get('total', 0) + 1
@@ -299,4 +305,4 @@ class PongConsumer(AsyncWebsocketConsumer):
         else:
             player2_stats['losses'] = player2_stats.get('losses', 0) + 1
         player2_user.game_stats = player2_stats
-        player2_user.save()
+        await sync_to_async(player2_user.save)()
