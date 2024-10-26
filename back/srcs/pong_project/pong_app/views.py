@@ -439,6 +439,7 @@ def authCreateUser(request):
 			user.set_unusable_password()
 			user.intra = True
 			user.is_active = True
+			user.is_online = True
 			user.save()
 		# Could use the CustomUser.objects.get_or_create() and later check if the user exists 
 		token = create_jwt_token(user)

@@ -73,16 +73,19 @@ async function verifyCode(code)
 		if (data.status === 'success')
 		{
 			console.log('Code verified');
+			alert('Code verification successful');
 			handle42Info(data.userInfo);
 		}
 		else
 		{
 			console.log('Error: ', data.message);
 			alert('Code verification failed');
+			alert("ex verifyCode1: " + data.message);
 		}
 	}
 	catch(error)
 	{
+		alert("ex verifyCode2: " + error);
 		console.error("Error: ", error);
 	}
 }
@@ -111,11 +114,13 @@ async function handle42Info(userInfo)
 			const jsonData = JSON.parse(data);
 			if (jsonData.status === 'success')
 			{
+				alert('OAuth login/signup successful');
 				window.location.href = jsonData.redirect_url;
 			}
 			else
 			{
 				console.log('Error: ', jsonData.message);
+				alert('OAuth login/signup failed');
 			}
 		}
 		catch(e)
@@ -123,10 +128,12 @@ async function handle42Info(userInfo)
 			console.error('Error: ', e);
 			console.error('Response: ', data);
 			alert('Failed to create the user');
+			alert("ex handle42Info1: " + e);
 		}
 	}
 	catch(error)
 	{
+		alert("ex handle42Info2: " + error);
 		console.error("Error: ", error);
 	}
 }
@@ -145,6 +152,7 @@ document.addEventListener('DOMContentLoaded', () =>
 	{
 		console.log('Inside event listener, found tokens');
 		localStorage.setItem('access', access);
+		alert("Successfully found the access code");
 		window.history.replaceState({}, document.title, "/home/");
 		navigateTo('/home/');
 	}

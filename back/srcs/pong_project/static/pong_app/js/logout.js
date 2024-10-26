@@ -1,5 +1,7 @@
 async function updateLogoutButtonVisibility()
 {
+    if (window.location.pathname.startsWith('/callback.html'))
+    	return;
     const logoutItem = document.getElementById('display-item');
     const token = localStorage.getItem('access');
 
