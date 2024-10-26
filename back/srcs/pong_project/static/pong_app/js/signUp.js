@@ -35,7 +35,7 @@ function signUpHandler()
 		{
                     if (data.status == 'success')
 		    {
-		    	alert('Signup correct');
+		    	alert('Signup successfully, please check your email to activate your account.');
 			navigateTo('/login/');
                     }
 		    else

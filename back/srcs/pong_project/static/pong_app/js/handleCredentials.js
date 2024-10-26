@@ -67,6 +67,7 @@ function logInHandler()
 			}
 			else
 			{
+				alert('Your account is not verified, please check your email.')
 				showMessage('email-error', 'Account is not verified, please check your email');
 			}
                     }
