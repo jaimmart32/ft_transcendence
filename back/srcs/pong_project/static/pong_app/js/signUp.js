@@ -35,7 +35,7 @@ function signUpHandler()
 		{
                     if (data.status == 'success')
 		    {
-		    	alert('Signup successfully, please check your email to activate your account.');
+		    	alert('Please check your email before logging in.');
 			navigateTo('/login/');
                     }
 		    else
@@ -46,8 +46,6 @@ function signUpHandler()
                     console.error('Error:', error);
                 });
 	    }
-	    else
-	    	console.log('Non-valid credentials');
         });
     }
     else
