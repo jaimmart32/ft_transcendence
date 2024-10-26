@@ -4,25 +4,29 @@ function homeHTML(data)
 {
 	return(`
 	<div class="jumbotron text-center bg-dark text-white mt-4">
-    	<h1 class="display-4">Welcome to WebPong ${data.username}!</h1>
-	    <p class="lead">The best way to connect with your friends, personalize your profile and enjoy Pong games.</p>
-	    <hr class="my-4">
-	    <p>
-	        With WebPong, you can:
-	        <ul class="list-unstyled">
-	            <li><i class="fas fa-user-friends"></i> Add and manage friends</li>
-	            <li><i class="fas fa-user-cog"></i> Customize your profile to your liking</li>
-	            <li><i class="fas fa-gamepad"></i> Challenge your friends in online Pong games</li>
-	            <li><i class="fas fa-trophy"></i> Create Pong Tournaments to test your skills</li>
-	        </ul>
-	    </p>
+		<h1 class="display-4">Welcome to WebPong ${data.username}!</h1>
+		<p class="lead">The best way to connect with your friends, personalize your profile and enjoy Pong games.</p>
+		<hr class="my-4">
+		<p>
+			With WebPong, you can:
+			<ul class="list-unstyled">
+				<li><i class="fas fa-user-friends"></i> Add and manage friends</li>
+				<li><i class="fas fa-user-cog"></i> Customize your profile to your liking</li>
+				<li><i class="fas fa-gamepad"></i> Challenge your friends in online Pong games</li>
+				<li><i class="fas fa-trophy"></i> Create Pong Tournaments to test your skills</li>
+			</ul>
+		</p>
 	</div>
 
-	    `);
+		`);
 }
 
 function profileHTML(data, avatarUrl)
 {
+//?. allows access to a property (total, wins or losses) of game_stats only if game_stats is defined and not null.
+	const gamesPlayed = data.game_stats?.total || 0;
+	const gamesWon = data.game_stats?.wins || 0;
+	const gamesLost = data.game_stats?.losses || 0;
 //	The username is not being picked up. Both bottom buttons are not being centered
 	return(`
 		<div id="profile-settings" class="container mt-4" style="font-family: 'Courier New', Courier, Monospace;">
@@ -36,15 +40,15 @@ function profileHTML(data, avatarUrl)
 								<b>Games</b>
 								<li class="list-group item">
 									Played: 
-									<span id="games-played">0</span>
+									<span id="games-played">${gamesPlayed}</span>
 								</li>
 								<li class="list-group item">
 									Won: 
-									<span id="games-won">0</span>
+									<span id="games-won">${gamesWon}</span>
 								</li>
 								<li class="list-group item">
 									Lost: 
-									<span id="games-lost">0</span>
+									<span id="games-lost">${gamesLost}</span>
 								</li>
 							</ul>
 						</div>
@@ -122,12 +126,12 @@ function loadGenericHTML(type)
 				<div class="form-group">
 					<label for="username">Username</label>
 					<input type="username" class="form-control" id="username" placeholder="Enter username">
-			    		<span id="username-error" class="error-message"></span>
+						<span id="username-error" class="error-message"></span>
 				</div>
 				<div class="form-group">
 					<label for="password">Password</label>
 					<input type="password" class="form-control" id="password" placeholder="Enter password">
-			    		<span id="password-error" class="error-message"></span>
+						<span id="password-error" class="error-message"></span>
 				</div>
 				<button class="custom-button" id="submit">Submit</button>
 			</form>
@@ -170,17 +174,17 @@ function loadGenericHTML(type)
 function loadTournamentSectionHTML()
 {
 	return (`<div class="options-container">
-            	<div class="option">
-            	    <h2>Create a Tournament</h2>
-            	    <p>Create your own tournament and invite your friends to compete!</p>
-            	    <button class="custom-button">Create</button>
-            	</div>
-            	<div class="option">
-            	    <h2>Join a Tournament</h2>
-            	    <p>Join an existing tournament and compete against other players!</p>
-            	    <button class="custom-button">Join</button>
-            	</div>
-        	</div>`);
+				<div class="option">
+					<h2>Create a Tournament</h2>
+					<p>Create your own tournament and invite your friends to compete!</p>
+					<button class="custom-button">Create</button>
+				</div>
+				<div class="option">
+					<h2>Join a Tournament</h2>
+					<p>Join an existing tournament and compete against other players!</p>
+					<button class="custom-button">Join</button>
+				</div>
+			</div>`);
 }
 
 function loadNotFoundHTML()
@@ -191,7 +195,7 @@ function loadNotAuthorizedHTML()
 {
 	return(`
 		<h2>Not Authorized to view this page. Please authenticate.</h2>
-	    `);
+		`);
 }
 window.homeHTML = homeHTML;
 window.profileHTML = profileHTML;
