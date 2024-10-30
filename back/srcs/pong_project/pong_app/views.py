@@ -493,5 +493,40 @@ def RemoveFriend(request):
 	return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
 
 
+# TOURNAMENTS
+
+@csrf_exempt
+@jwt_required
+def create_tournament_view(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            user_id = data.get('user_id')
+            tour_name = data.get('tour_name')
+
+            if not tour_name or not (2 <= len(tour_name) <= 15):
+                return JsonResponse({'status': 'error', 'message': 'Invalid Tournament name.'}, status=400)
+			
+			if Tournament.objects.filter(name=tour_name).exists():
+                return JsonResponse({'status': 'error', 'message': 'A tournament with this name already exists.'}, status=400)
+
+            # Obtain user to add username to tournament participants
+            try:
+                user = CustomUser.objects.get(id=user_id)
+            except CustomUser.DoesNotExist:
+                return JsonResponse({'status': 'error', 'message': 'User not found.'}, status=404)
+
+            # Create tournament and add user to it
+			participants = {user.username: user_id}
+            tournament = Tournament.objects.create(name=tour_name, participants=participants)
+            return JsonResponse({'status': 'success', 'message': 'Tournament created successfully!'}, status=200)
+
+        except json.JSONDecodeError:
+            return JsonResponse({'status': 'error', 'message': 'Invalid JSON format.'}, status=400)
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
+
 #def create_game(request, game_id):
 #	xxx
