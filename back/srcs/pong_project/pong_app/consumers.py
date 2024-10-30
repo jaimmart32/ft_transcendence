@@ -21,6 +21,7 @@ def ballOutOfBounds(yPosition, ball, board):
 waiting_queue = []
 active_players = set()
 game_states = {}
+tournament_records = {}
 
 # En un archivo nuevo, por ejemplo, game_state.py
 class GameState:
@@ -320,3 +321,75 @@ class PongConsumer(AsyncWebsocketConsumer):
             player2_stats['losses'] = player2_stats.get('losses', 0) + 1
         player2_user.game_stats = player2_stats
         await sync_to_async(player2_user.save)()
+
+
+
+class TournamentConsumer(AsyncWebsocketConsumer):
+    async def connect(self):
+
+        self.tournament_name = int(self.scope['url_route']['kwargs']['tournament'])
+        self.user_id = int(self.scope['url_route']['kwargs']['userid'])
+        self.group_name = None
+
+        if self.user_id in tournament_records[self.tournament_name]:
+            await self.close()  # Close the WebSocket connection
+            logger.info(f"Player {self.user_id} is already connected. Closing duplicate connection.")
+            return
+        tournament_record[self.tournament_name].append(self.user_id)
+        #active_players.add(self.user_id)
+        print(f'!!!!!! queue length = {len(waiting_queue)}', flush=True)
+        #self.user = await CustomUser.objects.aget(id=self.user_id)
+        #self.user = CustomUser.objects.get(id=self.user_id)
+
+        await self.accept()
+        # if there are sufficient players start if not wait
+        if len(tournament_records[self.tournament_name]) == 4:
+            message = {
+                    'status': "Ready",
+                }
+                self.channel_layer.group_send(
+                self.group_name,
+                {
+                    'type': 'send_status',
+                    'status': position_updated
+                }
+                )
+        if len(tournament_records[self.tournament_name]) > 4:
+            await self.close()  # Close the WebSocket connection
+            logger.info(f"Tournament {self.tournament_name} is already full. Closing incoming connection.")
+            return
+
+
+#            await self.send(text_data=json.dumps({'message': 'Ws connextion established'}))
+             
+    
+    async def disconnect(self, close_code):
+        logger.info(f"Disconnected: {close_code}")
+        tournament_records.pop(self.tournament_name, None)
+        #self.game_thread.join()  # Wait for the thread to finish before exiting
+        if self.group_name:
+            await self.channel_layer.group_discard(
+                self.group_name,
+                self.channel_name
+            )
+        
+        # Close the WebSocket connection
+        await super().disconnect(close_code)
+
+        # Remove game state if both players disconnect
+        #if self.group_name in game_states and not any(player.running for player in [self.player_1, self.player_2]):
+        #    del game_states[self.group_name]
+
+    async def send_status(self, event):
+        #print("SENDING POSITION", flush=True)
+        try:
+            status = event['status']
+            if self.scope["type"] == "websocket" and self.channel_layer is not None:
+                await self.send(text_data=json.dumps(status))
+            else:
+                print("Attempted to send message, but WebSocket is closed.")
+        except Exception as e:
+            logger.error(f"Error sending position: {e}")
+
+    async def receive(self, text_data):
+        pass

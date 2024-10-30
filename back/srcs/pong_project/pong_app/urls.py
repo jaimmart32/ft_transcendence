@@ -30,6 +30,9 @@ urlpatterns = [
 	path('home/friends/add/', views.AddFriend, name='add-friend'),
 	path('home/friends/remove/', views.RemoveFriend, name='remove-friend'),
 
+	# Tournaments
+	path('home/game/tournament/create/', views.create_tournament_view, name='create_tournament'),
+
 	# Game
 	#path('<str:game_id>/', views.game, name='create_game')
 ]
