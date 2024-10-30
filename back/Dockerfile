@@ -18,7 +18,7 @@ RUN apt-get update && apt-get install vim -y
 COPY .hostname.txt .
 
 RUN echo "" >> .env; \
-    echo -n "REDIRECT_URI='http://" >> .env; \ 
+    echo -n "REDIRECT_URI='https://" >> .env; \ 
     cat .hostname.txt >> .env; \
     echo ":8000/callback.html'" >> .env; \
     echo -n "HOST=" >> .env; \
