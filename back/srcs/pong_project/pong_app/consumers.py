@@ -338,7 +338,7 @@ class TournamentConsumer(AsyncWebsocketConsumer):
         tournament_record[self.tournament_name].append(self.user_id)
         #active_players.add(self.user_id)
         print(f'!!!!!! queue length = {len(waiting_queue)}', flush=True)
-        self.user = await CustomUser.objects.aget(id=self.user_id)
+        #self.user = await CustomUser.objects.aget(id=self.user_id)
         #self.user = CustomUser.objects.get(id=self.user_id)
 
         await self.accept()
