@@ -323,7 +323,7 @@ class PongConsumer(AsyncWebsocketConsumer):
         await sync_to_async(player2_user.save)()
 
 
-
+"""
 class TournamentConsumer(AsyncWebsocketConsumer):
     async def connect(self):
 
@@ -393,3 +393,4 @@ class TournamentConsumer(AsyncWebsocketConsumer):
 
     async def receive(self, text_data):
         pass
+	"""

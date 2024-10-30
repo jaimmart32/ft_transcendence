@@ -278,11 +278,11 @@ async function loadTournamentSection()
 				}
 				if (create)
 				{
-					create.addEventListener('click', function(event)
+					create.addEventListener('click', async function(event)
 					{
 						event.preventDefault();
 						console.log("clicked create");
-						loadCreateTournament();
+						await loadCreateTournament();
 					});
 				}
 			}

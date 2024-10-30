@@ -17,7 +17,7 @@ function createTournamentHTML()
 	`);
 }
 
-function loadCreateTournament()
+async function loadCreateTournament()
 {
 	const app = document.getElementById('app');
 	app.innerHTML = createTournamentHTML();
@@ -29,13 +29,13 @@ function loadCreateTournament()
 	if (create)
 	{
 		console.log("create exists");
-		create.addEventListener('click', function(event)
+		create.addEventListener('click', async function(event)
 		{
 			event.preventDefault();
 			if (name)
 			{
 				const tournamentName = name.Value;
-				createTournament(tournamentName);
+				await createTournament(tournamentName);
 			}
 			
 		});

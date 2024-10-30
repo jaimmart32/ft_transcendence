@@ -58,3 +58,5 @@ async function createTournament(tournamentName)
 		navigateTo('/login/');
 	}
 }
+
+window.createTournament = createTournament;
