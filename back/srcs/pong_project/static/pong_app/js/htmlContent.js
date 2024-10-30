@@ -177,12 +177,12 @@ function loadTournamentSectionHTML()
 				<div class="option">
 					<h2>Create a Tournament</h2>
 					<p>Create your own tournament and invite your friends to compete!</p>
-					<button class="custom-button">Create</button>
+					<button class="custom-button" id="create-btn">Create</button>
 				</div>
 				<div class="option">
 					<h2>Join a Tournament</h2>
 					<p>Join an existing tournament and compete against other players!</p>
-					<button class="custom-button">Join</button>
+					<button class="custom-button" id="join-btn">Join</button>
 				</div>
 			</div>`);
 }

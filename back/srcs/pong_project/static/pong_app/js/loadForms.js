@@ -246,6 +246,7 @@ async function loadTournamentSection()
 	{
 		try
 		{
+			console.log("Inside load tournament, we have a token");
 			const response = await fetch('/get_user_info/',
 			{
 				method: 'GET',
@@ -260,8 +261,30 @@ async function loadTournamentSection()
 
 			if (data.status === 'success')
 			{
+				console.log("success");
 				app.innerHTML = loadTournamentSectionHTML();
-//				Add two event listeners for both buttons, join or create buttons.
+				const create = document.getElementById('create-btn');
+				const join = document.getElementById('join-btn');
+				
+				if (join)
+				{
+					join.addEventListener('click', function(event)
+					{
+						event.preventDefault();
+						console.log("clicked join");
+						// Here we need to call the
+						 loadTournamentsSection();
+					});
+				}
+				if (create)
+				{
+					create.addEventListener('click', function(event)
+					{
+						event.preventDefault();
+						console.log("clicked create");
+						loadCreateTournament();
+					});
+				}
 			}
 			else
 			{
