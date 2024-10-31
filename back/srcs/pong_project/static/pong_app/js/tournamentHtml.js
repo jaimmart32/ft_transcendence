@@ -34,7 +34,8 @@ async function loadCreateTournament()
 			event.preventDefault();
 			if (name)
 			{
-				const tournamentName = name.Value;
+				const tournamentName = name.value;
+				console.log("Tournament name: " + tournamentName);
 				await createTournament(tournamentName);
 			}
 			
@@ -51,7 +52,7 @@ async function loadTournamentsSection()
 		console.log("we have a token inside of loadTournamentsSection");
 		try
 		{
-			const response = await fetch('/home/friends/',
+			const response = await fetch('/home/game/tournament/join',
 			{
 				method: 'GET',
 				headers:
@@ -65,57 +66,47 @@ async function loadTournamentsSection()
 
 			if (data.status === 'success')
 			{
-				let friendsHTML = `
+				let tournamentsHTML = `
 				<div class="options-container">
 					<div class="option">
-						<h3><b>Friends</b></h3>
-						<button class="custom-button" id="add-friend" style="background-color: green; width: 10%;">
-							<i class="fas fa-user-plus"></i>
-						</button>
+						<h3><b>Tournaments</b></h3>
 						<div class="friends-list" style="width: 100%;">
 				`;
 
-				data.friends.forEach(friend => {
-					friendsHTML += `
+				data.tournaments.forEach(tournament => {
+					tournamentsHTML += `
 							<div class="friend-card">
-								<span class="friend-username">${friend.username}</span>
-								<span class="friend-status ${friend.online ? 'online' : 'offline'}">
-									${friend.online ? 'Online' : 'Offline'}
-								</span>
+								<span class="friend-username">${tournament.name}</span>
+								<span class="friend-status">${tournament.players}/4</span>
 								<div class="friend-actions">
-									<button data-username="${friend.username}" class="custom-button remove-friend" style="background-color: red; align-items: left;">
-										<i class="fas fa-user-minus"></i>
+									<button data-username="${tournament.name}" class="custom-button remove-friend" style="background-color: green; align-items: left;">
+										<i class="fas fa-plus"></i>
 									</button>
 								</div>
 							</div>`});
-				friendsHTML +=	`</div>
+				tournamentsHTML +=	`</div>
 					</div>
 				</div>`;
 
-				app.innerHTML = friendsHTML;
+				app.innerHTML = tournamentsHTML;
 
 				document.querySelectorAll('.remove-friend').forEach(button => {
 					button.addEventListener('click', function(event) {
 						const username = event.target.getAttribute('data-username');
-						removeFriend(username);
+						console.log("Someone clicked the button");
+						
+//						removeFriend(username);
 					});
-				});
-
-				document.getElementById('add-friend').addEventListener('click', function() {
-					const username = prompt("Enter the username of the friend you want to add:");
-					if (username) {
-						addFriend(username);
-					}
 				});
 			}
 			else
 			{
-				await checkRefresh(data, '/home/friends/', token);
+				await checkRefresh(data, '/home/game/tournament/join', token);
 			}
 		}
 		catch(error)
 		{
-			console.log('INSIDE CATCH OF FRIENDS!');
+			console.log('INSIDE CATCH OF TOURNAMENTS!');
 			notAuthorized(error);
 		}
 	}
