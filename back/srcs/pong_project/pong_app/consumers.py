@@ -323,7 +323,6 @@ class PongConsumer(AsyncWebsocketConsumer):
         await sync_to_async(player2_user.save)()
 
 
-"""
 class TournamentConsumer(AsyncWebsocketConsumer):
     async def connect(self):
 
@@ -347,13 +346,13 @@ class TournamentConsumer(AsyncWebsocketConsumer):
             message = {
                     'status': "Ready",
                 }
-                self.channel_layer.group_send(
-                self.group_name,
-                {
-                    'type': 'send_status',
-                    'status': position_updated
-                }
-                )
+            self.channel_layer.group_send(
+            self.group_name,
+            {
+                'type': 'send_status',
+                'status': position_updated
+            }
+            )
         if len(tournament_records[self.tournament_name]) > 4:
             await self.close()  # Close the WebSocket connection
             logger.info(f"Tournament {self.tournament_name} is already full. Closing incoming connection.")
@@ -393,4 +392,3 @@ class TournamentConsumer(AsyncWebsocketConsumer):
 
     async def receive(self, text_data):
         pass
-	"""
