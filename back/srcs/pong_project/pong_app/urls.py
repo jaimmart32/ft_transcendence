@@ -32,6 +32,7 @@ urlpatterns = [
 
 	# Tournaments
 	path('home/game/tournament/create/', views.create_tournament_view, name='create_tournament'),
+	path('home/game/tournament/join/', views.join_tournament_view, name='join_tournament'),
 
 	# Game
 	#path('<str:game_id>/', views.game, name='create_game')

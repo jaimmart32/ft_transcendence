@@ -11,7 +11,7 @@ from django.http import HttpResponse, JsonResponse
 
 from django.contrib.auth import authenticate, login, logout
 
-from .models import CustomUser
+from .models import CustomUser, Tournament
 from django.conf import settings
 from django.contrib.auth.models import User 
 from .validators import validateUsername, validateEmail, validatePassword, generate_random_digits
@@ -528,5 +528,13 @@ def create_tournament_view(request):
 			return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
 	return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
 
-#def create_game(request, game_id):
-#	xxx
+
+@csrf_exempt
+@jwt_required
+def join_tournament_view(request):
+
+	if request.method == 'GET':
+		tournaments = Tournament.objects.all()
+		tournaments_data = [{'name': tournament.name, 'players': len(tournament.participants)} for tournament in tournaments]
+		return JsonResponse({'status': 'success', 'tournaments': tournaments_data}, status=200, safe=False)
+	return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
