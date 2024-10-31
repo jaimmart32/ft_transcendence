@@ -59,4 +59,19 @@ async function createTournament(tournamentName)
 	}
 }
 
+/*function joinTournament()
+{
+	const token = localStorage.getItem('access');
+
+	if (token)
+	{
+	}
+	else
+	{
+		console.error('Error:', error);
+		alert('You are not authorized to view this page. Please log in.');
+		navigateTo('/login/');
+	}
+}*/
+
 window.createTournament = createTournament;

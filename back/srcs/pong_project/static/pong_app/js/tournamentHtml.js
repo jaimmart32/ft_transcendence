@@ -77,10 +77,10 @@ async function loadTournamentsSection()
 					tournamentsHTML += `
 							<div class="friend-card">
 								<span class="friend-username">${tournament.name}</span>
-								<span class="friend-status ${tournament.players}"></span>
+								<span class="friend-status">${tournament.players}/4</span>
 								<div class="friend-actions">
-									<button data-username="${friend.username}" class="custom-button remove-friend" style="background-color: red; align-items: left;">
-										<i class="fas fa-user-minus"></i>
+									<button data-username="${tournament.name}" class="custom-button remove-friend" style="background-color: green; align-items: left;">
+										<i class="fas fa-plus"></i>
 									</button>
 								</div>
 							</div>`});
@@ -94,6 +94,7 @@ async function loadTournamentsSection()
 					button.addEventListener('click', function(event) {
 						const username = event.target.getAttribute('data-username');
 						console.log("Someone clicked the button");
+						
 //						removeFriend(username);
 					});
 				});
