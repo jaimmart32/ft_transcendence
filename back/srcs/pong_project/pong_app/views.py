@@ -11,7 +11,7 @@ from django.http import HttpResponse, JsonResponse
 
 from django.contrib.auth import authenticate, login, logout
 
-from .models import CustomUser
+from .models import CustomUser, Tournament
 from django.conf import settings
 from django.contrib.auth.models import User 
 from .validators import validateUsername, validateEmail, validatePassword, generate_random_digits
