@@ -115,7 +115,7 @@ def	verifyRefresh(request):
 		print(newToken, flush=True)
 		print('-------------------------------------', flush=True)
 		return JsonResponse({'status': 'success', 'newToken': newToken, 'message': 'New access token was generated'}, status=200)
-	return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
+	return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)
 
 @jwt_required
 def	getUserInfo(request):
@@ -126,7 +126,7 @@ def	getUserInfo(request):
 		print(f"Username: {username}, Status: {status}", flush=True)
 		return JsonResponse({'status': 'success', 'username': username, 'is_online': user.is_online, 'avatar': user.avatar.url if user.avatar else None, 'intra': user.intra, 'tfa': user.tfa}, status=200)
 
-	return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
+	return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)
 
 @csrf_exempt
 def signupView(request):
@@ -179,7 +179,7 @@ def signupView(request):
 		smtp_connection.quit()
 
 		return JsonResponse({'status': 'success', 'message': 'User created succesfully!'}, status=200)
-	return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
+	return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)
 
 
 @csrf_exempt
@@ -203,7 +203,7 @@ def ActivateAccountView(request, uidb64, token):
 		else:
 					# Render a template with an error message if the token is invalid
 			return redirect(f'https://{settings.HOST}:8000')
-	return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
+	return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)
 
 
 @csrf_exempt
@@ -267,7 +267,7 @@ def loginView(request):
 			return JsonResponse({'status': 'error', 'message': 'Invalid credentials'}, status=401)
 	elif request.method == 'GET':
 		return render(request, "pong_app/index.html")
-	return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
+	return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)
 
 @csrf_exempt
 @jwt_required
@@ -281,7 +281,7 @@ def	logoutView(request):
 			print("USER JUST LOGGEDOUT!!!", flush=True)
 			return JsonResponse({'status': 'success'}, status=200)
 		return JsonResponse({'status': 'error', 'message': 'User not found'}, status=404)
-	return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
+	return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)
 
 
 @csrf_exempt
@@ -310,7 +310,7 @@ def verify2FA(request):
 		except(CustomUser.DoesNotExist):
 			print("USER DOES NOT EXIST?!", flush=True)
 			return JsonResponse({'status': 'error', 'message': 'User does not exist'}, status=400)
-	return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
+	return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)
 
 
 @jwt_required
@@ -321,7 +321,7 @@ def Home(request):
 			content = {'status': 'success', 'message': 'Welcome to the home page!', 'username': request.user.username}
 			return JsonResponse(content, status=200)
 		return JsonResponse({'status': 'error', 'message': 'Not online dispite valid token'}, status=400)
-	return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
+	return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)
 
 
 @jwt_required
@@ -375,7 +375,7 @@ def EditProfile(request):
 			return JsonResponse({'status': 'error', 'message': 'Username in use'}, status=400)
 		except ValidationError as e:
 			return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
-	return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
+	return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)
 
 
 @csrf_exempt
@@ -390,7 +390,7 @@ def  authSettings(request):
 			'scope': settings.SCOPE,
 		}
 		return JsonResponse(data, status=200)
-	return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
+	return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)
 
 
 @csrf_exempt
@@ -422,7 +422,7 @@ def authVerify(request):
 			return JsonResponse({'status': 'error', 'message': 'Could not retrieve the user data'}, status=400)
 		userInfo = userResponse.json()
 		return JsonResponse({'status': 'success', 'userInfo': userInfo}, status=200)
-	return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
+	return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)
 
 
 @csrf_exempt
@@ -447,7 +447,7 @@ def authCreateUser(request):
 
 		redirect_url = f"https://{settings.HOST}:8000?access={token}"
 		return JsonResponse({'status': 'success', 'redirect_url': redirect_url}, status=200)
-	return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
+	return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)
 
 
 # FRIENDS
@@ -460,7 +460,7 @@ def FriendsList(request):
 		friends = user.friends.all()
 		friends_data = [{'username': friend.username, 'online': friend.is_online} for friend in friends]
 		return JsonResponse({'status': 'success', 'friends': friends_data}, status=200, safe=False)
-	return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
+	return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)
 
 @csrf_exempt
 @jwt_required
@@ -476,7 +476,7 @@ def AddFriend(request):
 			return JsonResponse({'status': 'success', 'message': f'{friend_username} added as a friend'}, status=200)
 		except CustomUser.DoesNotExist:
 			return JsonResponse({'status': 'error', 'message': 'User not found'}, status=404)
-	return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
+	return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)
 
 @csrf_exempt
 @jwt_required
@@ -492,7 +492,7 @@ def RemoveFriend(request):
 			return JsonResponse({'status': 'success', 'message': f'{friend_username} removed from friends'}, status=200)
 		except CustomUser.DoesNotExist:
 			return JsonResponse({'status': 'error', 'message': 'User not found'}, status=404)
-	return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
+	return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)
 
 
 # TOURNAMENTS
@@ -526,7 +526,7 @@ def create_tournament_view(request):
 			return JsonResponse({'status': 'error', 'message': 'Invalid JSON format.'}, status=400)
 		except Exception as e:
 			return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
-	return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
+	return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)
 
 
 @csrf_exempt
@@ -537,4 +537,31 @@ def join_tournament_view(request):
 		tournaments = Tournament.objects.all()
 		tournaments_data = [{'name': tournament.name, 'players': len(tournament.participants)} for tournament in tournaments]
 		return JsonResponse({'status': 'success', 'tournaments': tournaments_data}, status=200, safe=False)
-	return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
+	return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)
+
+
+@csrf_exempt
+@jwt_required
+def join_tournament_checker(request):
+	if request.method == 'POST':
+		data = json.loads(request.body)
+		tour_name = data.get('tournament')
+		user_id = data.get('user_id')
+		tour_name = Tournament.objects.all()
+		if not Tournament.objects.filter(name=tour_name).exists():
+			return JsonResponse({'status': 'error', 'message': 'No tournament with this name exists.'}, status=404)
+
+		# Obtain user to add username to tournament participants
+		try:
+			user = CustomUser.objects.get(id=user_id)
+		except CustomUser.DoesNotExist:
+			return JsonResponse({'status': 'error', 'message': 'User not found.'}, status=404)
+		tournament = Tournament.objects.get(name=tour_name)
+		if len(tournament.participants) == 4:
+			return JsonResponse({'status': 'error', 'message': "Tournament is full!"}, status=403, safe=False)
+		for t in tournaments:
+			if user_id in t:
+				return JsonResponse({'status': 'error', 'message': "User can not join another tournament!"}, status=400, safe=False)
+		tournament.participants.add(user)
+		return JsonResponse({'status': 'success', 'message': 'User joined the tournament!'}, status=200)
+	return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)
