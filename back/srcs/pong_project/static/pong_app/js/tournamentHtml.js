@@ -49,7 +49,6 @@ async function loadTournamentsSection()
 
 	if (token)
 	{
-		console.log("we have a token inside of loadTournamentsSection");
 		try
 		{
 			const response = await fetch('/home/game/tournament/join',

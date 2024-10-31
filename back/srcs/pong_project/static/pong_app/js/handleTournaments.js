@@ -19,8 +19,8 @@ async function createTournament(tournamentName)
 					'Authorization': `Bearer ${token}`,
 					'Content-Type': 'application/json'
 				},
-                body: JSON.stringify(TournamentInfo)
-        	})
+				body: JSON.stringify(TournamentInfo)
+			})
 			const data = await response.json();
 			if (data.status === 'success')
 			{
@@ -59,12 +59,50 @@ async function createTournament(tournamentName)
 	}
 }
 
-/*function joinTournament()
+function joinTournament(tournamentName)
 {
 	const token = localStorage.getItem('access');
+    	const uid = localStorage.getItem('userid');
 
 	if (token)
 	{
+		try
+		{
+			const TournamentInfo = 
+			{
+			    tournament: tournamentName,
+			    user_id: uid,
+			};
+			const response = await fetch('/home/game/tournament/join/checker',
+			{
+				method: 'POST',
+				headers:
+				{
+					'Authorization': `Bearer ${token}`,
+					'Content-Type': 'application/json'
+				}
+				body: JSON.stringify(TournamentInfo)
+			})
+			const data = await response.json();
+
+			if (data.status === 'success')
+			{
+				alert("Joined a tournament successfully. You will join automatically when it's full.")
+			}
+			else (data.message === '')
+			{
+				alert("Joined a tournament successfully. You will join automatically when it's full.")
+			}
+			else
+			{
+				await checkRefresh(data, '/home/game/tournament/join/checker', token);
+			}
+		}
+		catch(error)
+		{
+			alert("There was an error when trying to join the tournament. Try again later.")
+			notAuthorized(error);
+		}
 	}
 	else
 	{
@@ -72,6 +110,6 @@ async function createTournament(tournamentName)
 		alert('You are not authorized to view this page. Please log in.');
 		navigateTo('/login/');
 	}
-}*/
+}
 
 window.createTournament = createTournament;
