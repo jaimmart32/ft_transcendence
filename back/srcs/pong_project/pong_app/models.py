@@ -30,7 +30,7 @@ class CustomUser(AbstractUser):
 		return f"{self.username}"
 
 class Tournament(models.Model):
-	name = models.CharField(max_length=12)
+	name = models.CharField(max_length=15)
 	# Key = User chosen tag, value = user instance
 	participants = models.JSONField(default=dict)
 	winner = models.CharField(max_length=12, blank=True, null=True)
