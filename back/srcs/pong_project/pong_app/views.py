@@ -517,6 +517,10 @@ def create_tournament_view(request):
 			except CustomUser.DoesNotExist:
 				return JsonResponse({'status': 'error', 'message': 'User not found.'}, status=404)
 
+			# Check if user is on another tournament
+			if Tournament.objects.filter(participants__contains={user.username: str(user_id)}).exists():
+				return JsonResponse({'status': 'error', 'message': 'User is already in another tournament.'}, status=400)
+
             # Create tournament and add user to it
 			participants = {user.username: user_id}
 			tournament = Tournament.objects.create(name=tour_name, participants=participants)
@@ -547,8 +551,10 @@ def join_tournament_checker(request):
 		data = json.loads(request.body)
 		tour_name = data.get('tournament')
 		user_id = data.get('user_id')
-		tour_name = Tournament.objects.all()
-		if not Tournament.objects.filter(name=tour_name).exists():
+		
+		try:
+			tournament = Tournament.objects.get(name=tour_name)
+		except Tournament.DoesNotExist:
 			return JsonResponse({'status': 'error', 'message': 'No tournament with this name exists.'}, status=404)
 
 		# Obtain user to add username to tournament participants
@@ -556,12 +562,13 @@ def join_tournament_checker(request):
 			user = CustomUser.objects.get(id=user_id)
 		except CustomUser.DoesNotExist:
 			return JsonResponse({'status': 'error', 'message': 'User not found.'}, status=404)
-		tournament = Tournament.objects.get(name=tour_name)
+
 		if len(tournament.participants) == 4:
 			return JsonResponse({'status': 'error', 'message': "Tournament is full!"}, status=403, safe=False)
-		for t in tournaments:
-			if user_id in t:
-				return JsonResponse({'status': 'error', 'message': "User can not join another tournament!"}, status=400, safe=False)
-		tournament.participants.add(user)
+
+		if Tournament.objects.filter(participants__contains={user.username: str(user_id)}).exists():
+			return JsonResponse({'status': 'error', 'message': "User can not join another tournament!"}, status=400)
+		tournament.participants[user.username] = user_id
+		tournament.save()
 		return JsonResponse({'status': 'success', 'message': 'User joined the tournament!'}, status=200)
 	return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)

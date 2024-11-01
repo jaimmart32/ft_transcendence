@@ -392,3 +392,16 @@ class TournamentConsumer(AsyncWebsocketConsumer):
 
     async def receive(self, text_data):
         pass
+
+    async def update_tournament_stats(self, winner):
+
+        print(f"\033[96mUPDATE_TOURNAMENT_STATS CALLED, winner : {winner}\033[0m", flush=True)
+        player_user = await sync_to_async(CustomUser.objects.get)(id=self.user_id)
+        player_stats = player_user.tournament_stats
+        player_stats['total'] = player_stats.get('total', 0) + 1
+
+        if winner:
+            player_stats['wins'] = player_stats.get('wins', 0) + 1
+
+        player_user._stats = player_stats
+        await sync_to_async(player_user.save)()

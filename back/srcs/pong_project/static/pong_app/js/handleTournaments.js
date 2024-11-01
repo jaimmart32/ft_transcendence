@@ -41,6 +41,9 @@ async function createTournament(tournamentName)
 					case 'Invalid Tournament name.':
 						alert('Please enter a tournament name(between 2 and 15 characters).');
 						break;
+					case 'User is already in another tournament.':
+						alert('You are already in an active tournament.');
+						break;
 					default:
 						await checkRefresh(data, '/home/game/tournament/create/', token);
 				}
@@ -88,19 +91,29 @@ async function joinTournament(tournamentName)
 			if (data.status === 'success')
 			{
 				alert("Joined a tournament successfully. You will join automatically when it's full.");
-			}
-			else if (data.message === 'a')
-			{
-				alert("Joined a tournament successfully. You will join automatically when it's full.");
+				navigateTo('/home/game/tournament/');
 			}
 			else
 			{
-				await checkRefresh(data, '/home/game/tournament/join/checker', token);
+				switch(data.message)
+				{
+					case 'No tournament with this name exists.':
+						alert('No tournament with that name exists.');
+						break;
+					case 'Tournament is full!':
+						alert('This tournament is full.');
+						break;
+					case 'User can not join another tournament!':
+						alert('You can not join more than 1 tournament at a time.');
+						break;
+					default:
+						await checkRefresh(data, '/home/game/tournament/join/checker', token);
+				}
 			}
 		}
 		catch(error)
 		{
-			alert("There was an error when trying to join the tournament. Try again later.")
+			alert("There was an error when trying to join the tournament. Try again later.");
 			notAuthorized(error);
 		}
 	}
