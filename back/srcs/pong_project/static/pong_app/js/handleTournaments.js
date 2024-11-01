@@ -25,7 +25,7 @@ async function createTournament(tournamentName)
 			if (data.status === 'success')
 			{
                 alert('Tournament created successfully! Wait until it is full.');
-				navigateTo('/home/game/tournament/');
+				initializeTournamentGame(tournamentName);
 	 		}
 			else
 			{
@@ -91,7 +91,7 @@ async function joinTournament(tournamentName)
 			if (data.status === 'success')
 			{
 				alert("Joined a tournament successfully. You will join automatically when it's full.");
-				navigateTo('/home/game/tournament/');
+				initializeTournamentGame(tournamentName);
 			}
 			else
 			{

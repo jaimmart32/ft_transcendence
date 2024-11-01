@@ -326,9 +326,10 @@ class PongConsumer(AsyncWebsocketConsumer):
 class TournamentConsumer(AsyncWebsocketConsumer):
     async def connect(self):
 
-        self.tournament_name = int(self.scope['url_route']['kwargs']['tournament'])
+        self.tournament_name = self.scope['url_route']['kwargs']['tournament']
         self.user_id = int(self.scope['url_route']['kwargs']['userid'])
         self.group_name = None
+        print(f"\033[96muUSER: {self.user_id} , TOURNAMENT_GAME: {self.tournament_name} CONNECTED\033[0m", flush=True)
 
         if self.user_id in tournament_records[self.tournament_name]:
             await self.close()  # Close the WebSocket connection

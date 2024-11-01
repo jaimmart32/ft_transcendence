@@ -31,7 +31,13 @@ from django.conf import settings
 contraseña = 'Password1' + settings.PEPPER
 user1 = User.objects.create_user(username='josito', email='josito@gmail.com', is_active=True)
 user2 = User.objects.create_user(username='pepita', email='pepita@gmail.com', is_active=True)
+user3 = User.objects.create_user(username='bri', email='bri@gmail.com', is_active=True)
+user4 = User.objects.create_user(username='javi', email='javi@gmail.com', is_active=True)
 user1.set_password(contraseña)
 user2.set_password(contraseña)
+user3.set_password(contraseña)
+user4.set_password(contraseña)
 user1.save()
 user2.save()
+user3.save()
+user4.save()
