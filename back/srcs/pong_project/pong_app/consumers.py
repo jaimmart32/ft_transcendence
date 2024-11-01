@@ -331,68 +331,95 @@ class TournamentConsumer(AsyncWebsocketConsumer):
         self.group_name = None
         print(f"\033[96muUSER: {self.user_id} , TOURNAMENT_GAME: {self.tournament_name} CONNECTED\033[0m", flush=True)
 
-        if self.user_id in tournament_records[self.tournament_name]:
-            await self.close()  # Close the WebSocket connection
-            logger.info(f"Player {self.user_id} is already connected. Closing duplicate connection.")
-            return
-        tournament_record[self.tournament_name].append(self.user_id)
-        #active_players.add(self.user_id)
-        print(f'!!!!!! queue length = {len(waiting_queue)}', flush=True)
-        #self.user = await CustomUser.objects.aget(id=self.user_id)
-        #self.user = CustomUser.objects.get(id=self.user_id)
+        # Inicializar el torneo si no existe en el registro
+        if self.tournament_name not in tournament_records:
+            tournament_records[self.tournament_name] = []
 
+        # Verificar si el usuario ya está en el torneo
+        if self.user_id in [player.user_id for player in tournament_records[self.tournament_name]]:
+            await self.close()
+            return
+
+        # Añadir el consumidor actual al registro del torneo
+        tournament_records[self.tournament_name].append(self)
+
+        # Aceptar la conexión WebSocket
         await self.accept()
-        # if there are sufficient players start if not wait
+
+        # Si hay 4 jugadores, iniciar las dos partidas
         if len(tournament_records[self.tournament_name]) == 4:
-            message = {
-                    'status': "Ready",
-                }
-            self.channel_layer.group_send(
-            self.group_name,
-            {
-                'type': 'send_status',
-                'status': position_updated
-            }
-            )
-        if len(tournament_records[self.tournament_name]) > 4:
-            await self.close()  # Close the WebSocket connection
-            logger.info(f"Tournament {self.tournament_name} is already full. Closing incoming connection.")
+            await self.start_tournament()
+
+        elif len(tournament_records[self.tournament_name]) > 4:
+            print(f"Tournament {self.tournament_name} is already full.")
+            await self.close()
             return
 
+    async def start_tournament(self):
+        players = tournament_records[self.tournament_name]
+        print("Starting matches for tournament:", self.tournament_name)
 
-#            await self.send(text_data=json.dumps({'message': 'Ws connextion established'}))
-             
-    
-    async def disconnect(self, close_code):
-        logger.info(f"Disconnected: {close_code}")
-        tournament_records.pop(self.tournament_name, None)
-        #self.game_thread.join()  # Wait for the thread to finish before exiting
-        if self.group_name:
-            await self.channel_layer.group_discard(
-                self.group_name,
-                self.channel_name
-            )
-        
-        # Close the WebSocket connection
-        await super().disconnect(close_code)
+        # Emparejamiento de los 4 jugadores
+        self.match_1 = (players[0], players[1])
+        self.match_2 = (players[2], players[3])
 
-        # Remove game state if both players disconnect
-        #if self.group_name in game_states and not any(player.running for player in [self.player_1, self.player_2]):
-        #    del game_states[self.group_name]
+        # Iniciar la primera ronda
+        await self.start_match(self.match_1)
+        await self.start_match(self.match_2)
 
-    async def send_status(self, event):
-        #print("SENDING POSITION", flush=True)
-        try:
-            status = event['status']
-            if self.scope["type"] == "websocket" and self.channel_layer is not None:
-                await self.send(text_data=json.dumps(status))
-            else:
-                print("Attempted to send message, but WebSocket is closed.")
-        except Exception as e:
-            logger.error(f"Error sending position: {e}")
+    async def start_match(self, match):
+        """Iniciar una partida entre dos jugadores."""
+        player1, player2 = match
+        game_group = f"match_{player1.user_id}_{player2.user_id}"
 
-    async def receive(self, text_data):
-        pass
+        # Añadir ambos jugadores al grupo del canal
+        await self.channel_layer.group_add(game_group, player1.channel_name)
+        await self.channel_layer.group_add(game_group, player2.channel_name)
+
+        await self.channel_layer.group_send(
+            game_group,
+            {
+                'type': 'game_start',
+                'message': f"Match between {player1.user_id} and {player2.user_id} is starting!"
+            }
+        )
+
+    async def game_start(self, event):
+        message = event['message']
+        await self.send(text_data=json.dumps({'message': message}))
+
+    async def end_match(self, match, winner):
+        """Finalizar una partida, actualiza los ganadores."""
+        player1, player2 = match
+        game_group = f"match_{player1.user_id}_{player2.user_id}"
+
+        # Quitar los jugadores del grupo del canal
+        await self.channel_layer.group_discard(game_group, player1.channel_name)
+        await self.channel_layer.group_discard(game_group, player2.channel_name)
+
+        # Registrar el ganador y preparar para la final si ambas partidas han terminado
+        if match == self.match_1:
+            self.winner_match_1 = winner
+        elif match == self.match_2:
+            self.winner_match_2 = winner
+
+        # Iniciar la partida final si los dos ganadores están listos
+        if hasattr(self, 'winner_match_1') and hasattr(self, 'winner_match_2'):
+            await self.start_match((self.winner_match_1, self.winner_match_2))
+
+    async def end_tournament(self, winner):
+        """Finaliza el torneo actual, actualizando estadísticas y cerrando conexiones."""
+        print(f"Tournament {self.tournament_name} finished. Winner: {winner.user_id}")
+
+        # Actualizar las estadísticas del torneo para el ganador
+        await self.update_tournament_stats(winner.user_id)
+
+        # Cerrar todas las conexiones de los jugadores
+        for player in tournament_records[self.tournament_name]:
+            await player.close()
+
+        # Eliminar el torneo del registro
+        del tournament_records[self.tournament_name]
 
     async def update_tournament_stats(self, winner):
 
@@ -406,3 +433,12 @@ class TournamentConsumer(AsyncWebsocketConsumer):
 
         player_user._stats = player_stats
         await sync_to_async(player_user.save)()
+
+    async def disconnect(self, close_code):
+        """Maneja la desconexión de un usuario."""
+        if self.tournament_name in tournament_records:
+            tournament_records[self.tournament_name] = [
+                player for player in tournament_records[self.tournament_name] if player.user_id != self.user_id
+            ]
+
+        await super().disconnect(close_code)
