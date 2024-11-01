@@ -59,7 +59,7 @@ async function createTournament(tournamentName)
 	}
 }
 
-function joinTournament(tournamentName)
+async function joinTournament(tournamentName)
 {
 	const token = localStorage.getItem('access');
     	const uid = localStorage.getItem('userid');
@@ -80,18 +80,18 @@ function joinTournament(tournamentName)
 				{
 					'Authorization': `Bearer ${token}`,
 					'Content-Type': 'application/json'
-				}
+				},
 				body: JSON.stringify(TournamentInfo)
-			})
+			});
 			const data = await response.json();
 
 			if (data.status === 'success')
 			{
-				alert("Joined a tournament successfully. You will join automatically when it's full.")
+				alert("Joined a tournament successfully. You will join automatically when it's full.");
 			}
-			else (data.message === '')
+			else if (data.message === 'a')
 			{
-				alert("Joined a tournament successfully. You will join automatically when it's full.")
+				alert("Joined a tournament successfully. You will join automatically when it's full.");
 			}
 			else
 			{
@@ -113,3 +113,4 @@ function joinTournament(tournamentName)
 }
 
 window.createTournament = createTournament;
+window.joinTournament = joinTournament;
