@@ -61,7 +61,7 @@ function initializeGame(){
     //const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
     
     // TODO: generate id only when a new game is created, if not, select the id
-    socket = new WebSocket('wss://' + window.location.host + '/ws/pong-socket/'  + userid + '/');
+    socket = new WebSocket('wss://' + window.location.host + '/ws/pong-socket/'  + userid + '/' + 0 + '/');
     //const socket = new WebSocket('ws://' + window.location.host + '/ws/pong-socket/' + id + '/');
     isSocketOpen = false;
     socket.onopen = function(event) {

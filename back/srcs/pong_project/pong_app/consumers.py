@@ -22,6 +22,7 @@ waiting_queue = []
 active_players = set()
 game_states = {}
 tournament_records = {}
+tournament_ids = {}
 
 # En un archivo nuevo, por ejemplo, game_state.py
 class GameState:
@@ -44,32 +45,47 @@ class PongConsumer(AsyncWebsocketConsumer):
     async def connect(self):
 
         self.user_id = int(self.scope['url_route']['kwargs']['userid'])
+        self.user_id2 = int(self.scope['url_route']['kwargs']['userid2'])
         self.group_name = None
         self.player_1 = None
         self.player_2 = None
         self.player_number = None
         self.game_state = None
         self.ended = False
+        check = 0
 
         if self.user_id in active_players:
             await self.close()  # Close the WebSocket connection
             logger.info(f"Player {self.user_id} is already connected. Closing duplicate connection.")
             return
-        active_players.add(self.user_id)
-        waiting_queue.append(self)
-        print(f'!!!!!! queue length = {len(waiting_queue)}', flush=True)
-        self.user = await CustomUser.objects.aget(id=self.user_id)
-        #self.user = CustomUser.objects.get(id=self.user_id)
+        if self.user_id2 == 0:
+            active_players.add(self.user_id)
+            waiting_queue.append(self)
+            print(f'!!!!!! queue length = {len(waiting_queue)}', flush=True)
+            self.user = await CustomUser.objects.aget(id=self.user_id)
+            #self.user = CustomUser.objects.get(id=self.user_id)
 
-        await self.accept()
-        # if there are sufficient players start if not wait
-        if len(waiting_queue) >= 2:
-                
-            self.player_1 = waiting_queue.pop(0)
-            self.player_2 = waiting_queue.pop(0)
-            self.player_1.player_1 = self.player_1
-            self.player_1.player_2 = self.player_2
-
+            await self.accept()
+            # if there are sufficient players start if not wait
+            if len(waiting_queue) >= 2:
+                    
+                self.player_1 = waiting_queue.pop(0)
+                self.player_2 = waiting_queue.pop(0)
+                self.player_1.player_1 = self.player_1
+                self.player_1.player_2 = self.player_2
+                check = 1
+        else:
+            if f"{self.user_id}+{self.user_id2}" not in tournament_ids:
+                tournament_ids[f"{self.user_id}+{self.user_id2}"] = []
+            tournament_ids[f"{self.user_id}+{self.user_id2}"].append(self)
+            if len(tournament_ids[f"{self.user_id}+{self.user_id2}"]) >= 2:
+                print("INSIDE LEN >= 2!!!!!!!!!!!!!!!!!!!", flush=True)
+                self.player_1 = tournament_ids[f"{self.user_id}+{self.user_id2}"].pop(0)
+                self.player_2 = tournament_ids[f"{self.user_id}+{self.user_id2}"].pop(0)
+                self.player_1.player_1 = self.player_1
+                self.player_1.player_2 = self.player_2
+                check = 1
+        if check == 1:
             # Create unique identifier for game
             self.group_name = f'pong_game_{self.player_1.user_id}_{self.player_2.user_id}'
 

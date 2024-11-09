@@ -39,6 +39,8 @@ function initializeTournamentGame(tournamentName){
     let context;
     let socket;
     let isSocketOpen = false;
+    let isGameSocketOpen = false;
+    let gamesocket;
     
     // Close existing WebSocket connection if open
     if (socket) {
@@ -77,24 +79,53 @@ function initializeTournamentGame(tournamentName){
     };
 
     socket.onmessage = function(event) {
-        console.log("RECIEVING MESSAGE FROM WS!!")
-        console.log(event.data)
-        // Parse the JSON data received from the server
-        const data = JSON.parse(event.data);
+        const data = event.data;
+        const regex = /Match between (\d+) and (\d+) is starting!/;
+        const match = data.match(regex);
 
-        // Update player1's position with the received data
-        player1.y = data['Player1'];
-
-        // Update player2's position with the received data
-        player2.y = data['Player2'];
-
-        ball.x = data['ballX'];
-        ball.y = data['ballY'];
-
-        score1 = data['Score1']
-        score2 = data['Score2']
-        update();
+        // Check if the match was successful
+        if (match) {
+            const player1Id = match[1];
+            const player2Id = match[2];
+            if (player1Id == userid){
+                gamesocket = new WebSocket('wss://' + window.location.host + '/ws/pong-socket/' + userid + '/'  + player2Id + '/');
+            }
+            else if (player2Id == userid){
+                gamesocket = new WebSocket('wss://' + window.location.host + '/ws/pong-socket/' + userid + '/'  + player1Id + '/');
+            }
+        }
     }
+
+    if (gamesocket)
+    {    
+        gamesocket.onerror = function(error) {
+            console.error("WebSocket Error: ", error);
+        };
+        gamesocket.onmessage = function(event) {
+            console.log("RECIEVING MESSAGE FROM WS!!")
+            console.log(event.data)
+            // Parse the JSON data received from the server
+            const data = JSON.parse(event.data);
+            // Update player1's position with the received data
+            player1.y = data['Player1'];
+
+            // Update player2's position with the received data
+            player2.y = data['Player2'];
+
+            ball.x = data['ballX'];
+            ball.y = data['ballY'];
+
+            score1 = data['Score1']
+            score2 = data['Score2']
+            update();
+        }
+        gamesocket.onopen = function(event) {
+            console.log("WebSocket is open now.");
+    //        console.log(id);
+            isGameSocketOpen = true;
+        };
+    }
+
 
     let canvas = document.getElementById("board");
     context = canvas.getContext("2d");
@@ -121,9 +152,8 @@ function initializeTournamentGame(tournamentName){
     }
 
     function sendPlayerData(keycode, action){
-        console.log('!!SENDING DATA!!!');
-        if (isSocketOpen) {
-            socket.send(JSON.stringify({
+        if (gamesocket && isGameSocketOpen){
+            gamesocket.send(JSON.stringify({
                 'position': {
                     'key': keycode,// ArrowUp or ArrowDown
                     'action': action//"move" or "stop"
