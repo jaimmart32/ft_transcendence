@@ -346,7 +346,7 @@ class TournamentConsumer(AsyncWebsocketConsumer):
         # Aceptar la conexión WebSocket
         await self.accept()
 
-        # Si hay 4 jugadores, iniciar las dos partidas
+        # Si hay 4 jugadores, iniciar las dos partidas(el 4 es el que inicia el torneo)
         if len(tournament_records[self.tournament_name]) == 4:
             await self.start_tournament()
 
@@ -357,7 +357,7 @@ class TournamentConsumer(AsyncWebsocketConsumer):
 
     async def start_tournament(self):
         players = tournament_records[self.tournament_name]
-        print("Starting matches for tournament:", self.tournament_name)
+        print("Starting matches for tournament:", self.tournament_name, flush=True)
 
         # Emparejamiento de los 4 jugadores
         self.match_1 = (players[0], players[1])
@@ -442,3 +442,176 @@ class TournamentConsumer(AsyncWebsocketConsumer):
             ]
 
         await super().disconnect(close_code)
+
+    def ballSaved(self):
+        if (self.game_state.ball.x + self.game_state.ball.velocityX <= self.game_state.player1.x + self.game_state.player1.width) and (self.game_state.ball.x >= self.game_state.player1.x) and \
+                (self.game_state.player1.y <= self.game_state.ball.y <= self.game_state.player1.y + self.game_state.player1.height):
+            paddle_center = self.game_state.player1.y + self.game_state.player1.height / 2
+            hit_pos = (self.game_state.ball.y - paddle_center) / (self.game_state.player1.height / 2)
+            self.game_state.ball.velocityY += hit_pos * 3  # Modify the vertical velocity
+            
+            self.game_state.ball.x = self.game_state.player1.x + self.game_state.player1.width + 1
+            return True
+
+        elif (self.game_state.ball.x + self.game_state.ball.velocityX >= self.game_state.player2.x - self.game_state.ball.width) and (self.game_state.ball.x <= self.game_state.player2.x) and \
+                (self.game_state.player2.y <= self.game_state.ball.y <= self.game_state.player2.y + self.game_state.player2.height):
+            paddle_center = self.game_state.player2.y + self.game_state.player2.height / 2
+            hit_pos = (self.game_state.ball.y - paddle_center) / (self.game_state.player2.height / 2)
+            self.game_state.ball.velocityY += hit_pos * 3
+            
+            self.game_state.ball.x = self.game_state.player2.x - self.game_state.ball.width - 1
+            return True
+
+        return False
+
+
+    def move_players(self):
+        if not outOfBounds(self.game_state.player1.y + self.game_state.player1.velocityY, self.game_state.player1.height, self.game_state.board.height):
+            self.game_state.player1.y += self.game_state.player1.velocityY
+        if not outOfBounds(self.game_state.player2.y + self.game_state.player2.velocityY, self.game_state.player1.height, self.game_state.board.height):
+            self.game_state.player2.y += self.game_state.player2.velocityY
+    
+    def score(self):
+        if self.game_state.ball.x >= self.game_state.board.width:
+            self.game_state.player1.score += 1
+            return True
+        elif self.game_state.ball.x <= 0 - self.game_state.ball.width:
+            self.game_state.player2.score += 1
+            return True
+        return False
+
+    async def move_ball(self):
+#        print("MOVE BALL CALLED", flush=True)
+        #print("Before: ", self.game_state.ball.x, flush=True)
+        #async with self.lock:  # Acquire the lock before modifying shared resources CHECK IF NEEDED
+        if ballOutOfBounds(self.game_state.ball.y, self.game_state.ball.height, self.game_state.board.height):
+            self.game_state.ball.velocityY = -self.game_state.ball.velocityY
+
+        # Ensure that the ball has a minimum speed to avoid getting stuck
+        if abs(self.game_state.ball.velocityX) < 5:
+            self.game_state.ball.velocityX = 5 if self.game_state.ball.velocityX > 0 else -5
+
+        if self.ballSaved():
+            self.game_state.ball.velocityX = -self.game_state.ball.velocityX
+
+        # Move the ball as usual
+        self.game_state.ball.x += self.game_state.ball.velocityX
+        self.game_state.ball.y += self.game_state.ball.velocityY
+
+        
+        #
+
+        # Check if the ball is out of bounds to score
+        if self.score():
+            if self.game_state.player1.score == 7 or self.game_state.player2.score == 7:
+                winner = 1 if self.game_state.player1.score == 7 else 2
+                await self.update_game_stats(winner)
+                position_updated = {
+                    'Player1': self.game_state.player1.y,
+                    'Player2': self.game_state.player2.y,
+                    'ballX': self.game_state.ball.x,
+                    'ballY': self.game_state.ball.y,
+                    'Score1': self.game_state.player1.score,
+                    'Score2': self.game_state.player2.score
+                }
+                self.channel_layer.group_send(
+                self.group_name,
+                {
+                    'type': 'send_position',
+                    'position': position_updated
+                }
+                )
+
+                #Ends Game
+                self.running = False
+                self.ended = True
+                #self.disconnect("game over") # TODO: when you restart the game it gets a bit weird so it has to be improved
+            # Reset the ball after scoring
+            self.game_state.ball = Ball(board=self.game_state.board)
+        
+    
+# TENEMOS QUE ADAPATAR EL GAME_LOOP A LA LOGICA DEL CONSUMER DE LOS TORNEOS!! AHORA LO GESTIONA EL 4 CONSUMER. VA A HABER 2 GAMELOOPS AL MISMO TIEMPO,
+# LOS GESTIONA TODOS EL 4 O UNO EL  Y OTRO EL 2? !!! HAY VARIABLES DE LAS FUNCIONES AÑADIDAS DESPUES DE SELF.DISCONNECT QUE NO TIENE ESTE CONSUMER!!ADAPTAR!!
+# FALTA INICIALIZAR LOS GAME_STATES(BASADOS EN EL GROUP_NAME) Y TENERLOS EN CUENTA PARA ELIMINARLOS CUANDO NO HAGAN FALTA. AL HABER 3 GAME_STATES,
+# SE PODRIA CREAR UN DICCIONARIO EN SELF QUE TENGA MATCH1_GAMESTATE, MATCH2_GAMESTATE Y FINAL_GAMESTATE
+    async def game_loop(self):
+        print("GAME LOOP CALLED", flush=True)
+        self.running = True
+        while self.running:
+            await self.move_ball()
+            self.move_players()
+            position_updated = {
+                    'Player1': self.game_state.player1.y,
+                    'Player2': self.game_state.player2.y,
+                    'ballX': self.game_state.ball.x,
+                    'ballY': self.game_state.ball.y,
+                    'Score1': self.game_state.player1.score,
+                    'Score2': self.game_state.player2.score
+                }
+
+            await self.channel_layer.group_send(
+                self.group_name,
+                {
+                    'type': 'send_position',
+                    'position': position_updated
+                }
+            )
+
+            await asyncio.sleep(0.016)  # 0.016 -> Approx 60 FPS
+            if self.ended:
+                await asyncio.sleep(1)
+                await self.close()
+                await self.player_2.close()
+
+
+    async def send_position(self, event):
+        try:
+            position = event['position']
+            if self.scope["type"] == "websocket" and self.channel_layer is not None:
+                await self.send(text_data=json.dumps(position))
+            else:
+                print("Attempted to send message, but WebSocket is closed.")
+        except Exception as e:
+            logger.error(f"Error sending position: {e}")
+
+# ESTA FUNCION NO TIENE SENTIDO POR QUESE GESTIONAN VARIAS PARTIDAS, NO HAY SELF.PLAYER_NUMBER, HAY QUE DETERMINAR QUIEN MANDO EL MENSAJE DE OTRA MANERA
+    async def receive(self, text_data):
+        #print("!!!!!RECIBIDO!!!", flush=True)
+        try:
+            text_data_json = json.loads(text_data)
+            key = text_data_json['position']["key"]
+            action = text_data_json['position']["action"]
+
+            # Determinar qué jugador envió la actualización
+            print(f"\033[91mPlayer number : {self.player_number}\033[0m", flush=True)
+            print(f"\033[91mKey : {key}\033[0m", flush=True)
+            print(f"\033[91mAction : {action}\033[0m", flush=True)
+            player = self.game_state.player1 if self.player_number == 1 else self.game_state.player2
+        
+            if action == "move":
+                if key == "ArrowUp":
+                    player.velocityY = -10
+                elif key == "ArrowDown":
+                    player.velocityY = 10
+            else:
+                player.velocityY = 0
+
+            position_updated = {
+                    'Player1': self.game_state.player1.y,
+                    'Player2': self.game_state.player2.y,
+                    'ballX': self.game_state.ball.x,
+                    'ballY': self.game_state.ball.y,
+                    'Score1': self.game_state.player1.score,
+                    'Score2': self.game_state.player2.score
+                }
+            await self.channel_layer.group_send(
+            self.group_name,
+            {
+                'type': 'send_position',
+                'position': position_updated
+            }
+        )
+        except json.JSONDecodeError as e:
+            logger.error("Failed to parse JSON: %s", e)
+        except Exception as e:
+            logger.error("Unexpected error: %s", e)
