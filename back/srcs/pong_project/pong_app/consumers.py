@@ -257,9 +257,11 @@ class PongConsumer(AsyncWebsocketConsumer):
         self.running = False
         active_players.discard(self.user_id)
         #self.game_thread.join()  # Wait for the thread to finish before exiting
-        if self.group_name in game_states:
-            del game_states[self.group_name]  # Clean up game state
-        await self.channel_layer.group_discard(self.group_name, self.channel_name)
+        if self.group_name:
+            await self.channel_layer.group_discard(
+                self.group_name,
+                self.channel_name
+            )
         
         # Close the WebSocket connection
         await super().disconnect(close_code)
@@ -277,9 +279,9 @@ class PongConsumer(AsyncWebsocketConsumer):
         if self.scope["type"] == "websocket" and self.channel_layer is not None:
             await self.send(text_data=json.dumps(position))
         else:
-            print("Attempted to send message, but WebSocket is closed.")
+            print("Attempted to send message, but WebSocket is closed.", flush=True)
     #except Exception as e:
-        logger.error(f"Error sending position: {e}")
+        #logger.error(f"Error sending position: {e}")
 
     async def receive(self, text_data):
         print("!!!!!RECIBIDO!!!", flush=True)
