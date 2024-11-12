@@ -11,6 +11,7 @@ from asgiref.sync import sync_to_async
 from .models import Paddle, Board, Ball, Game, CustomUser
 
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.WARNING)  # or logging.ERROR for fewer logs
 
 def outOfBounds(yPosition, player, board):
     return yPosition < 0 or yPosition + player > board
@@ -52,6 +53,8 @@ class PongConsumer(AsyncWebsocketConsumer):
         self.player_number = None
         self.game_state = None
         self.ended = False
+        min_id = 0
+        max_id = 0
         check = 0
 
         if self.user_id in active_players:
@@ -73,23 +76,28 @@ class PongConsumer(AsyncWebsocketConsumer):
                 self.player_2 = waiting_queue.pop(0)
                 self.player_1.player_1 = self.player_1
                 self.player_1.player_2 = self.player_2
+                min_id = self.player_1.user_id
+                max_id = self.player_2.user_id
                 check = 1
         else:
-            if f"{self.user_id}+{self.user_id2}" not in tournament_ids:
-                tournament_ids[f"{self.user_id}+{self.user_id2}"] = []
-            tournament_ids[f"{self.user_id}+{self.user_id2}"].append(self)
-            if len(tournament_ids[f"{self.user_id}+{self.user_id2}"]) >= 2:
+            min_id = self.user_id if self.user_id < self.user_id2 else self.user_id2
+            max_id = self.user_id if self.user_id > self.user_id2 else self.user_id2
+            if f"{min_id}+{max_id}" not in tournament_ids:
+                tournament_ids[f"{min_id}+{max_id}"] = []
+            print(f"TOURNMENT IDS: {tournament_ids}", flush=True)
+            tournament_ids[f"{min_id}+{max_id}"].append(self)
+            await self.accept()
+            if len(tournament_ids[f"{min_id}+{max_id}"]) >= 2:
                 print("INSIDE LEN >= 2!!!!!!!!!!!!!!!!!!!", flush=True)
-                self.player_1 = tournament_ids[f"{self.user_id}+{self.user_id2}"].pop(0)
-                self.player_2 = tournament_ids[f"{self.user_id}+{self.user_id2}"].pop(0)
+                self.player_1 = tournament_ids[f"{min_id}+{max_id}"].pop(0)
+                self.player_2 = tournament_ids[f"{min_id}+{max_id}"].pop(0)
                 self.player_1.player_1 = self.player_1
                 self.player_1.player_2 = self.player_2
                 check = 1
         if check == 1:
             # Create unique identifier for game
-            self.group_name = f'pong_game_{self.player_1.user_id}_{self.player_2.user_id}'
-
-            self.player_1.game_state = GameState(user_id1=self.player_1.user_id, user_id2=self.player_2.user_id)
+            self.group_name = f'pong_game_{min_id}_{max_id}'
+            self.player_1.game_state = GameState(user_id1=min_id, user_id2=max_id)
             self.player_2.game_state = self.player_1.game_state
             game_states[self.group_name] = self.player_1.game_state
             # Asign same room for players
@@ -226,6 +234,7 @@ class PongConsumer(AsyncWebsocketConsumer):
                     'Score1': self.game_state.player1.score,
                     'Score2': self.game_state.player2.score
                 }
+            print(f"Position: {position_updated}.\nPlayer {self.player_1.user_id}, Player number {self.player_number}", flush=True)
             #print(f'Player: {self.user_id}, ballx: {self.game_state.ball.x}', flush=True)
             #print(self.game_state.player1.y, flush=True)
             await self.channel_layer.group_send(
@@ -236,7 +245,7 @@ class PongConsumer(AsyncWebsocketConsumer):
                 }
             )
 
-            await asyncio.sleep(0.016)  # 0.016 -> Approx 60 FPS
+            await asyncio.sleep(0.033)  # 0.016 -> Approx 60 FPS
             if self.ended:
                 await asyncio.sleep(1)
                 await self.close()
@@ -248,11 +257,9 @@ class PongConsumer(AsyncWebsocketConsumer):
         self.running = False
         active_players.discard(self.user_id)
         #self.game_thread.join()  # Wait for the thread to finish before exiting
-        if self.group_name:
-            await self.channel_layer.group_discard(
-                self.group_name,
-                self.channel_name
-            )
+        if self.group_name in game_states:
+            del game_states[self.group_name]  # Clean up game state
+        await self.channel_layer.group_discard(self.group_name, self.channel_name)
         
         # Close the WebSocket connection
         await super().disconnect(close_code)
@@ -263,14 +270,16 @@ class PongConsumer(AsyncWebsocketConsumer):
 
     async def send_position(self, event):
         #print("SENDING POSITION", flush=True)
-        try:
-            position = event['position']
-            if self.scope["type"] == "websocket" and self.channel_layer is not None:
-                await self.send(text_data=json.dumps(position))
-            else:
-                print("Attempted to send message, but WebSocket is closed.")
-        except Exception as e:
-            logger.error(f"Error sending position: {e}")
+    #try:
+        position = event['position']
+        print(f"POSITION {position}", flush=True)
+        print(f"scope type: {self.scope}", flush=True)
+        if self.scope["type"] == "websocket" and self.channel_layer is not None:
+            await self.send(text_data=json.dumps(position))
+        else:
+            print("Attempted to send message, but WebSocket is closed.")
+    #except Exception as e:
+        logger.error(f"Error sending position: {e}")
 
     async def receive(self, text_data):
         print("!!!!!RECIBIDO!!!", flush=True)
@@ -573,7 +582,7 @@ class TournamentConsumer(AsyncWebsocketConsumer):
                 }
             )
 
-            await asyncio.sleep(0.016)  # 0.016 -> Approx 60 FPS
+            await asyncio.sleep(0.033)  # 0.016 -> Approx 60 FPS
             if self.ended:
                 await asyncio.sleep(1)
                 await self.close()
