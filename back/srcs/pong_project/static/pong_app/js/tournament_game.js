@@ -78,6 +78,8 @@ function initializeTournamentGame(tournamentName){
         console.error("WebSocket Error: ", error);
     };
 
+    let player1Id;
+    let player2Id;
     socket.onmessage = function(event) {
         const data = event.data;
         console.log("received: ", data);
@@ -86,8 +88,8 @@ function initializeTournamentGame(tournamentName){
 
         // Check if the match was successful
         if (match) {
-            const player1Id = match[1];
-            const player2Id = match[2];// Abre el `gamesocket` basado en los IDs de los jugadores
+            player1Id = match[1];
+            player2Id = match[2];// Abre el `gamesocket` basado en los IDs de los jugadores
             const opponentId = (player1Id === userid) ? player2Id : player1Id;
             const gamesocketUrl = `wss://${window.location.host}/ws/pong-socket/${userid}/${opponentId}/`;
 
@@ -196,10 +198,24 @@ function initializeTournamentGame(tournamentName){
         context.fillRect(ball.x, ball.y, ball.width, ball.height);
         if (score1 == 7 || score2 == 7)
         {
-            if (score1 == 7)
+            if (score1 == 7){
                 displayWinnerBanner("Player 1");
-            else
+                if (userid === player1Id)
+                    console.log("eliminar esta linea es solo debug")
+                    // Logic to show "Next Game" button
+                else
+                    console.log("eliminar esta linea es solo debug")    
+                    // Logic to send back to tthe main menu 
+            }
+            else{
                 displayWinnerBanner("Player 2");
+                if (userid === player2Id)
+                    console.log("eliminar esta linea es solo debug")
+                    // Logic to show "Next Game" button
+                else
+                    console.log("eliminar esta linea es solo debug")    
+                    // Logic to send back to tthe main menu
+            }
         }
         else{
             context.fillText(score1.toString(), (board.width / 4), board.height/2);
