@@ -80,51 +80,57 @@ function initializeTournamentGame(tournamentName){
 
     socket.onmessage = function(event) {
         const data = event.data;
+        console.log("received: ", data);
         const regex = /Match between (\d+) and (\d+) is starting!/;
         const match = data.match(regex);
 
         // Check if the match was successful
         if (match) {
             const player1Id = match[1];
-            const player2Id = match[2];
-            if (player1Id == userid){
-                gamesocket = new WebSocket('wss://' + window.location.host + '/ws/pong-socket/' + userid + '/'  + player2Id + '/');
-            }
-            else if (player2Id == userid){
-                gamesocket = new WebSocket('wss://' + window.location.host + '/ws/pong-socket/' + userid + '/'  + player1Id + '/');
-            }
+            const player2Id = match[2];// Abre el `gamesocket` basado en los IDs de los jugadores
+            const opponentId = (player1Id === userid) ? player2Id : player1Id;
+            const gamesocketUrl = `wss://${window.location.host}/ws/pong-socket/${userid}/${opponentId}/`;
+
+            console.log("Creando gamesocket con URL:", gamesocketUrl);
+            createGameSocket(gamesocketUrl);
         }
-    }
+    };
 
-    if (gamesocket)
-    {    
-        gamesocket.onerror = function(error) {
-            console.error("WebSocket Error: ", error);
-        };
-        gamesocket.onmessage = function(event) {
-            console.log("RECIEVING MESSAGE FROM WS!!")
-            console.log(event.data)
-            // Parse the JSON data received from the server
-            const data = JSON.parse(event.data);
-            // Update player1's position with the received data
-            player1.y = data['Player1'];
+    function createGameSocket(url) {
+        gamesocket = new WebSocket(url);
 
-            // Update player2's position with the received data
-            player2.y = data['Player2'];
-
-            ball.x = data['ballX'];
-            ball.y = data['ballY'];
-
-            score1 = data['Score1']
-            score2 = data['Score2']
-            update();
-        }
-        gamesocket.onopen = function(event) {
-            console.log("WebSocket is open now.");
-    //        console.log(id);
+        gamesocket.onopen = function () {
+            console.log("GameWebSocket abierto");
             isGameSocketOpen = true;
         };
+
+        gamesocket.onclose = function () {
+            console.log("GameWebSocket cerrado");
+            isGameSocketOpen = false;
+        };
+
+        gamesocket.onerror = function (error) {
+            console.error("Error en GameWebSocket:", error);
+        };
+
+        gamesocket.onmessage = function (event) {
+            console.log("Mensaje recibido en gamesocket:", event.data);
+            const data = JSON.parse(event.data);
+
+            // Actualiza posiciones y puntajes
+            player1.y = data['Player1'];
+            player2.y = data['Player2'];
+            ball.x = data['ballX'];
+            ball.y = data['ballY'];
+            score1 = data['Score1'];
+            score2 = data['Score2'];
+            update();
+        };
     }
+
+    // Funciones de movimiento
+    document.removeEventListener("keyup", stopDjango);
+    document.removeEventListener("keydown", moveDjango);
 
 
     let canvas = document.getElementById("board");
