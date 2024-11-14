@@ -41,6 +41,7 @@ function initializeTournamentGame(tournamentName){
     let isSocketOpen = false;
     let isGameSocketOpen = false;
     let gamesocket;
+    let isFinalMatch = false;
     
     // Close existing WebSocket connection if open
     if (socket) {
@@ -81,20 +82,44 @@ function initializeTournamentGame(tournamentName){
     let player1Id;
     let player2Id;
     socket.onmessage = function(event) {
-        const data = event.data;
-        console.log("received: ", data);
-        const regex = /Match between (\d+) and (\d+) is starting!/;
-        const match = data.match(regex);
+//        const data = event.data;
+//        console.log("received: ", data);
+//        const regex = /Match between (\d+) and (\d+) is starting!/;
+//        const match = data.match(regex);
+//
+//        // Check if the match was successful
+//        if (match) {
+//            player1Id = match[1];
+//            player2Id = match[2];// Abre el `gamesocket` basado en los IDs de los jugadores
+//            const opponentId = (player1Id === userid) ? player2Id : player1Id;
+//            const gamesocketUrl = `wss://${window.location.host}/ws/pong-socket/${userid}/${opponentId}/`;
+//
+//            console.log("Creando gamesocket con URL:", gamesocketUrl);
+//            createGameSocket(gamesocketUrl);
 
-        // Check if the match was successful
-        if (match) {
-            player1Id = match[1];
-            player2Id = match[2];// Abre el `gamesocket` basado en los IDs de los jugadores
-            const opponentId = (player1Id === userid) ? player2Id : player1Id;
-            const gamesocketUrl = `wss://${window.location.host}/ws/pong-socket/${userid}/${opponentId}/`;
+        const data = JSON.parse(event.data);
+            
+        if (data.message) {
+            let matchDetails;
+            if (data.message.includes("Final match between")) {
+                isFinalMatch = true;  // Marcar como partida final
+                matchDetails = data.message.match(/Final match between (\d+) and (\d+) is starting!/);
+            } else if (data.message.includes("Match between")) {
+                isFinalMatch = false;  // No es la final
+                matchDetails = data.message.match(/Match between (\d+) and (\d+) is starting!/);
+            }
+        
+            if (matchDetails) {
+                player1Id = matchDetails[1];
+                player2Id = matchDetails[2];
+            
+                // Identificar al oponente para crear el `gamesocket`
+                const opponentId = (player1Id === userid) ? player2Id : player1Id;
+                const gamesocketUrl = `wss://${window.location.host}/ws/pong-socket/${userid}/${opponentId}/`;
+                console.log("Creando gamesocket con URL:", gamesocketUrl);
+                createGameSocket(gamesocketUrl);
+        };
 
-            console.log("Creando gamesocket con URL:", gamesocketUrl);
-            createGameSocket(gamesocketUrl);
         }
     };
 
@@ -116,7 +141,7 @@ function initializeTournamentGame(tournamentName){
         };
 
         gamesocket.onmessage = function (event) {
-            console.log("Mensaje recibido en gamesocket:", event.data);
+            //console.log("Mensaje recibido en gamesocket:", event.data);
             const data = JSON.parse(event.data);
 
             // Actualiza posiciones y puntajes
@@ -180,6 +205,15 @@ function initializeTournamentGame(tournamentName){
         context.clearRect(0, 0, canvas.width, canvas.height);
         // Draw the banner in the center of the canvas
         context.fillText(text, (canvas.width / 2) - (textWidth / 2), canvas.height / 2);
+
+        const winnerId = (score1 === 7) ? player1Id : player2Id;
+        // is its a final, notify TournamentConsumer to save data
+        if (isFinalMatch) {
+            socket.send(JSON.stringify({
+                'type': "end_tournament",
+                'winner_id': winnerId
+            }));
+        }
     }
             
     function update() {
