@@ -106,11 +106,15 @@ function initializeTournamentGame(tournamentName){
                 isFinalMatch = true;
                 matchDetails = data.message.match(/Final match between (\d+) and (\d+) is starting!/);
                 console.log('FINAL MATCH SHOULD BE ABOUT TO BEGIN!!!!!!!!!!!!!!')
+                if (gamesocket) {
+                    gamesocket.close();
+                    isGameSocketOpen = false;
+                }
             } else if (data.message.includes("Match between")) {
                 isFinalMatch = false;
                 matchDetails = data.message.match(/Match between (\d+) and (\d+) is starting!/);
             }
-        
+            console.log('MATCH DETAILS: ' + matchDetails);
             if (matchDetails) {
                 player1Id = matchDetails[1];
                 player2Id = matchDetails[2];

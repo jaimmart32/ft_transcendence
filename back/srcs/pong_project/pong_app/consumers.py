@@ -396,6 +396,7 @@ class TournamentConsumer(AsyncWebsocketConsumer):
         self.tournament_name = self.scope['url_route']['kwargs']['tournament']
         self.user_id = int(self.scope['url_route']['kwargs']['userid'])
         self.group_name = None
+        self.final_started = False
         print(f"\033[96muUSER: {self.user_id} , TOURNAMENT_GAME: {self.tournament_name} CONNECTED\033[0m", flush=True)
 
         # Inicializar el torneo si no existe en el registro
@@ -452,7 +453,7 @@ class TournamentConsumer(AsyncWebsocketConsumer):
                 game_group,
                 {
                     'type': 'game_start',
-                    'message': f"Final match between {player1} and {player2} is starting!"
+                    'message': f"Final match between {player1.user_id} and {player2.user_id} is starting!"
                 }
             )
         else:
@@ -498,8 +499,9 @@ class TournamentConsumer(AsyncWebsocketConsumer):
         elif sorted_match_players == match_2_ids:
             self.winner_match_2 = winner_instance
         # Si ambos ganadores de la primera ronda están listos, comienza la partida final
-        if hasattr(self, 'winner_match_1') and hasattr(self, 'winner_match_2'):
+        if hasattr(self, 'winner_match_1') and hasattr(self, 'winner_match_2') and not self.final_started:
             print("\033[96mA punto de empezar la final\033[0m", flush=True)
+            self.final_started = True
             await self.start_match((self.winner_match_1, self.winner_match_2), True)
 
     async def end_match(self, match, winner):
@@ -523,17 +525,19 @@ class TournamentConsumer(AsyncWebsocketConsumer):
 
     async def end_tournament(self, winner_id):
         """Finaliza el torneo actual, actualizando estadísticas y cerrando conexiones."""
-        print(f"Tournament {self.tournament_name} finished. Winner: {winner_id}")
+        print(f"Tournament {self.tournament_name} finished. Winner: {winner_id}, self.user_id = {self.user_id}.", flush=True)
 
-        # Actualizar las estadísticas del torneo para el ganador
-        await self.update_tournament_stats(winner_id)
+        if winner_id == self.user_id:
+            # Actualizar las estadísticas del torneo para el ganador
+            print(f"\033[96mABOUT TO CALL UPDATE_TOURNAMENT_STATS BROOO\033[0m", flush=True)
+            await self.update_tournament_stats(winner_id)
 
-        # Cerrar todas las conexiones de los jugadores
-        for player in tournament_records[self.tournament_name]:
-            await player.close()
+            # Cerrar todas las conexiones de los jugadores
+            for player in tournament_records[self.tournament_name]:
+                await player.close()    
 
-        # Eliminar el torneo del registro
-        del tournament_records[self.tournament_name]
+            # Eliminar el torneo del registro
+            del tournament_records[self.tournament_name]
 
     async def update_tournament_stats(self, winner):
 
@@ -561,5 +565,5 @@ class TournamentConsumer(AsyncWebsocketConsumer):
     async def receive(self, text_data):
         data = json.loads(text_data)
         if data['type'] == 'end_tournament':
-            winner_id = data['winner_id']
+            winner_id = int(data['winner_id'])
             await self.end_tournament(winner_id)
