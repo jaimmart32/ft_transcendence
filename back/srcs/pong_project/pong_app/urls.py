@@ -30,7 +30,12 @@ urlpatterns = [
 	path('home/friends/add/', views.AddFriend, name='add-friend'),
 	path('home/friends/remove/', views.RemoveFriend, name='remove-friend'),
 
+	path('home/game/', views.gameOptions , name='gameOptions'),
+	path('home/game/local/', views.gameLocal, name='gameLocal'),
+	path('home/game/online/', views.gameOnline, name='gameOnline'),
+
 	# Tournaments
+	path('home/game/tournament/', views.gameTournamentOptions, name='gameTornamentOptions'),
 	path('home/game/tournament/create/', views.create_tournament_view, name='create_tournament'),
 	path('home/game/tournament/join/', views.join_tournament_view, name='join_tournament'),
 	path('home/game/tournament/join/checker', views.join_tournament_checker, name='join_tournament_checker'),
